@@ -49,7 +49,7 @@ namespace Somniloquy {
                 serialized += $"{entry.Key} + || + {entry.Value.SpriteName} \n";
             }
 
-            SerializationManager.WriteFile(typeof(FunctionalSprite), fSprite.SpriteName, serialized);
+            SerializationManager.WriteToFile(typeof(FunctionalSprite), fSprite.SpriteName, serialized);
         }
 
         public static FunctionalSprite Deserialize(string serialized) {
