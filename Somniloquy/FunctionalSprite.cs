@@ -1,7 +1,6 @@
 namespace Somniloquy {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
 
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
@@ -38,7 +37,7 @@ namespace Somniloquy {
         public Animation CurrentAnimation { get; set; }
         public int FrameInCurrentAnimation { get; private set; }
 
-        public void AdvanceFrames(int frames) {
+        public void AdvanceFrames(int frames = 1) {
             FrameInCurrentAnimation = (FrameInCurrentAnimation + frames) % CurrentAnimation.spriteBoundaries.Count;
         }
 

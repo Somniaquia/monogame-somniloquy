@@ -8,9 +8,9 @@ namespace Somniloquy {
     /// The SerializationManager handles compression/decompression of strings and wrtiting/reading those into files.
     /// </summary>
     public static class SerializationManager {
-        public static Dictionary<Type, string> Directories { get; private set; }
+        public static Dictionary<Type, string> Directories { get; private set; } = new();
 
-        public static void AddDirectories(params (Type, string)[] directories) {
+        public static void InitializeDirectories(params (Type, string)[] directories) {
             string baseDirectory = Directory.GetCurrentDirectory();
 
             foreach (var entry in directories) {
