@@ -10,7 +10,10 @@
         public Somniloquy() {
             graphicsDeviceManager = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-            IsMouseVisible = true;
+            IsMouseVisible = false;
+
+            ResourceManager.GraphicsDeviceManager = graphicsDeviceManager;
+            ResourceManager.ContentManager = Content;
         }
 
         protected override void Initialize() {
@@ -20,18 +23,22 @@
 
         protected override void LoadContent() {
             spriteBatch = new SpriteBatch(GraphicsDevice);
-
+            ResourceManager.SpriteBatch = spriteBatch;
         }
 
         protected override void Update(GameTime gameTime) {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
+            ResourceManager.GameTime = gameTime;
+
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime) {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.AliceBlue);
+
+            
 
             base.Draw(gameTime);
         }
