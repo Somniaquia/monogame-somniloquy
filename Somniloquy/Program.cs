@@ -1,3 +1,3 @@
 ﻿
-using var game = new Somniloquy.Game1();
+using var game = new Somniloquy.Somniloquy();
 game.Run();
