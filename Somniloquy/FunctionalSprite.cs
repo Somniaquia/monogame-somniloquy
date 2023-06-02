@@ -1,7 +1,7 @@
 namespace Somniloquy {
     using System;
     using System.Collections.Generic;
-    using System.Text;
+    using System.Linq;
 
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
@@ -28,14 +28,19 @@ namespace Somniloquy {
     /// A sprite does NOT contain these information:
     /// - position in the world
     /// - position in the screen
+    /// thus the sprite does not contain the drawing functionality neither - Entity class will do that instead
     /// I only intend to use the FunctionalSprite class to efficiently control between animations.
     /// </summary>
     public class FunctionalSprite {
         public string SpriteName { get; set; }
         public Dictionary<string, Animation> Animations { get; set; }
 
-        private Animation currentAnimation;
-        private int frameInCurrentAnimation;
+        public Animation CurrentAnimation { get; set; }
+        public int FrameInCurrentAnimation { get; private set; }
+
+        public void AdvanceFrames(int frames) {
+            FrameInCurrentAnimation = (FrameInCurrentAnimation + frames) % CurrentAnimation.spriteBoundaries.Count;
+        }
 
         public static void Serialize(FunctionalSprite fSprite) {
             string serialized = "";
@@ -47,8 +52,12 @@ namespace Somniloquy {
             SerializationManager.WriteFile(typeof(FunctionalSprite), fSprite.SpriteName, serialized);
         }
 
-        public static void Deserialize(string serialized) {
-            
+        public static FunctionalSprite Deserialize(string serialized) {
+            var fSprite = new FunctionalSprite();
+
+            // Set fSprite properties
+
+            return fSprite;
         }
     }
 }
