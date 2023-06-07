@@ -17,11 +17,7 @@
         }
 
         protected override void Initialize() {
-            SerializationManager.InitializeDirectories(
-                (typeof(World), "Resources/Worlds"), 
-                (typeof(FunctionalSprite), "Resources/SpriteInformations")
-            );
-            base.Initialize();
+            
         }
 
         protected override void LoadContent() {

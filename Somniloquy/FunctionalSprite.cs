@@ -48,14 +48,14 @@ namespace Somniloquy {
                 serialized += $"{entry.Key} + || + {entry.Value.SpriteName} \n";
             }
 
-            SerializationManager.WriteToFile(typeof(FunctionalSprite), fSprite.SpriteName, serialized);
+            ResourceManager.WriteTextToFile(typeof(FunctionalSprite), fSprite.SpriteName, serialized);
         }
 
         public static FunctionalSprite Deserialize(string serialized) {
             var fSprite = new FunctionalSprite();
 
             // Set fSprite properties
-
+            
             return fSprite;
         }
     }
