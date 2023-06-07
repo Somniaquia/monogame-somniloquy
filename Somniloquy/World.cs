@@ -5,7 +5,7 @@
     using Microsoft.Xna.Framework;
 
     public struct Tile {
-
+        
     }
 
     /// <summary>
@@ -20,8 +20,16 @@
         public Point Dimensions { get; set; }
         public Tile[,] Tiles { get; set; }
 
-        public void Update() {
+        public void SetTile(int x, int y, Tile tile) {
+            Tiles[x, y] = tile;
+        }
 
+        public Tile GetTile(int x, int y) {
+            return Tiles[x, y];
+        }
+
+        public void Update() {
+            
         }
     }
 
@@ -40,11 +48,11 @@
         public static void Serialize(World world) {
             // TODO: Add World Serialization logic
             string serialized = "";
-            SerializationManager.WriteToFile(typeof(World), world.Name, serialized);
+            ResourceManager.WriteTextToFile(typeof(World), world.Name, serialized);
         }
 
         public static World Deserialize(string worldName) {
-            string serialized = SerializationManager.ReadFromFile(typeof(World), worldName);
+            string serialized = ResourceManager.ReadTextFromFile(typeof(World), worldName);
             World world = new World();
 
             // Set world properties
@@ -53,7 +61,7 @@
         }
 
         public void Update() {
-
+            
         }
 
         public void Draw() {
