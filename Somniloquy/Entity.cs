@@ -20,9 +20,10 @@ namespace Somniloquy
     }
 
     public class Entity {
-        public string Name { get; set; }
-        public FunctionalSprite FSprite { get; set; }
-        public CollisionBounds CollisionBounds { get; set; }
+        public string Name { get; private set; }
+        public FunctionalSprite FSprite { get; private set; }
+        public Vector2 Position { get; private set; }
+        public CollisionBounds CollisionBounds { get; private set; }
 
         public virtual void Update() {
             // Resolve Collisions
