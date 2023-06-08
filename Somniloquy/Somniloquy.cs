@@ -1,4 +1,7 @@
 ﻿namespace Somniloquy {
+    using System;
+    using System.Collections.Generic;
+
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
     using Microsoft.Xna.Framework.Input;
@@ -6,7 +9,7 @@
     public class Somniloquy : Game {
         private GraphicsDeviceManager graphicsDeviceManager;
         private SpriteBatch spriteBatch;
-        private Camera camera = new Camera();
+        private List<Screen> activeScreens = new();
 
         public Somniloquy() {
             graphicsDeviceManager = new GraphicsDeviceManager(this);
@@ -15,13 +18,16 @@
 
             ResourceManager.GraphicsDeviceManager = graphicsDeviceManager;
             ResourceManager.ContentManager = Content;
-        }
-
-        protected override void Initialize() {
             
         }
 
+        protected override void Initialize() {
+            base.Initialize();
+            activeScreens.Add(new WorldScreen());
+        }
+
         protected override void LoadContent() {
+            base.LoadContent();
             spriteBatch = new SpriteBatch(GraphicsDevice);
             ResourceManager.SpriteBatch = spriteBatch;
         }
@@ -31,15 +37,18 @@
                 Exit();
 
             ResourceManager.GameTime = gameTime;
-
+            foreach (var screen in activeScreens) {
+                screen.Update();
+            }
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime) {
             GraphicsDevice.Clear(Color.AliceBlue);
-            ResourceManager.SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, transformMatrix: camera.GetTransformation());
 
-            ResourceManager.SpriteBatch.End();
+            foreach (var screen in activeScreens) {
+                screen.Draw();
+            }
             base.Draw(gameTime);
         }
     }

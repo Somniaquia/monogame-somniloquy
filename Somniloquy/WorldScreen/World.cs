@@ -5,7 +5,13 @@
     using Microsoft.Xna.Framework;
 
     public struct Tile {
-        
+        public void Update() {
+
+        }
+
+        public void Draw() {
+
+        }
     }
 
     /// <summary>
@@ -29,7 +35,19 @@
         }
 
         public void Update() {
-            
+            for (int y = 0; y < Tiles.GetLength(1); y++) {
+                for (int x = 0; x < Tiles.GetLength(0); x++) {
+                    Tiles[x, y].Update();
+                }
+            }
+        }
+
+        public void Draw() {
+            for (int y = 0; y < Tiles.GetLength(1); y++) {
+                for (int x = 0; x < Tiles.GetLength(0); x++) {
+                    Tiles[x, y].Draw();
+                }
+            }
         }
     }
 
@@ -44,6 +62,7 @@
     /// </summary>
     public class World {
         public string Name { get; set; }
+        public List<Layer> Layers { get; private set; }
 
         public static void Serialize(World world) {
             // TODO: Add World Serialization logic
@@ -61,11 +80,15 @@
         }
 
         public void Update() {
-            
+            foreach (var layer in Layers) {
+                layer.Update();
+            }
         }
 
         public void Draw() {
-
+            foreach (var layer in Layers) {
+                layer.Draw();
+            }
         }
     }
 
