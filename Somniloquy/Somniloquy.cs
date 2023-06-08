@@ -6,6 +6,7 @@
     public class Somniloquy : Game {
         private GraphicsDeviceManager graphicsDeviceManager;
         private SpriteBatch spriteBatch;
+        private Camera camera = new Camera();
 
         public Somniloquy() {
             graphicsDeviceManager = new GraphicsDeviceManager(this);
@@ -36,9 +37,9 @@
 
         protected override void Draw(GameTime gameTime) {
             GraphicsDevice.Clear(Color.AliceBlue);
+            ResourceManager.SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, transformMatrix: camera.GetTransformation());
 
-            
-
+            ResourceManager.SpriteBatch.End();
             base.Draw(gameTime);
         }
     }
