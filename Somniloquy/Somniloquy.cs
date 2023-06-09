@@ -37,6 +37,7 @@
                 Exit();
 
             ResourceManager.GameTime = gameTime;
+            InputManager.Update();
             foreach (var screen in activeScreens) {
                 screen.Update();
             }

@@ -6,6 +6,7 @@ namespace Somniloquy {
     
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
+    using MonoGame.Extended;
     using Microsoft.Xna.Framework.Content;
 
     public static class ResourceManager {
@@ -66,12 +67,16 @@ namespace Somniloquy {
             }
         }
 
-        public static void DrawFunctionalSprite(FunctionalSprite fSprite, Rectangle boundaries, Effect spriteEffect) {
+        public static void DrawFunctionalSprite(FunctionalSprite fSprite, Rectangle destination, Effect spriteEffect) {
             SpriteBatch.Draw(
-                SpriteSheets[fSprite.CurrentAnimation.SpriteSheetName],
-                boundaries,
-                fSprite.CurrentAnimation.spriteBoundaries[fSprite.FrameInCurrentAnimation],
+                fSprite.CurrentAnimation.SpriteSheet,
+                destination,
+                fSprite.CurrentAnimation.FrameBoundaries[fSprite.FrameInCurrentAnimation],
                 Color.White);
+        }
+
+        public static void DrawRectangle(Rectangle destination, Color color) {
+            SpriteBatch.DrawRectangle(destination, Color.AliceBlue);
         }
     }
 }

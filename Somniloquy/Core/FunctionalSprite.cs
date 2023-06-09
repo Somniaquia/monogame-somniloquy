@@ -12,17 +12,17 @@ namespace Somniloquy {
     /// - list of boundaries of sprites in a sprite sheet
     /// </summary> 
     public struct Animation {
-        public string SpriteName { get; set; }
-        public string SpriteSheetName { get; set; }
-        public List<Rectangle> spriteBoundaries { get; set; }
-        public List<Point> spriteCenters { get; set; }
+        public string AnimationName { get; set; }
+        public Texture2D SpriteSheet { get; set; }
+        public List<Rectangle> FrameBoundaries { get; set; }
+        public List<Point> FrameAnchors { get; set; }
     }
 
     /// <summary>
     /// A functional sprite contains these information:
     /// - the name of the sprite that will be used to identify them 
     /// - animations included in the functional sprite
-    /// - current animation stats
+    /// - current animation states
     /// 
     /// A sprite does NOT contain these information:
     /// - position in the world
@@ -37,15 +37,23 @@ namespace Somniloquy {
         public Animation CurrentAnimation { get; set; }
         public int FrameInCurrentAnimation { get; private set; }
 
+        public Rectangle GetSourceRectangle() {
+            return CurrentAnimation.FrameBoundaries[FrameInCurrentAnimation];
+        }
+
+        public Point GetDestinationRectangleOffset() {
+            return CurrentAnimation.FrameAnchors[FrameInCurrentAnimation];
+        }
+
         public void AdvanceFrames(int frames = 1) {
-            FrameInCurrentAnimation = (FrameInCurrentAnimation + frames) % CurrentAnimation.spriteBoundaries.Count;
+            FrameInCurrentAnimation = (FrameInCurrentAnimation + frames) % CurrentAnimation.FrameBoundaries.Count;
         }
 
         public static void Serialize(FunctionalSprite fSprite) {
             string serialized = "";
 
             foreach (KeyValuePair<string, Animation> entry in fSprite.Animations) {
-                serialized += $"{entry.Key} + || + {entry.Value.SpriteName} \n";
+                serialized += $"{entry.Key} + || + {entry.Value.AnimationName} \n";
             }
 
             ResourceManager.WriteTextToFile(typeof(FunctionalSprite), fSprite.SpriteName, serialized);

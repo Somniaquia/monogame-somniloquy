@@ -3,14 +3,16 @@
     using System.Collections.Generic;
 
     using Microsoft.Xna.Framework;
+    using Microsoft.Xna.Framework.Graphics;
 
-    public struct Tile {
+    public class Tile {
+        public FunctionalSprite FSprite;
         public void Update() {
 
         }
 
-        public void Draw() {
-
+        public void Draw(Rectangle destination) {
+            ResourceManager.DrawRectangle(destination, Color.AntiqueWhite);
         }
     }
 
@@ -21,31 +23,57 @@
     /// The dynamic modification of layers in a same world will help form the overall expected nature of the game, triggering
     /// different layouts or looks for the same world in every visit, sometimes connecting a different world or triggering events such as jumpscares
     /// </summary>
-    public class Layer {
+    public class Layer
+    {
         public Layer ChildLayers { get; set; }
         public Point Dimensions { get; set; }
-        public Tile[,] Tiles { get; set; }
+        public Dictionary<Point, Tile[,]> Chunks = new();
+        public const int ChunkLength = 16;
+        public const int TileLength = 8;
 
-        public void SetTile(int x, int y, Tile tile) {
-            Tiles[x, y] = tile;
+        public Point GetTilePositionOf(Point pixelPosition) {
+            return new Point(Commons.Modulo(pixelPosition.X, TileLength), Commons.Modulo(pixelPosition.Y, TileLength));
         }
 
-        public Tile GetTile(int x, int y) {
-            return Tiles[x, y];
+        public Point GetChunkPositionOf(Point tilePosition) {
+            return new Point(Commons.Modulo(tilePosition.X, ChunkLength), Commons.Modulo(tilePosition.Y, ChunkLength));
+        }
+
+        public void SetTile(Point tilePosition, Tile tile) {
+            Point chunkPosition = GetChunkPositionOf(tilePosition);
+
+            if (!Chunks.ContainsKey(tilePosition)) {
+                Chunks.Add(tilePosition, new Tile[ChunkLength, ChunkLength]);
+            }
+
+            Chunks[chunkPosition][tilePosition.X - GetChunkPositionOf(tilePosition).X, tilePosition.Y - GetChunkPositionOf(tilePosition).Y] = tile;
+        }
+
+        public Tile GetTile(Point tilePosition) {
+            return Chunks[GetChunkPositionOf(tilePosition)][tilePosition.X - GetChunkPositionOf(tilePosition).X, tilePosition.Y - GetChunkPositionOf(tilePosition).Y];
         }
 
         public void Update() {
-            for (int y = 0; y < Tiles.GetLength(1); y++) {
-                for (int x = 0; x < Tiles.GetLength(0); x++) {
-                    Tiles[x, y].Update();
+            foreach (KeyValuePair<Point, Tile[,]> pointTilePair in Chunks) {
+                for (int y = 0; y < ChunkLength; y++) {
+                    for (int x = 0; x < ChunkLength; x++) {
+                        pointTilePair.Value[x, y]?.Update();
+                    }
                 }
             }
         }
 
         public void Draw() {
-            for (int y = 0; y < Tiles.GetLength(1); y++) {
-                for (int x = 0; x < Tiles.GetLength(0); x++) {
-                    Tiles[x, y].Draw();
+            // TODO: Only render chunks AND blocks on screen
+            foreach (KeyValuePair<Point, Tile[,]> pointTilePair in Chunks) {
+                for (int y = 0; y < ChunkLength; y++) {
+                    for (int x = 0; x < ChunkLength; x++) {
+                        pointTilePair.Value[x, y]?.Draw(
+                            new Rectangle(
+                                (pointTilePair.Key.X * ChunkLength + x) * TileLength,
+                                (pointTilePair.Key.X * ChunkLength + x) * TileLength,
+                                TileLength, TileLength));
+                    }
                 }
             }
         }
@@ -62,7 +90,7 @@
     /// </summary>
     public class World {
         public string Name { get; set; }
-        public List<Layer> Layers { get; private set; }
+        public List<Layer> Layers { get; set; } = new();
 
         public static void Serialize(World world) {
             // TODO: Add World Serialization logic
@@ -76,6 +104,12 @@
 
             // Set world properties
 
+            return world;
+        }
+
+        public static World CreateNew() {
+            World world = new World();
+            world.Layers.Add(new Layer());
             return world;
         }
 

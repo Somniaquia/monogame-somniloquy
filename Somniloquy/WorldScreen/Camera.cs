@@ -16,23 +16,15 @@ namespace Somniloquy {
         private float visibleRotation = 0.0f;
         public Matrix Transform { get; private set; }
 
-        private float Lerp(float origin, float target) {
-            return origin * (1 - LerpModifier) + target * LerpModifier;
-        }
-
-        private float Modulo(float dividend, float divisor) {
-            return (dividend%divisor + divisor) % divisor;
-        }
-
         public void UpdateTransformation() {
-            visiblePosition.X = Lerp(visiblePosition.X, Position.X);
-            visiblePosition.Y = Lerp(visiblePosition.Y, Position.Y);
+            visiblePosition.X = Commons.Lerp(visiblePosition.X, Position.X, LerpModifier);
+            visiblePosition.Y = Commons.Lerp(visiblePosition.Y, Position.Y, LerpModifier);
 
             Zoom = Zoom < 0.1f ? 0.1f : Zoom;
-            visibleZoom = Lerp(visibleZoom, Zoom);
+            visibleZoom = Commons.Lerp(visibleZoom, Zoom, LerpModifier);
 
-            Rotation = Modulo(Rotation, 2 * 3.141592653589793f);
-            visibleRotation = Lerp(visibleRotation, Rotation);
+            Rotation = Commons.ModuloF(Rotation, 2 * 3.141592653589793f);
+            visibleRotation = Commons.Lerp(visibleRotation, Rotation, LerpModifier);
 
             Viewport viewport = ResourceManager.GraphicsDeviceManager.GraphicsDevice.Viewport;
             Transform =
