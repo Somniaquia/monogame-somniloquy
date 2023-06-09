@@ -4,6 +4,8 @@ namespace Somniloquy {
 
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
+    using Microsoft.Xna.Framework.Input;
+    using MonoGame.Extended;
 
     public abstract class Screen {
         public abstract void Update();
@@ -21,23 +23,34 @@ namespace Somniloquy {
         }
 
         public override void Update() {
-            Camera.UpdateTransformation();
             if (EditMode) {
                 Vector2 mousePosition = Camera.ApplyInvertTransform(InputManager.GetMousePosition());
+                
                 if (InputManager.IsLeftButtonDown()) {
                     if (ActiveWorld.Layers.Count == 0) ActiveWorld.Layers.Add(new Layer());
                     ActiveWorld.Layers[0].SetTile(ActiveWorld.Layers[0].GetTilePositionOf(mousePosition.ToPoint()), new Tile());
                 }
-                
+
+                if (InputManager.IsKeyDown(Keys.Down)) Camera.Move(new Vector2(0, 1));
+                if (InputManager.IsKeyDown(Keys.Up)) Camera.Move(new Vector2(0, -1));
+                if (InputManager.IsKeyDown(Keys.Right)) Camera.Move(new Vector2(1, 0));
+                if (InputManager.IsKeyDown(Keys.Left)) Camera.Move(new Vector2(-1, 0));
+
+                if (InputManager.IsKeyDown(Keys.Space)) Camera.Zoom *= 1.1f;
+                if (InputManager.IsKeyDown(Keys.LeftShift)) Camera.Zoom *= 0.9f;
+
             } else {
 
             }
+            Camera.UpdateTransformation();
             ActiveWorld?.Update();
         }
 
         public override void Draw() {
             ResourceManager.SpriteBatch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend, transformMatrix: Camera.Transform);
             ActiveWorld?.Draw();
+            Vector2 mousePosition = Camera.ApplyInvertTransform(InputManager.GetMousePosition());
+            ResourceManager.SpriteBatch.DrawPoint(mousePosition.X, mousePosition.Y, Color.Black, 4);
             ResourceManager.SpriteBatch.End();
         }
     }

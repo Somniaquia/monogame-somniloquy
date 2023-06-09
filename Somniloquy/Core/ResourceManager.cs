@@ -74,9 +74,5 @@ namespace Somniloquy {
                 fSprite.CurrentAnimation.FrameBoundaries[fSprite.FrameInCurrentAnimation],
                 Color.White);
         }
-
-        public static void DrawRectangle(Rectangle destination, Color color) {
-            SpriteBatch.DrawRectangle(destination, Color.AliceBlue);
-        }
     }
 }

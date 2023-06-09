@@ -5,6 +5,7 @@
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
     using Microsoft.Xna.Framework.Input;
+    using MonoGame.Extended;
 
     public class Somniloquy : Game {
         private GraphicsDeviceManager graphicsDeviceManager;
@@ -14,11 +15,10 @@
         public Somniloquy() {
             graphicsDeviceManager = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-            IsMouseVisible = false;
+            IsMouseVisible = true;
 
             ResourceManager.GraphicsDeviceManager = graphicsDeviceManager;
             ResourceManager.ContentManager = Content;
-            
         }
 
         protected override void Initialize() {
@@ -29,6 +29,7 @@
         protected override void LoadContent() {
             base.LoadContent();
             spriteBatch = new SpriteBatch(GraphicsDevice);
+
             ResourceManager.SpriteBatch = spriteBatch;
         }
 

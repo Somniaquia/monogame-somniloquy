@@ -7,14 +7,18 @@ namespace Somniloquy {
 
     public class Camera
     {
-        public float LerpModifier { get; set; }
-        public Vector2 Position { get; set; } = Vector2.Zero;
+        public const float LerpModifier =  0.1f;
+        public Vector2 Position = Vector2.Zero;
         private Vector2 visiblePosition = Vector2.Zero;
-        public float Zoom { get; set; } = 1.0f;
+        public float Zoom = 1.0f;
         private float visibleZoom = 1.0f;
-        public float Rotation { get; set; } = 0.0f;
+        public float Rotation = 0.0f;
         private float visibleRotation = 0.0f;
         public Matrix Transform { get; private set; }
+
+        public void Move(Vector2 displacement) {
+            Position += displacement / Zoom * 4;
+        }
 
         public void UpdateTransformation() {
             visiblePosition.X = Commons.Lerp(visiblePosition.X, Position.X, LerpModifier);

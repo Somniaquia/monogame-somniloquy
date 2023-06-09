@@ -4,6 +4,7 @@
 
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
+    using MonoGame.Extended;
 
     public class Tile {
         public FunctionalSprite FSprite;
@@ -12,7 +13,7 @@
         }
 
         public void Draw(Rectangle destination) {
-            ResourceManager.DrawRectangle(destination, Color.AntiqueWhite);
+            ResourceManager.SpriteBatch.DrawRectangle(destination, Color.Azure);
         }
     }
 
@@ -32,25 +33,26 @@
         public const int TileLength = 8;
 
         public Point GetTilePositionOf(Point pixelPosition) {
-            return new Point(Commons.Modulo(pixelPosition.X, TileLength), Commons.Modulo(pixelPosition.Y, TileLength));
+            return new Point(Commons.FloorDivide(pixelPosition.X, TileLength), Commons.FloorDivide(pixelPosition.Y, TileLength));
         }
 
         public Point GetChunkPositionOf(Point tilePosition) {
-            return new Point(Commons.Modulo(tilePosition.X, ChunkLength), Commons.Modulo(tilePosition.Y, ChunkLength));
+            return new Point(Commons.FloorDivide(tilePosition.X, ChunkLength), Commons.FloorDivide(tilePosition.Y, ChunkLength));
         }
 
         public void SetTile(Point tilePosition, Tile tile) {
             Point chunkPosition = GetChunkPositionOf(tilePosition);
 
-            if (!Chunks.ContainsKey(tilePosition)) {
-                Chunks.Add(tilePosition, new Tile[ChunkLength, ChunkLength]);
+            if (!Chunks.ContainsKey(chunkPosition)) {
+                Chunks.Add(chunkPosition, new Tile[ChunkLength, ChunkLength]);
             }
 
-            Chunks[chunkPosition][tilePosition.X - GetChunkPositionOf(tilePosition).X, tilePosition.Y - GetChunkPositionOf(tilePosition).Y] = tile;
+            Chunks[chunkPosition][tilePosition.X - chunkPosition.X * ChunkLength, tilePosition.Y - chunkPosition.Y * ChunkLength] = tile;
         }
 
         public Tile GetTile(Point tilePosition) {
-            return Chunks[GetChunkPositionOf(tilePosition)][tilePosition.X - GetChunkPositionOf(tilePosition).X, tilePosition.Y - GetChunkPositionOf(tilePosition).Y];
+            Point chunkPosition = GetChunkPositionOf(tilePosition);
+            return Chunks[chunkPosition][tilePosition.X - chunkPosition.X * ChunkLength, tilePosition.Y - chunkPosition.Y * ChunkLength];
         }
 
         public void Update() {
@@ -65,13 +67,17 @@
 
         public void Draw() {
             // TODO: Only render chunks AND blocks on screen
-            foreach (KeyValuePair<Point, Tile[,]> pointTilePair in Chunks) {
+            foreach (KeyValuePair<Point, Tile[,]> pointChunkPair in Chunks) {
+                ResourceManager.SpriteBatch.DrawRectangle(new Rectangle(
+                                (pointChunkPair.Key.X * ChunkLength) * TileLength,
+                                (pointChunkPair.Key.Y * ChunkLength) * TileLength,
+                                TileLength * ChunkLength, TileLength * ChunkLength), Color.Black);
                 for (int y = 0; y < ChunkLength; y++) {
                     for (int x = 0; x < ChunkLength; x++) {
-                        pointTilePair.Value[x, y]?.Draw(
+                        pointChunkPair.Value[x, y]?.Draw(
                             new Rectangle(
-                                (pointTilePair.Key.X * ChunkLength + x) * TileLength,
-                                (pointTilePair.Key.X * ChunkLength + x) * TileLength,
+                                (pointChunkPair.Key.X * ChunkLength + x) * TileLength,
+                                (pointChunkPair.Key.Y * ChunkLength + y) * TileLength,
                                 TileLength, TileLength));
                     }
                 }
