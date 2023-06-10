@@ -17,6 +17,14 @@
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
 
+            graphicsDeviceManager.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
+            graphicsDeviceManager.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
+            graphicsDeviceManager.HardwareModeSwitch = false;
+            graphicsDeviceManager.ApplyChanges();
+
+            Window.IsBorderless = true;
+            Window.Position = new Point(0, 0);
+
             ResourceManager.GraphicsDeviceManager = graphicsDeviceManager;
             ResourceManager.ContentManager = Content;
         }
@@ -24,6 +32,7 @@
         protected override void Initialize() {
             base.Initialize();
             activeScreens.Add(new WorldScreen());
+            activeScreens.Add(new UIScreen());
         }
 
         protected override void LoadContent() {
@@ -31,6 +40,9 @@
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             ResourceManager.SpriteBatch = spriteBatch;
+            Texture2D pixel = new Texture2D(GraphicsDevice, 1, 1);
+            pixel.SetData(new[] { Color.White });
+            ResourceManager.Pixel = pixel;
         }
 
         protected override void Update(GameTime gameTime) {

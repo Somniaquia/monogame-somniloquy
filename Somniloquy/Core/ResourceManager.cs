@@ -17,6 +17,7 @@ namespace Somniloquy {
 
         public static Dictionary<Type, string> Directories { get; private set; } = new();
         public static Dictionary<string, Texture2D> SpriteSheets { get; set; }
+        public static Texture2D Pixel { get; set; }
 
         public static void InitializeDirectories(params (Type, string)[] directories) {
             string baseDirectory = Directory.GetCurrentDirectory();
@@ -73,6 +74,10 @@ namespace Somniloquy {
                 destination,
                 fSprite.CurrentAnimation.FrameBoundaries[fSprite.FrameInCurrentAnimation],
                 Color.White);
+        }
+
+        public static void DrawFilledRectangle(Rectangle destination, Color color, float layerDepth) {
+            SpriteBatch.Draw(Pixel, destination, null, color, 0f, Vector2.Zero, SpriteEffects.None, layerDepth:layerDepth);
         }
     }
 }

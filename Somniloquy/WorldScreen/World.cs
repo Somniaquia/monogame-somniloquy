@@ -13,7 +13,7 @@
         }
 
         public void Draw(Rectangle destination) {
-            ResourceManager.SpriteBatch.DrawRectangle(destination, Color.Azure);
+            ResourceManager.DrawFilledRectangle(destination, Color.MediumAquamarine, 0.5f);
         }
     }
 
@@ -30,7 +30,7 @@
         public Point Dimensions { get; set; }
         public Dictionary<Point, Tile[,]> Chunks = new();
         public const int ChunkLength = 16;
-        public const int TileLength = 8;
+        public const int TileLength = 16;
 
         public Point GetTilePositionOf(Point pixelPosition) {
             return new Point(Commons.FloorDivide(pixelPosition.X, TileLength), Commons.FloorDivide(pixelPosition.Y, TileLength));
@@ -71,7 +71,7 @@
                 ResourceManager.SpriteBatch.DrawRectangle(new Rectangle(
                                 (pointChunkPair.Key.X * ChunkLength) * TileLength,
                                 (pointChunkPair.Key.Y * ChunkLength) * TileLength,
-                                TileLength * ChunkLength, TileLength * ChunkLength), Color.Black);
+                                TileLength * ChunkLength, TileLength * ChunkLength), Color.Black, layerDepth:1);
                 for (int y = 0; y < ChunkLength; y++) {
                     for (int x = 0; x < ChunkLength; x++) {
                         pointChunkPair.Value[x, y]?.Draw(

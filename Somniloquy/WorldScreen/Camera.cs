@@ -10,11 +10,16 @@ namespace Somniloquy {
         public const float LerpModifier =  0.1f;
         public Vector2 Position = Vector2.Zero;
         private Vector2 visiblePosition = Vector2.Zero;
-        public float Zoom = 1.0f;
-        private float visibleZoom = 1.0f;
+        public float Zoom;
+        private float visibleZoom;
         public float Rotation = 0.0f;
         private float visibleRotation = 0.0f;
         public Matrix Transform { get; private set; }
+
+        public Camera(float zoom=1.0f) {
+            Zoom = zoom;
+            visibleZoom = zoom;
+        }
 
         public void Move(Vector2 displacement) {
             Position += displacement / Zoom * 4;

@@ -14,7 +14,7 @@ namespace Somniloquy {
 
     public class WorldScreen : Screen {
         public bool EditMode { get; private set; } = true;
-        public Camera Camera { get; private set; } = new Camera();
+        public Camera Camera { get; private set; } = new Camera(4.0f);
         public World ActiveWorld { get; private set; } = new();
         private Texture2D TransitionSnipplet;
 
@@ -53,5 +53,24 @@ namespace Somniloquy {
             ResourceManager.SpriteBatch.DrawPoint(mousePosition.X, mousePosition.Y, Color.Black, 4);
             ResourceManager.SpriteBatch.End();
         }
+    }
+
+    public class UIScreen : Screen {
+        private ColorChart ColorChart = new();
+
+        public override void Update() {
+            ColorChart.GenerateColorChart(16, 16);
+        }
+
+        public override void Draw() {
+            ResourceManager.SpriteBatch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
+            ResourceManager.SpriteBatch.Draw(ColorChart.Chart,
+                new Rectangle(
+                    ResourceManager.GraphicsDeviceManager.GraphicsDevice.Viewport.Width - 144,
+                    ResourceManager.GraphicsDeviceManager.GraphicsDevice.Viewport.Height - 144, 
+                    128, 128), 
+                Color.White);
+            ResourceManager.SpriteBatch.End();
+        }        
     }
 }
