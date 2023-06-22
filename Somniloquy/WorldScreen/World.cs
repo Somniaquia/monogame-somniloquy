@@ -13,7 +13,7 @@
         }
 
         public void Draw(Rectangle destination) {
-            ResourceManager.DrawFilledRectangle(destination, Color.MediumAquamarine, 0.5f);
+            ResourceManager.DrawFilledRectangle(destination, Color.AliceBlue, 0.5f);
         }
     }
 
@@ -38,6 +38,41 @@
 
         public Point GetChunkPositionOf(Point tilePosition) {
             return new Point(Commons.FloorDivide(tilePosition.X, ChunkLength), Commons.FloorDivide(tilePosition.Y, ChunkLength));
+        }
+
+        public void SetLine(Point tilePos1, Point tilePos2, Tile tile) {
+            int dx = Math.Abs(tilePos2.X - tilePos1.X);
+            int dy = Math.Abs(tilePos2.Y - tilePos1.Y);
+            int sx = (tilePos1.X < tilePos2.X) ? 1 : -1;
+            int sy = (tilePos1.Y < tilePos2.Y) ? 1 : -1;
+            int err = dx - dy;
+
+            while (true) {
+                SetTile(new Point(tilePos1.X, tilePos1.Y), tile);
+
+                if (tilePos1.X == tilePos2.X && tilePos1.Y == tilePos2.Y)
+                    break;
+
+                int err2 = 2 * err;
+
+                if (err2 > -dy) {
+                    err -= dy;
+                    tilePos1.X += sx;
+                }
+
+                if (err2 < dx) {
+                    err += dx;
+                    tilePos1.Y += sy;
+                }
+            }
+        }
+
+        public void SetRectangle(Point tilePos1, Point tilePos2, Tile tile) {
+            for (int y = tilePos1.Y; y < tilePos2.Y; y++) {
+                for (int x = tilePos1.X; x < tilePos2.X; x++) {
+                    SetTile(new Point(x, y), tile);
+                }
+            }
         }
 
         public void SetTile(Point tilePosition, Tile tile) {
@@ -71,7 +106,7 @@
                 ResourceManager.SpriteBatch.DrawRectangle(new Rectangle(
                                 (pointChunkPair.Key.X * ChunkLength) * TileLength,
                                 (pointChunkPair.Key.Y * ChunkLength) * TileLength,
-                                TileLength * ChunkLength, TileLength * ChunkLength), Color.Black, layerDepth:1);
+                                TileLength * ChunkLength, TileLength * ChunkLength), Color.FloralWhite, layerDepth:1);
                 for (int y = 0; y < ChunkLength; y++) {
                     for (int x = 0; x < ChunkLength; x++) {
                         pointChunkPair.Value[x, y]?.Draw(
