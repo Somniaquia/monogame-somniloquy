@@ -9,13 +9,14 @@ namespace Somniloquy {
     using MonoGame.Extended;
     using Microsoft.Xna.Framework.Content;
 
-    public static class ResourceManager
+    public static class GameManager
     {
         public static GraphicsDeviceManager GraphicsDeviceManager { get; set; }
         public static ContentManager ContentManager { get; set; }
         public static SpriteBatch SpriteBatch { get; set; }
         public static GameTime GameTime { get; set; }
 
+        public static Rectangle WindowSize { get; set; }
         public static Dictionary<Type, string> Directories { get; private set; } = new();
         public static Dictionary<string, Texture2D> SpriteSheets { get; set; }
         public static Texture2D Pixel { get; set; }
@@ -78,7 +79,7 @@ namespace Somniloquy {
                 Color.White);
         }
 
-        public static void DrawFilledRectangle(Rectangle destination, Color color, float layerDepth) {
+        public static void DrawFilledRectangle(Rectangle destination, Color color, float layerDepth=0) {
             SpriteBatch.Draw(Pixel, destination, null, color, 0f, Vector2.Zero, SpriteEffects.None, layerDepth:layerDepth);
         }
     }

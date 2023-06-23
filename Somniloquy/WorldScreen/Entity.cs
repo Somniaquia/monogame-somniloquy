@@ -32,7 +32,7 @@ namespace Somniloquy
 
         public virtual void Draw() {
             var boundaries = new Rectangle();
-            ResourceManager.DrawFunctionalSprite(FSprite, boundaries, null);
+            GameManager.DrawFunctionalSprite(FSprite, boundaries, null);
         }
     }
 

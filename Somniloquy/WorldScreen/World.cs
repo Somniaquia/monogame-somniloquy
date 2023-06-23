@@ -7,13 +7,15 @@
     using MonoGame.Extended;
 
     public class Tile {
-        public FunctionalSprite FSprite;
+        public FunctionalSprite FSprite { get; set; }
+        public Color Color { get; set; } = Color.AliceBlue;
+
         public void Update() {
 
         }
 
         public void Draw(Rectangle destination) {
-            ResourceManager.DrawFilledRectangle(destination, Color.AliceBlue, 0.5f);
+            GameManager.DrawFilledRectangle(destination, Color, 0.5f);
         }
     }
 
@@ -103,7 +105,7 @@
         public void Draw() {
             // TODO: Only render chunks AND blocks on screen
             foreach (KeyValuePair<Point, Tile[,]> pointChunkPair in Chunks) {
-                ResourceManager.SpriteBatch.DrawRectangle(new Rectangle(
+                GameManager.SpriteBatch.DrawRectangle(new Rectangle(
                                 (pointChunkPair.Key.X * ChunkLength) * TileLength,
                                 (pointChunkPair.Key.Y * ChunkLength) * TileLength,
                                 TileLength * ChunkLength, TileLength * ChunkLength), Color.FloralWhite, layerDepth:1);
@@ -136,11 +138,11 @@
         public static void Serialize(World world) {
             // TODO: Add World Serialization logic
             string serialized = "";
-            ResourceManager.WriteTextToFile(typeof(World), world.Name, serialized);
+            GameManager.WriteTextToFile(typeof(World), world.Name, serialized);
         }
 
         public static World Deserialize(string worldName) {
-            string serialized = ResourceManager.ReadTextFromFile(typeof(World), worldName);
+            string serialized = GameManager.ReadTextFromFile(typeof(World), worldName);
             World world = new World();
 
             // Set world properties

@@ -35,7 +35,7 @@ namespace Somniloquy {
             Rotation = Commons.ModuloF(Rotation, 2 * 3.141592653589793f);
             visibleRotation = Commons.Lerp(visibleRotation, Rotation, LerpModifier);
 
-            Viewport viewport = ResourceManager.GraphicsDeviceManager.GraphicsDevice.Viewport;
+            Viewport viewport = GameManager.GraphicsDeviceManager.GraphicsDevice.Viewport;
             Transform =
                 Matrix.CreateTranslation(new Vector3(-visiblePosition.X, -visiblePosition.Y, 0)) *
                 Matrix.CreateRotationZ(visibleRotation) *

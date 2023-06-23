@@ -56,7 +56,7 @@ namespace Somniloquy {
                 serialized += $"{entry.Key} + || + {entry.Value.AnimationName} \n";
             }
 
-            ResourceManager.WriteTextToFile(typeof(FunctionalSprite), fSprite.SpriteName, serialized);
+            GameManager.WriteTextToFile(typeof(FunctionalSprite), fSprite.SpriteName, serialized);
         }
 
         public static FunctionalSprite Deserialize(string serialized) {

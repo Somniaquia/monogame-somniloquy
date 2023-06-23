@@ -28,34 +28,37 @@
             Window.IsBorderless = true;
             Window.Position = new Point(0, 0);
 
-            ResourceManager.GraphicsDeviceManager = graphicsDeviceManager;
-            ResourceManager.ContentManager = Content;
+            GameManager.GraphicsDeviceManager = graphicsDeviceManager;
+            GameManager.ContentManager = Content;
+            GameManager.WindowSize = new Rectangle(0, 0, graphicsDeviceManager.PreferredBackBufferWidth, graphicsDeviceManager.PreferredBackBufferHeight);
         }
 
         protected override void Initialize() {
             base.Initialize();
-            activeScreens.Add(new WorldScreen());
-            activeScreens.Add(new UIScreen());
+            activeScreens.Add(new EditorScreen(GameManager.WindowSize));
         }
 
         protected override void LoadContent() {
             base.LoadContent();
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            ResourceManager.SpriteBatch = spriteBatch;
+            GameManager.SpriteBatch = spriteBatch;
             Texture2D pixel = new Texture2D(GraphicsDevice, 1, 1);
             pixel.SetData(new[] { Color.White });
-            ResourceManager.Pixel = pixel;
+            GameManager.Pixel = pixel;
 
-            ResourceManager.Misaki = Content.Load<SpriteFont>("MisakiGothic2nd");
+            GameManager.Misaki = Content.Load<SpriteFont>("MisakiGothic2nd");
         }
 
         protected override void Update(GameTime gameTime) {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            ResourceManager.GameTime = gameTime;
-            InputManager.Update();
+            GameManager.GameTime = gameTime;
+
+            if (IsActive)
+                InputManager.Update();
+            
             foreach (var screen in activeScreens) {
                 screen.Update();
             }

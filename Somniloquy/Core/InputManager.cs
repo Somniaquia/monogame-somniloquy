@@ -13,7 +13,7 @@ namespace Somniloquy {
         private static MouseState currentMouseState;
         private static MouseState previousMouseState;
 
-        //public List<UIFrame> 
+        
 
         public static void Update() {
             previousKeyboardState = currentKeyboardState;
@@ -41,5 +41,9 @@ namespace Somniloquy {
         public static bool IsMiddleButtonDown() => currentMouseState.MiddleButton == ButtonState.Pressed;
         public static bool IsMiddleButtonClicked() => currentMouseState.MiddleButton == ButtonState.Pressed && previousMouseState.MiddleButton == ButtonState.Released;
         public static int GetMiddleButtonDelta() => currentMouseState.ScrollWheelValue;
+
+        public static float GetPenPressure() {
+            return 1;
+        }
     }
 }

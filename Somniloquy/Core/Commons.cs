@@ -29,5 +29,9 @@ namespace Somniloquy {
         public static bool IsWithinBoundaries(Point point, Rectangle boundaries) {
             return (boundaries.Left <= point.X && point.X <= boundaries.Right & boundaries.Top < point.Y && point.Y < boundaries.Bottom);
         }
+
+        public static Color InvertColor(Color color) {
+            return new Color(255 - color.R, 255 - color.G, 255 - color.B);
+        }
     }
 }
