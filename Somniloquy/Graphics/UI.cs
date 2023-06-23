@@ -7,16 +7,50 @@ namespace Somniloquy
     using Microsoft.Xna.Framework.Graphics;
     using MonoGame.Extended;
 
-    public class UIFrame {
+    public abstract class UIFrame {
+        public Rectangle Boundaries { get; set; }
+        public Matrix TransformMatrix { get; protected set; }
+        public List<UIFrame> ChildUIFrames { get; set; } = new();
 
+        public UIFrame(Rectangle boundaries) {
+            Boundaries = boundaries;
+            TransformMatrix = Matrix.CreateScale(
+                1f / ResourceManager.GraphicsDeviceManager.PreferredBackBufferWidth, 
+                1f / ResourceManager.GraphicsDeviceManager.PreferredBackBufferHeight, 
+                1f) * Matrix.CreateTranslation(boundaries.X, boundaries.Y, 0f);
+        }
+
+        public abstract void OnFocus();
+
+        public void Update() {
+            if (Commons.IsWithinBoundaries(InputManager.GetMousePosition().ToPoint(), Boundaries)) {
+                if (InputManager.IsLeftButtonClicked()) {
+                    InputManager.Focus = this;
+                } else if (InputManager.IsLeftButtonReleased()) {
+                    InputManager.Focus = null;
+                }
+            }
+
+            foreach (var child in ChildUIFrames) {
+                child.Update();
+            }
+
+            if (InputManager.Focus == this) {
+                OnFocus();
+            }
+        }
+
+        public virtual void Draw() {
+            foreach (var child in ChildUIFrames) {
+                child.Draw();
+            }
+        }
     }
 
-    public class UIImage {
-
-    }
-
-    public class ColorChart : UIImage {
+    public class ColorChart : UIFrame {
+        public ColorChart(Rectangle boundaries) : base(boundaries) { }
         public Texture2D Chart { get; set; }
+        public int Hue { get; set; } = 0;
 
         public static Color ColorFromHSV(float hue, float saturation, float value) {
             int hi = Convert.ToInt32(Math.Floor(hue / 60)) % 6;
@@ -42,37 +76,41 @@ namespace Somniloquy
                 return new Color(v, p, q);
         }
 
-        public void GenerateColorChart(int width=16, int height=16, int hue=0) {
-            hue = Commons.Modulo(hue, 255);
+        public void UpdateChart() {
+            Hue = Commons.Modulo(Hue, 255);
             if (Chart == null)
-                Chart = new Texture2D(ResourceManager.GraphicsDeviceManager.GraphicsDevice, width, height);
+                Chart = new Texture2D(ResourceManager.GraphicsDeviceManager.GraphicsDevice, Boundaries.Width, Boundaries.Height);
 
-            Color[] chartData = new Color[width * height];
+            Color[] chartData = new Color[Boundaries.Width * Boundaries.Height];
 
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    float saturation = (float)x / width;
-                    float value = 1f - (float)y / height;
-                    Color color = ColorFromHSV(0, saturation, value);
-                    chartData[y * width + x] = color;
+            for (int y = 0; y < Boundaries.Height; y++) {
+                for (int x = 0; x < Boundaries.Width; x++) {
+                    chartData[y * Boundaries.Width + x] = FetchColor(new Vector2((float)x/Boundaries.Width, (float)y/Boundaries.Height));
                 }
             }
 
             Chart.SetData(chartData);
         }
 
-        public Color FetchColor(Point positionOnChart) {
-            return Color.Beige;
+        public override void OnFocus() {
+            if (InputManager.IsLeftButtonDown()) {
+                FetchColor(Vector2.Transform(InputManager.GetMousePosition(), TransformMatrix));
+            }
+
+            base.Update();
+        }
+
+        public Color FetchColor(Vector2 positionOnChart) {
+            return ColorFromHSV(Hue, (float)positionOnChart.X, 1f - (float)positionOnChart.Y);
         }
 
         public Point FetchPositionOnChart(Color color) {
             return Point.Zero;
         }
 
-        public void Draw(Rectangle destination) {
-            ResourceManager.SpriteBatch.Draw(Chart, destination, Color.White);
+        public override void Draw() {
+            ResourceManager.SpriteBatch.Draw(Chart, Boundaries, Color.White);
+            base.Draw();
         }
     }
 }

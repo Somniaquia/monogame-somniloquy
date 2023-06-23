@@ -6,11 +6,14 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework.Input;
 
     public static class InputManager {
+        public static object Focus { get; set; }
         private static KeyboardState currentKeyboardState;
         private static KeyboardState previousKeyboardState;
 
         private static MouseState currentMouseState;
         private static MouseState previousMouseState;
+
+        //public List<UIFrame> 
 
         public static void Update() {
             previousKeyboardState = currentKeyboardState;
@@ -24,6 +27,7 @@ namespace Somniloquy {
         public static bool IsKeyPressed(Keys key) => currentKeyboardState.IsKeyDown(key) && previousKeyboardState.IsKeyUp(key);
         public static bool IsKeyReleasesd(Keys key) => currentKeyboardState.IsKeyUp(key) && previousKeyboardState.IsKeyDown(key);
 
+        public static Vector2 GetPreviousMousePosition() => new Vector2(previousMouseState.Position.X, previousMouseState.Position.Y);
         public static Vector2 GetMousePosition() => new Vector2(currentMouseState.Position.X, currentMouseState.Position.Y);
 
         public static bool IsLeftButtonDown() => currentMouseState.LeftButton == ButtonState.Pressed;

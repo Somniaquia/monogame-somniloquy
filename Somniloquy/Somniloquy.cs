@@ -7,6 +7,8 @@
     using Microsoft.Xna.Framework.Input;
     using MonoGame.Extended;
 
+    // dotnet publish -c Release -r win-x64 -p:PublishSingleFile=true --self-contained
+
     public class Somniloquy : Game {
         private GraphicsDeviceManager graphicsDeviceManager;
         private SpriteBatch spriteBatch;
@@ -20,6 +22,7 @@
             graphicsDeviceManager.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
             graphicsDeviceManager.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
             graphicsDeviceManager.HardwareModeSwitch = false;
+            graphicsDeviceManager.IsFullScreen = false;
             graphicsDeviceManager.ApplyChanges();
 
             Window.IsBorderless = true;
@@ -43,6 +46,8 @@
             Texture2D pixel = new Texture2D(GraphicsDevice, 1, 1);
             pixel.SetData(new[] { Color.White });
             ResourceManager.Pixel = pixel;
+
+            ResourceManager.Misaki = Content.Load<SpriteFont>("MisakiGothic2nd");
         }
 
         protected override void Update(GameTime gameTime) {
@@ -58,7 +63,7 @@
         }
 
         protected override void Draw(GameTime gameTime) {
-            GraphicsDevice.Clear(Color.AliceBlue);
+            GraphicsDevice.Clear(Color.Black);
 
             foreach (var screen in activeScreens) {
                 screen.Draw();

@@ -25,11 +25,25 @@ namespace Somniloquy {
         public override void Update() {
             if (EditMode) {
                 Vector2 mousePosition = Camera.ApplyInvertTransform(InputManager.GetMousePosition());
-                
+                Vector2 previousMousePosition = Camera.ApplyInvertTransform(InputManager.GetPreviousMousePosition());
+
                 if (InputManager.IsLeftButtonDown()) {
+                    Tile tile = null;
+                    if (!InputManager.IsKeyDown(Keys.LeftControl))
+                        tile = new Tile();
+
                     if (ActiveWorld.Layers.Count == 0) ActiveWorld.Layers.Add(new Layer());
-                    ActiveWorld.Layers[0].SetTile(ActiveWorld.Layers[0].GetTilePositionOf(mousePosition.ToPoint()), new Tile());
+                    if (InputManager.IsLeftButtonClicked())
+                        ActiveWorld.Layers[0].SetTile(ActiveWorld.Layers[0].GetTilePositionOf(mousePosition.ToPoint()), tile);
+                    else
+                        ActiveWorld.Layers[0].SetLine(
+                            ActiveWorld.Layers[0].GetTilePositionOf(previousMousePosition.ToPoint()),
+                            ActiveWorld.Layers[0].GetTilePositionOf(mousePosition.ToPoint()),
+                            tile
+                        );
                 }
+
+                if (InputManager.IsKeyPressed(Keys.Delete)) ActiveWorld.Layers[0] = new Layer();
 
                 if (InputManager.IsKeyDown(Keys.Down)) Camera.Move(new Vector2(0, 1));
                 if (InputManager.IsKeyDown(Keys.Up)) Camera.Move(new Vector2(0, -1));
@@ -56,20 +70,29 @@ namespace Somniloquy {
     }
 
     public class UIScreen : Screen {
-        private ColorChart ColorChart = new();
+        public ColorChart ColorChart;
+
+        public UIScreen() {
+            ColorChart = new ColorChart(new Rectangle(
+                    ResourceManager.GraphicsDeviceManager.GraphicsDevice.Viewport.Width - 144,
+                    ResourceManager.GraphicsDeviceManager.GraphicsDevice.Viewport.Height - 144,
+                    128, 128));
+        }
 
         public override void Update() {
-            ColorChart.GenerateColorChart(16, 16);
+            ColorChart.UpdateChart();
         }
 
         public override void Draw() {
             ResourceManager.SpriteBatch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
-            ResourceManager.SpriteBatch.Draw(ColorChart.Chart,
-                new Rectangle(
-                    ResourceManager.GraphicsDeviceManager.GraphicsDevice.Viewport.Width - 144,
-                    ResourceManager.GraphicsDeviceManager.GraphicsDevice.Viewport.Height - 144, 
-                    128, 128), 
-                Color.White);
+
+            ColorChart.Draw();
+
+            ResourceManager.SpriteBatch.DrawString(ResourceManager.Misaki, "color palette", 
+                new Vector2(ResourceManager.GraphicsDeviceManager.GraphicsDevice.Viewport.Width - 144,
+                    ResourceManager.GraphicsDeviceManager.GraphicsDevice.Viewport.Height - 160), Color.White
+            );
+
             ResourceManager.SpriteBatch.End();
         }        
     }

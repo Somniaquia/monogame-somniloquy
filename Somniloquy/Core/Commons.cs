@@ -25,5 +25,9 @@ namespace Somniloquy {
         public static int Modulo(int dividend, int divisor) {
             return (dividend%divisor + divisor) % divisor;
         }
+
+        public static bool IsWithinBoundaries(Point point, Rectangle boundaries) {
+            return (boundaries.Left <= point.X && point.X <= boundaries.Right & boundaries.Top < point.Y && point.Y < boundaries.Bottom);
+        }
     }
 }
