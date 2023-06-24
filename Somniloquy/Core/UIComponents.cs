@@ -16,13 +16,13 @@ namespace Somniloquy {
 
         public static Color ColorFromHSV(float hue, float saturation, float value) {
             int hi = Convert.ToInt32(Math.Floor(hue / 60)) % 6;
-            float f = hue / 60 - (float)Math.Floor(hue / 60);
+            hue = hue / 60 - (float)Math.Floor(hue / 60);
 
             value = value * 255;
             int v = Convert.ToInt32(value);
             int p = Convert.ToInt32(value * (1 - saturation));
-            int q = Convert.ToInt32(value * (1 - f * saturation));
-            int t = Convert.ToInt32(value * (1 - (1 - f) * saturation));
+            int q = Convert.ToInt32(value * (1 - hue * saturation));
+            int t = Convert.ToInt32(value * (1 - (1 - hue) * saturation));
 
             if (hi == 0)
                 return new Color(v, t, p);
@@ -38,10 +38,43 @@ namespace Somniloquy {
                 return new Color(v, p, q);
         }
 
+        public static (float hue, float saturation, float value) HSVFromColor(Color color) {
+            float r = color.R / 255f;
+            float g = color.G / 255f;
+            float b = color.B / 255f;
+
+            float max = Math.Max(r, Math.Max(g, b));
+            float min = Math.Min(r, Math.Min(g, b));
+            float delta = max - min;
+
+            float hue = 0f;
+            float saturation = 0f;
+            float value = max;
+
+            if (max > 0f) {
+                saturation = delta / max;
+
+                if (r >= max) {
+                    hue = (g - b) / delta;
+                } else if (g >= max) {
+                    hue = 2f + (b - r) / delta;
+                } else {
+                    hue = 4f + (r - g) / delta;
+                }
+
+                hue *= 60f;
+                if (hue < 0f) {
+                    hue += 360f;
+                }
+            }
+
+            return (hue, saturation, value);
+        }
+
         public void UpdateChart() {
             PositionOnChart = new Vector2((MathF.Max(MathF.Min(1, PositionOnChart.X), 0)), MathF.Max(MathF.Min(1, PositionOnChart.Y), 0));
+            Hue = Commons.Modulo(Hue, 360);
 
-            Hue = Commons.Modulo(Hue, 255);
             if (Chart == null)
                 Chart = new Texture2D(GameManager.GraphicsDeviceManager.GraphicsDevice, Boundaries.Width, Boundaries.Height);
 
@@ -59,8 +92,6 @@ namespace Somniloquy {
 
         public override void OnFocus() {
             if (InputManager.IsLeftButtonDown()) {
-                System.Console.Write(InputManager.GetMousePosition());
-                System.Console.WriteLine(Vector2.Transform(InputManager.GetMousePosition(), TransformMatrix));
                 PositionOnChart = Vector2.Transform(InputManager.GetMousePosition(), TransformMatrix);
                 EditorScreen.EditorColor = FetchColor(PositionOnChart);
                 UpdateChart();
@@ -72,22 +103,10 @@ namespace Somniloquy {
         }
 
         public void FetchPositionAndHueFromColor(Color desiredColor) {
-            PositionOnChart = Vector2.Zero;
-
-            for (int y = 0; y < Boundaries.Height; y++)
-            {
-                for (int x = 0; x < Boundaries.Width; x++)
-                {
-                    Vector2 currentPosition = new Vector2((float)x / Boundaries.Width, (float)y / Boundaries.Height);
-                    Color currentColor = FetchColor(currentPosition);
-
-                    if (currentColor == desiredColor)
-                    {
-                        PositionOnChart = currentPosition;
-                        Hue = Commons.Modulo(Hue, 255);
-                    }
-                }
-            }
+            var hsvPair = HSVFromColor(desiredColor);
+            PositionOnChart = new Vector2(hsvPair.saturation, 1 - hsvPair.value);
+            Hue = (int) hsvPair.hue;
+            UpdateChart();
         }
 
         public override void Update() {

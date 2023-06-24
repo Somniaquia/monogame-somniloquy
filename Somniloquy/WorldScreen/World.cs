@@ -8,14 +8,26 @@
 
     public class Tile {
         public FunctionalSprite FSprite { get; set; }
-        public Color Color { get; set; } = Color.AliceBlue;
+        public Color Color;
 
+        public Tile(Color color) {
+            Color = color;
+        }
+        
         public void Update() {
-
+            
         }
 
         public void Draw(Rectangle destination) {
-            GameManager.DrawFilledRectangle(destination, Color, 0.5f);
+            if (FSprite is null)
+                GameManager.DrawFilledRectangle(destination, Color, 0.5f);
+            else {
+                GameManager.SpriteBatch.Draw(
+                    FSprite.CurrentAnimation.SpriteSheet, 
+                    destination, 
+                    FSprite.CurrentAnimation.FrameBoundaries[FSprite.FrameInCurrentAnimation], 
+                    Color);
+            }
         }
     }
 
@@ -26,8 +38,7 @@
     /// The dynamic modification of layers in a same world will help form the overall expected nature of the game, triggering
     /// different layouts or looks for the same world in every visit, sometimes connecting a different world or triggering events such as jumpscares
     /// </summary>
-    public class Layer
-    {
+    public class Layer {
         public Layer ChildLayers { get; set; }
         public Point Dimensions { get; set; }
         public Dictionary<Point, Tile[,]> Chunks = new();
@@ -134,6 +145,7 @@
     public class World {
         public string Name { get; set; }
         public List<Layer> Layers { get; set; } = new();
+        public List<Tile> Tiles { get; set; } = new();
 
         public static void Serialize(World world) {
             // TODO: Add World Serialization logic
