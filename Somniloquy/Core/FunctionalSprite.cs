@@ -32,10 +32,15 @@ namespace Somniloquy {
     /// </summary>
     public class FunctionalSprite {
         public string SpriteName { get; set; }
-        public Dictionary<string, Animation> Animations { get; set; }
+        public Dictionary<string, Animation> Animations { get; private set; }
 
         public Animation CurrentAnimation { get; set; }
-        public int FrameInCurrentAnimation { get; private set; }
+        public int FrameInCurrentAnimation { get; private set; } = 0;
+
+        public void AddAnimation(string name, Animation animation) {
+            Animations.Add(name, animation);
+            animation.AnimationName = name;
+        }
 
         public Rectangle GetSourceRectangle() {
             return CurrentAnimation.FrameBoundaries[FrameInCurrentAnimation];

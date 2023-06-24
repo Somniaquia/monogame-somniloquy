@@ -51,11 +51,13 @@ namespace Somniloquy {
         public Camera Camera { get; private set; } = new Camera(4.0f);
         public World ActiveWorld { get; private set; } = new();
         public static Color EditorColor { get; set; } = Color.AliceBlue;
+        public ColorChart ColorChart { get; private set; }
+        public int animationFrame { get; set; } = 0;
 
         public EditorScreen(Rectangle boundaries) : base(boundaries) {
-            ColorChart colorChart = new ColorChart(new Rectangle(boundaries.Width - 144, boundaries.Height - 144, 128, 128));
-            colorChart.UpdateChart();
-            ChildScreens.Add(colorChart);
+            ColorChart = new ColorChart(new Rectangle(boundaries.Width - 144, boundaries.Height - 144, 128, 128));
+            ColorChart.UpdateChart();
+            ChildScreens.Add(ColorChart);
         }
 
         public override void OnFocus() {
@@ -65,8 +67,7 @@ namespace Somniloquy {
             if (InputManager.IsLeftButtonDown()) {
                 Tile tile = null;
                 if (!InputManager.IsKeyDown(Keys.LeftControl)) {
-                    tile = new Tile();
-                    tile.Color = EditorColor;
+                    tile = new Tile(EditorColor);
                 }
 
                 if (ActiveWorld.Layers.Count == 0) ActiveWorld.Layers.Add(new Layer());
@@ -78,6 +79,14 @@ namespace Somniloquy {
                         ActiveWorld.Layers[0].GetTilePositionOf(mousePosition.ToPoint()),
                         tile
                     );
+            }
+
+            if (InputManager.IsRightButtonDown()) {
+                if (ActiveWorld.Layers.Count != 0) {
+                    Tile tile = ActiveWorld.Layers[0].GetTile(ActiveWorld.Layers[0].GetTilePositionOf(mousePosition.ToPoint()));
+                    if (tile is not null)
+                        ColorChart.FetchPositionAndHueFromColor(tile.Color);
+                }
             }
 
             if (InputManager.IsKeyPressed(Keys.Delete)) ActiveWorld.Layers[0] = new Layer();
