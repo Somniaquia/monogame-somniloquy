@@ -11,13 +11,25 @@ namespace Somniloquy {
         public abstract void Undo();
     }
 
-    public class TileCommand : ICommand {
+    public class PaintTrajectoryCommand : ICommand {
         public void Execute() {
             throw new NotImplementedException();
         }
 
         public void Undo() {
             throw new NotImplementedException();
+        }
+    }
+
+    public class PaintDropCommand : ICommand {
+        private List<Tile> affectedTiles;
+
+        public void Execute() {
+            
+        }
+
+        public void Undo() {
+            
         }
     }
 }

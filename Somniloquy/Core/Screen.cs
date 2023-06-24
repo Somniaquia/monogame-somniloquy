@@ -6,6 +6,7 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework.Graphics;
     using Microsoft.Xna.Framework.Input;
     using MonoGame.Extended;
+    using MonoGame.Extended.BitmapFonts;
 
     public abstract class Screen {
         public Rectangle Boundaries { get; set; }
@@ -117,8 +118,7 @@ namespace Somniloquy {
             GameManager.SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
             base.Draw();
 
-            // TODO: Move to Text UI class
-            GameManager.SpriteBatch.DrawString(GameManager.Misaki, "color palette", new Vector2(Boundaries.Width - 144, Boundaries.Height - 160), Color.White);
+            //GameManager.SpriteBatch.DrawString(GameManager.Misaki, "こんにちは", new Vector2(Boundaries.Width - 144, Boundaries.Height - 160), Color.White);
             GameManager.SpriteBatch.End();
         }
     }

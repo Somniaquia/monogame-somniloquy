@@ -5,7 +5,9 @@
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
     using Microsoft.Xna.Framework.Input;
+
     using MonoGame.Extended;
+    using MonoGame.Extended.BitmapFonts;
 
     // dotnet publish -c Release -r win-x64 -p:PublishSingleFile=true --self-contained
 
@@ -47,7 +49,7 @@
             pixel.SetData(new[] { Color.White });
             GameManager.Pixel = pixel;
 
-            GameManager.Misaki = Content.Load<SpriteFont>("MisakiGothic2nd");
+            //GameManager.Misaki = Content.Load<BitmapFont>("misaki");
         }
 
         protected override void Update(GameTime gameTime) {
