@@ -4,6 +4,7 @@ namespace Somniloquy {
 
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Input;
+    using WintabDN;
 
     public static class InputManager {
         public static object Focus { get; set; }
@@ -11,9 +12,19 @@ namespace Somniloquy {
         private static KeyboardState previousKeyboardState;
 
         private static MouseState currentMouseState;
+        public static float PenPressure { get; private set; }
         private static MouseState previousMouseState;
+        private static CWintabData wintabData;
 
-        
+        public static void Initialize(GameWindow window) {
+            SDL2.SDL.SDL_SysWMinfo systemInfo = new SDL2.SDL.SDL_SysWMinfo();
+            SDL2.SDL.SDL_VERSION(out systemInfo.version);
+            SDL2.SDL.SDL_GetWindowWMInfo(window.Handle, ref systemInfo);
+
+            CWintabContext logContext = CWintabInfo.GetDefaultSystemContext(ECTXOptionValues.CXO_MESSAGES);
+            logContext.Open(systemInfo.info.win.window, true);
+            wintabData = new CWintabData(logContext);
+        }
 
         public static void Update() {
             previousKeyboardState = currentKeyboardState;
@@ -21,6 +32,15 @@ namespace Somniloquy {
 
             previousMouseState = currentMouseState;
             currentMouseState = Mouse.GetState();
+
+            // Thank you Apos for sharing the code!
+            float maxPressure = CWintabInfo.GetMaxPressure();
+
+            uint count = 0; PenPressure = 0;
+            WintabPacket[] results = wintabData.GetDataPackets(1, true, ref count);
+            for (int i = 0; i < count; i++) {
+                PenPressure = results[i].pkNormalPressure / maxPressure;
+            }
         }
 
         public static bool IsKeyDown(Keys key) => currentKeyboardState.IsKeyDown(key);
@@ -40,10 +60,6 @@ namespace Somniloquy {
         
         public static bool IsMiddleButtonDown() => currentMouseState.MiddleButton == ButtonState.Pressed;
         public static bool IsMiddleButtonClicked() => currentMouseState.MiddleButton == ButtonState.Pressed && previousMouseState.MiddleButton == ButtonState.Released;
-        public static int GetMiddleButtonDelta() => currentMouseState.ScrollWheelValue;
-
-        public static float GetPenPressure() {
-            return 1;
-        }
+        public static int GetMiddleButtonDelta() => currentMouseState.ScrollWheelValue;       
     }
 }

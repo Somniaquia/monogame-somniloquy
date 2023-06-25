@@ -38,6 +38,8 @@
         protected override void Initialize() {
             base.Initialize();
             activeScreens.Add(new EditorScreen(GameManager.WindowSize));
+
+            InputManager.Initialize(Window);
         }
 
         protected override void LoadContent() {

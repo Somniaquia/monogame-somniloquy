@@ -49,7 +49,7 @@ namespace Somniloquy {
         public Point GetDestinationRectangleOffset() {
             return CurrentAnimation.FrameAnchors[FrameInCurrentAnimation];
         }
-
+        
         public void AdvanceFrames(int frames = 1) {
             FrameInCurrentAnimation = (FrameInCurrentAnimation + frames) % CurrentAnimation.FrameBoundaries.Count;
         }

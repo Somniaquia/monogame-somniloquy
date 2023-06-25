@@ -72,13 +72,16 @@ namespace Somniloquy {
                 }
 
                 if (ActiveWorld.Layers.Count == 0) ActiveWorld.Layers.Add(new Layer());
-                if (InputManager.IsLeftButtonClicked())
-                    ActiveWorld.Layers[0].SetTile(ActiveWorld.Layers[0].GetTilePositionOf(mousePosition.ToPoint()), tile);
+
+                if (InputManager.IsLeftButtonClicked()) {
+                    ActiveWorld.Layers[0].SetTile(ActiveWorld.Layers[0].GetTilePositionOf(mousePosition.ToPoint()), tile, Math.Max(1, (int) (InputManager.PenPressure * 5)));
+                }
+
                 else
                     ActiveWorld.Layers[0].SetLine(
                         ActiveWorld.Layers[0].GetTilePositionOf(previousMousePosition.ToPoint()),
                         ActiveWorld.Layers[0].GetTilePositionOf(mousePosition.ToPoint()),
-                        tile
+                        tile, Math.Max(1, (int) (5 * InputManager.PenPressure))
                     );
             }
 
@@ -88,6 +91,7 @@ namespace Somniloquy {
                     if (tile is not null)
                         ColorChart.FetchPositionAndHueFromColor(tile.Color);
                 }
+
             }
 
             if (InputManager.IsKeyPressed(Keys.Delete)) ActiveWorld.Layers[0] = new Layer();
@@ -112,7 +116,7 @@ namespace Somniloquy {
             ActiveWorld?.Draw();
 
             Vector2 mousePosition = Camera.ApplyInvertTransform(InputManager.GetMousePosition());
-            GameManager.SpriteBatch.DrawPoint(mousePosition.X, mousePosition.Y, Color.Black, 10 * InputManager.GetPenPressure());
+            GameManager.SpriteBatch.DrawPoint(mousePosition.X, mousePosition.Y, Color.Black);
             GameManager.SpriteBatch.End();
 
             GameManager.SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);

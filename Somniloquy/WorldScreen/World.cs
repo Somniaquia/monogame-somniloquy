@@ -53,7 +53,7 @@
             return new Point(Commons.FloorDivide(tilePosition.X, ChunkLength), Commons.FloorDivide(tilePosition.Y, ChunkLength));
         }
 
-        public void SetLine(Point tilePos1, Point tilePos2, Tile tile) {
+        public void SetLine(Point tilePos1, Point tilePos2, Tile tile, int width) {
             int dx = Math.Abs(tilePos2.X - tilePos1.X);
             int dy = Math.Abs(tilePos2.Y - tilePos1.Y);
             int sx = (tilePos1.X < tilePos2.X) ? 1 : -1;
@@ -61,7 +61,7 @@
             int err = dx - dy;
 
             while (true) {
-                SetTile(new Point(tilePos1.X, tilePos1.Y), tile);
+                SetTile(new Point(tilePos1.X, tilePos1.Y), tile, width);
 
                 if (tilePos1.X == tilePos2.X && tilePos1.Y == tilePos2.Y)
                     break;
@@ -83,19 +83,24 @@
         public void SetRectangle(Point tilePos1, Point tilePos2, Tile tile) {
             for (int y = tilePos1.Y; y < tilePos2.Y; y++) {
                 for (int x = tilePos1.X; x < tilePos2.X; x++) {
-                    SetTile(new Point(x, y), tile);
+                    SetTile(new Point(x, y), tile, 1);
                 }
             }
         }
 
-        public void SetTile(Point tilePosition, Tile tile) {
-            Point chunkPosition = GetChunkPositionOf(tilePosition);
+        public void SetTile(Point centerPosition, Tile tile, int width) {
+            for (int y = -(width - 1) / 2; y <= width / 2; y++) {
+                for (int x = -(width - 1) / 2; x <= width / 2; x++) {
+                    Point position = new Point(centerPosition.X + x, centerPosition.Y + y);
+                    Point chunkPosition = GetChunkPositionOf(position);
 
-            if (!Chunks.ContainsKey(chunkPosition)) {
-                Chunks.Add(chunkPosition, new Tile[ChunkLength, ChunkLength]);
-            }
+                    if (!Chunks.ContainsKey(chunkPosition)) {
+                        Chunks.Add(chunkPosition, new Tile[ChunkLength, ChunkLength]);
+                    }
 
-            Chunks[chunkPosition][tilePosition.X - chunkPosition.X * ChunkLength, tilePosition.Y - chunkPosition.Y * ChunkLength] = tile;
+                    Chunks[chunkPosition][position.X - chunkPosition.X * ChunkLength, position.Y - chunkPosition.Y * ChunkLength] = tile;
+                }
+            }   
         }
 
         public Tile GetTile(Point tilePosition) {
