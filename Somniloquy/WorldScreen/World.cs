@@ -7,13 +7,21 @@
     using MonoGame.Extended;
 
     public class Tile {
-        public FunctionalSprite FSprite { get; set; }
+        public FunctionalSprite FSprite { get; set; } = new();
         public Color Color;
 
         public Tile(Color color) {
             Color = color;
+
+            Texture2D fallBackSprite = new Texture2D(GameManager.GraphicsDeviceManager.GraphicsDevice, Layer.TileLength, Layer.TileLength);
+            Color[] fallBackSpriteData = new Color[Layer.TileLength * Layer.TileLength];
+            Array.Fill(fallBackSpriteData, Color.White);
+            fallBackSprite.SetData(fallBackSpriteData);
+
+            var fallbackAnimation = FSprite.AddAnimation("Fallback");
+            fallbackAnimation.AddFrame(fallBackSprite);
         }
-        
+
         public void Update() {
             
         }
@@ -42,15 +50,15 @@
         public Layer ChildLayers { get; set; }
         public Point Dimensions { get; set; }
         public Dictionary<Point, Tile[,]> Chunks = new();
-        public const int ChunkLength = 16;
-        public const int TileLength = 16;
+        public static int ChunkLength = 16;
+        public static int TileLength = 8;
 
         public Point GetTilePositionOf(Point pixelPosition) {
-            return new Point(Commons.FloorDivide(pixelPosition.X, TileLength), Commons.FloorDivide(pixelPosition.Y, TileLength));
+            return new Point(MathsHelper.FloorDivide(pixelPosition.X, TileLength), MathsHelper.FloorDivide(pixelPosition.Y, TileLength));
         }
 
         public Point GetChunkPositionOf(Point tilePosition) {
-            return new Point(Commons.FloorDivide(tilePosition.X, ChunkLength), Commons.FloorDivide(tilePosition.Y, ChunkLength));
+            return new Point(MathsHelper.FloorDivide(tilePosition.X, ChunkLength), MathsHelper.FloorDivide(tilePosition.Y, ChunkLength));
         }
 
         public void SetLine(Point tilePos1, Point tilePos2, Tile tile, int width) {
@@ -109,29 +117,41 @@
         }
 
         public void Update() {
-            foreach (KeyValuePair<Point, Tile[,]> pointTilePair in Chunks) {
-                for (int y = 0; y < ChunkLength; y++) {
-                    for (int x = 0; x < ChunkLength; x++) {
-                        pointTilePair.Value[x, y]?.Update();
-                    }
-                }
-            }
+            // foreach (KeyValuePair<Point, Tile[,]> pointTilePair in Chunks) {
+            //     for (int y = 0; y < ChunkLength; y++) {
+            //         for (int x = 0; x < ChunkLength; x++) {
+            //             pointTilePair.Value[x, y]?.Update();
+            //         }
+            //     }
+            // }
         }
 
-        public void Draw() {
-            // TODO: Only render chunks AND blocks on screen
-            foreach (KeyValuePair<Point, Tile[,]> pointChunkPair in Chunks) {
-                GameManager.SpriteBatch.DrawRectangle(new Rectangle(
-                                (pointChunkPair.Key.X * ChunkLength) * TileLength,
-                                (pointChunkPair.Key.Y * ChunkLength) * TileLength,
-                                TileLength * ChunkLength, TileLength * ChunkLength), Color.FloralWhite, layerDepth:1);
-                for (int y = 0; y < ChunkLength; y++) {
-                    for (int x = 0; x < ChunkLength; x++) {
-                        pointChunkPair.Value[x, y]?.Draw(
-                            new Rectangle(
-                                (pointChunkPair.Key.X * ChunkLength + x) * TileLength,
-                                (pointChunkPair.Key.Y * ChunkLength + y) * TileLength,
-                                TileLength, TileLength));
+        public void Draw(Camera camera) {
+            var cameraBounds = camera.GetCameraBounds();
+
+            var startChunkPosition = GetChunkPositionOf(GetTilePositionOf(cameraBounds.Item1.ToPoint()));
+            var endChunkPosition = GetChunkPositionOf(GetTilePositionOf(cameraBounds.Item2.ToPoint()));
+
+            for (int chunkY = startChunkPosition.Y; chunkY < endChunkPosition.Y; chunkY++) {
+                for (int chunkX = startChunkPosition.X; chunkX < endChunkPosition.X; chunkX++) {
+                    if (!Chunks.ContainsKey(new Point(chunkX, chunkY))) {
+                        continue;
+                    }
+
+                    var chunk = Chunks[new Point(chunkX, chunkY)];
+
+                    GameManager.SpriteBatch.DrawRectangle(new Rectangle(
+                                    (chunkX * ChunkLength) * TileLength,
+                                    (chunkY * ChunkLength) * TileLength,
+                                    TileLength * ChunkLength, TileLength * ChunkLength), Color.GhostWhite, layerDepth: 1);
+                    for (int yInChunk = 0; yInChunk < ChunkLength; yInChunk++) {
+                        for (int xInChunk = 0; xInChunk < ChunkLength; xInChunk++) {
+                            chunk[xInChunk, yInChunk]?.Draw(
+                                new Rectangle(
+                                    (chunkX * ChunkLength + xInChunk) * TileLength,
+                                    (chunkY * ChunkLength + yInChunk) * TileLength,
+                                    TileLength, TileLength));
+                        }
                     }
                 }
             }
@@ -179,9 +199,9 @@
             }
         }
 
-        public void Draw() {
+        public void Draw(Camera camera) {
             foreach (var layer in Layers) {
-                layer.Draw();
+                layer.Draw(camera);
             }
         }
     }
@@ -212,9 +232,9 @@
             }
         }
 
-        public static void Draw() {
+        public static void Draw(Camera camera) {
             foreach (var entry in LoadedWorlds) {
-                entry.Value.Draw();
+                entry.Value.Draw(camera);
             }
         }
     }

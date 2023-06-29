@@ -24,7 +24,7 @@ namespace Somniloquy {
 
         public virtual void Update() {
             if (Focusable) {
-                if (Commons.IsWithinBoundaries(InputManager.GetMousePosition().ToPoint(), Boundaries)) {
+                if (MathsHelper.IsWithinBoundaries(InputManager.GetMousePosition().ToPoint(), Boundaries)) {
                     if (InputManager.IsLeftButtonClicked()) {
                         InputManager.Focus = this;
                     }
@@ -100,6 +100,8 @@ namespace Somniloquy {
             if (InputManager.IsKeyDown(Keys.W)) Camera.Move(new Vector2(0, -1));
             if (InputManager.IsKeyDown(Keys.D)) Camera.Move(new Vector2(1, 0));
             if (InputManager.IsKeyDown(Keys.A)) Camera.Move(new Vector2(-1, 0));
+            if (InputManager.IsKeyDown(Keys.Q)) Camera.Rotation += 0.1f;
+            if (InputManager.IsKeyDown(Keys.E)) Camera.Rotation -= 0.1f;
 
             if (InputManager.IsKeyDown(Keys.Space)) Camera.Zoom *= 1.1f;
             if (InputManager.IsKeyDown(Keys.LeftShift)) Camera.Zoom *= 0.9f;
@@ -113,7 +115,7 @@ namespace Somniloquy {
 
         public override void Draw() {
             GameManager.SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, transformMatrix: Camera.Transform);
-            ActiveWorld?.Draw();
+            ActiveWorld?.Draw(Camera);
 
             Vector2 mousePosition = Camera.ApplyInvertTransform(InputManager.GetMousePosition());
             GameManager.SpriteBatch.DrawPoint(mousePosition.X, mousePosition.Y, Color.Black);
