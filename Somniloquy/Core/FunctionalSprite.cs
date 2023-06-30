@@ -21,8 +21,7 @@ namespace Somniloquy {
             AnimationName = name;
         }
 
-        public Texture2D MergeTextures(Texture2D texture1, Texture2D texture2)
-        {
+        public static Texture2D AppendTextureOnRight(Texture2D texture1, Texture2D texture2) {
             int width = texture1.Width + texture2.Width;
             int height = Math.Max(texture1.Height, texture2.Height);
 
@@ -50,17 +49,45 @@ namespace Somniloquy {
             return mergedTexture;
         }
 
+        public void MergeTextures(Texture2D texture1, Texture2D texture2, Rectangle boundaries) {
+            if (boundaries.X + texture2.Width > texture1.Width || boundaries.Y + texture2.Height > texture1.Height) {
+                // Handle error or return if the smaller texture doesn't fit
+                return;
+            }
+
+            Color[] textureData1 = new Color[texture1.Width * texture1.Height];
+            texture1.GetData(textureData1);
+
+            Color[] textureData2 = new Color[texture2.Width * texture2.Height];
+            texture2.GetData(textureData2);
+
+            for (int y = 0; y < boundaries.Right; y++) {
+                for (int x = 0; x < boundaries.Bottom; x++) {
+                    if (textureData2[y * texture2.Width + x] == Color.Transparent) {
+                        continue;
+                    }
+                    textureData1[(boundaries.Y + y) * texture1.Width + (boundaries.X + x)] = textureData2[y * texture2.Width + x];
+                }
+            }
+
+            texture1.SetData(textureData1);
+        }
+
         public void AddFrame(Texture2D frame) {
             if (SpriteSheet is null) {
                 SpriteSheet = frame;
                 FrameBoundaries.Add(new Rectangle(0, 0, frame.Width, frame.Height));
             } else {
                 FrameBoundaries.Add(new Rectangle(SpriteSheet.Width, 0, frame.Width, frame.Height));
-                SpriteSheet = MergeTextures(SpriteSheet, frame);
+                SpriteSheet = AppendTextureOnRight(SpriteSheet, frame);
             }
 
             // TODO: Calculate  anchors
             FrameAnchors.Add(new Point(0, 0));
+        }
+
+        public void PaintOnFrame(Texture2D texture, int frameIndex) {
+            MergeTextures(SpriteSheet, texture, FrameBoundaries[frameIndex]);
         }
     }
 

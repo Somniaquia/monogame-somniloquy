@@ -22,6 +22,10 @@
             fallbackAnimation.AddFrame(fallBackSprite);
         }
 
+        public void PaintOnCurrentFrame(Texture2D texture) {
+            FSprite.CurrentAnimation.PaintOnFrame(texture, 0);
+        }
+
         public void Update() {
             
         }
@@ -53,12 +57,88 @@
         public static int ChunkLength = 16;
         public static int TileLength = 8;
 
+        public Point GetPositionInTile(Point pixelPosition) {
+            return new Point(MathsHelper.Modulo(pixelPosition.X, TileLength), MathsHelper.Modulo(pixelPosition.Y, TileLength));
+        }
+
         public Point GetTilePositionOf(Point pixelPosition) {
             return new Point(MathsHelper.FloorDivide(pixelPosition.X, TileLength), MathsHelper.FloorDivide(pixelPosition.Y, TileLength));
         }
 
         public Point GetChunkPositionOf(Point tilePosition) {
             return new Point(MathsHelper.FloorDivide(tilePosition.X, ChunkLength), MathsHelper.FloorDivide(tilePosition.Y, ChunkLength));
+        }
+
+        public void PaintLine(Point point1, Point point2, Color color, int width) {
+            int dx = Math.Abs(point2.X - point1.X);
+            int dy = Math.Abs(point2.Y - point1.Y);
+            int sx = (point1.X < point2.X) ? 1 : -1;
+            int sy = (point1.Y < point2.Y) ? 1 : -1;
+            int err = dx - dy;
+
+            while (true)
+            {
+                PaintPixel(new Point(point1.X, point1.Y), color, width);
+
+                if (point1.X == point2.X && point1.Y == point2.Y)
+                    break;
+
+                int err2 = 2 * err;
+
+                if (err2 > -dy)
+                {
+                    err -= dy;
+                    point1.X += sx;
+                }
+
+                if (err2 < dx)
+                {
+                    err += dx;
+                    point1.Y += sy;
+                }
+            }
+        }
+
+        public void PaintPixel(Point point, Color color, int width) {
+            // TODO: Add brush shape other than a square
+            int left = point.X - (width - 1) / 2;
+            int right = point.X + width / 2;
+            int top = point.Y - (width - 1) / 2;
+            int bottom = point.Y + width / 2;
+
+            PaintRectangle(new Rectangle(left, top, right - left, bottom - top), color);
+        }
+
+        public void PaintRectangle(Rectangle rectangle, Color color) {
+            int startTileX = MathsHelper.FloorDivide(rectangle.X, TileLength);
+            int startTileY = MathsHelper.FloorDivide(rectangle.Y, TileLength);
+            int endTileX = MathsHelper.FloorDivide(rectangle.Right, TileLength);
+            int endTileY = MathsHelper.FloorDivide(rectangle.Bottom, TileLength);
+
+            for (int tileY = startTileY; tileY <= endTileY; tileY++) {
+                for (int tileX = startTileX; tileX <= endTileX; tileX++) {
+                    var tilewiseTexture = new Texture2D(GameManager.GraphicsDeviceManager.GraphicsDevice, Layer.TileLength, Layer.TileLength);
+                    Color[] data = new Color[Layer.TileLength * Layer.TileLength];
+                    Array.Fill(data, Color.Transparent);
+
+                    int startX = Math.Max(rectangle.X - startTileX * TileLength, 0);
+                    int startY = Math.Max(rectangle.Y - startTileY * TileLength, 0);
+                    int endX = Math.Max(rectangle.Right - endTileX * TileLength, 0);
+                    int endY = Math.Max(rectangle.Bottom - endTileY * TileLength, 0);
+
+                    for (int y = startY; y <= endY; y++) {
+                        for (int x = startX; x <= endX; x++) {
+                            data[y * TileLength + x] = color;
+                        }
+                    }
+
+                    tilewiseTexture.SetData(data);
+                    if (GetTile(new Point(tileX, tileY)) is null) {
+                        SetTile(new Point(tileX, tileY), new Tile(color), 1);
+                    }
+                    GetTile(new Point(tileX, tileY)).PaintOnCurrentFrame(tilewiseTexture);
+                }
+            }
         }
 
         public void SetLine(Point tilePos1, Point tilePos2, Tile tile, int width) {
@@ -113,6 +193,11 @@
 
         public Tile GetTile(Point tilePosition) {
             Point chunkPosition = GetChunkPositionOf(tilePosition);
+
+            if (!Chunks.ContainsKey(chunkPosition)) {
+                return null;
+            }
+
             return Chunks[chunkPosition][tilePosition.X - chunkPosition.X * ChunkLength, tilePosition.Y - chunkPosition.Y * ChunkLength];
         }
 
