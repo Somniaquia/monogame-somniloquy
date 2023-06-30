@@ -6,6 +6,7 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework.Graphics;
     using Microsoft.Xna.Framework.Input;
     using MonoGame.Extended;
+    using MonoGame.Extended.BitmapFonts;
 
     public abstract class Screen {
         public Rectangle Boundaries { get; set; }
@@ -23,7 +24,7 @@ namespace Somniloquy {
 
         public virtual void Update() {
             if (Focusable) {
-                if (Commons.IsWithinBoundaries(InputManager.GetMousePosition().ToPoint(), Boundaries)) {
+                if (MathsHelper.IsWithinBoundaries(InputManager.GetMousePosition().ToPoint(), Boundaries)) {
                     if (InputManager.IsLeftButtonClicked()) {
                         InputManager.Focus = this;
                     }
@@ -48,7 +49,7 @@ namespace Somniloquy {
     }
 
     public class EditorScreen : Screen {
-        public Camera Camera { get; private set; } = new Camera(4.0f);
+        public Camera Camera { get; private set; } = new Camera(8.0f);
         public World ActiveWorld { get; private set; } = new();
         public static Color EditorColor { get; set; } = Color.AliceBlue;
         public ColorChart ColorChart { get; private set; }
@@ -65,21 +66,45 @@ namespace Somniloquy {
             Vector2 previousMousePosition = Camera.ApplyInvertTransform(InputManager.GetPreviousMousePosition());
 
             if (InputManager.IsLeftButtonDown()) {
-                Tile tile = null;
-                if (!InputManager.IsKeyDown(Keys.LeftControl)) {
-                    tile = new Tile(EditorColor);
+                if (ActiveWorld.Layers.Count == 0) ActiveWorld.Layers.Add(new Layer());
+                var layer = ActiveWorld.Layers[0];
+                var color = EditorColor;
+
+                if (InputManager.IsKeyDown(Keys.LeftControl)) {
+                    color = Color.Transparent;
                 }
 
-                if (ActiveWorld.Layers.Count == 0) ActiveWorld.Layers.Add(new Layer());
-                if (InputManager.IsLeftButtonClicked())
-                    ActiveWorld.Layers[0].SetTile(ActiveWorld.Layers[0].GetTilePositionOf(mousePosition.ToPoint()), tile);
-                else
-                    ActiveWorld.Layers[0].SetLine(
-                        ActiveWorld.Layers[0].GetTilePositionOf(previousMousePosition.ToPoint()),
-                        ActiveWorld.Layers[0].GetTilePositionOf(mousePosition.ToPoint()),
-                        tile
-                    );
+                if (InputManager.IsLeftButtonClicked()) {
+                    if (layer.GetTile(layer.GetTilePositionOf(mousePosition.ToPoint())) is null) {
+                        ActiveWorld.Layers[0].SetTile(layer.GetTilePositionOf(mousePosition.ToPoint()), new Tile(EditorColor), Math.Max(1, (int)(InputManager.PenPressure * 5)));
+                    }
+
+                    layer.PaintPixel(mousePosition.ToPoint(), color, Math.Max(1, (int) (InputManager.PenPressure * 5)));
+                } else {
+                    layer.PaintLine(previousMousePosition.ToPoint(), mousePosition.ToPoint(), color, Math.Max(1, (int)(InputManager.PenPressure * 5)));
+                }
+
             }
+
+            // if (InputManager.IsLeftButtonDown()) {
+            //     Tile tile = null;
+            //     if (!InputManager.IsKeyDown(Keys.LeftControl)) {
+            //         tile = new Tile(EditorColor);
+            //     }
+
+            //     if (ActiveWorld.Layers.Count == 0) ActiveWorld.Layers.Add(new Layer());
+
+            //     if (InputManager.IsLeftButtonClicked()) {
+            //         ActiveWorld.Layers[0].SetTile(ActiveWorld.Layers[0].GetTilePositionOf(mousePosition.ToPoint()), tile, Math.Max(1, (int) (InputManager.PenPressure * 5)));
+            //     }
+
+            //     else
+            //         ActiveWorld.Layers[0].SetLine(
+            //             ActiveWorld.Layers[0].GetTilePositionOf(previousMousePosition.ToPoint()),
+            //             ActiveWorld.Layers[0].GetTilePositionOf(mousePosition.ToPoint()),
+            //             tile, Math.Max(1, (int) (5 * InputManager.PenPressure))
+            //         );
+            // }
 
             if (InputManager.IsRightButtonDown()) {
                 if (ActiveWorld.Layers.Count != 0) {
@@ -87,6 +112,7 @@ namespace Somniloquy {
                     if (tile is not null)
                         ColorChart.FetchPositionAndHueFromColor(tile.Color);
                 }
+
             }
 
             if (InputManager.IsKeyPressed(Keys.Delete)) ActiveWorld.Layers[0] = new Layer();
@@ -95,6 +121,8 @@ namespace Somniloquy {
             if (InputManager.IsKeyDown(Keys.W)) Camera.Move(new Vector2(0, -1));
             if (InputManager.IsKeyDown(Keys.D)) Camera.Move(new Vector2(1, 0));
             if (InputManager.IsKeyDown(Keys.A)) Camera.Move(new Vector2(-1, 0));
+            if (InputManager.IsKeyDown(Keys.Q)) Camera.Rotation += 0.1f;
+            if (InputManager.IsKeyDown(Keys.E)) Camera.Rotation -= 0.1f;
 
             if (InputManager.IsKeyDown(Keys.Space)) Camera.Zoom *= 1.1f;
             if (InputManager.IsKeyDown(Keys.LeftShift)) Camera.Zoom *= 0.9f;
@@ -107,18 +135,17 @@ namespace Somniloquy {
         }
 
         public override void Draw() {
-            GameManager.SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, transformMatrix: Camera.Transform);
-            ActiveWorld?.Draw();
+            GameManager.SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, transformMatrix: Camera.Transform);
+            ActiveWorld?.Draw(Camera);
 
             Vector2 mousePosition = Camera.ApplyInvertTransform(InputManager.GetMousePosition());
-            GameManager.SpriteBatch.DrawPoint(mousePosition.X, mousePosition.Y, Color.Black, 10 * InputManager.GetPenPressure());
+            GameManager.SpriteBatch.DrawPoint(mousePosition.X, mousePosition.Y, Color.Black);
             GameManager.SpriteBatch.End();
 
-            GameManager.SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
+            GameManager.SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp);
             base.Draw();
 
-            // TODO: Move to Text UI class
-            GameManager.SpriteBatch.DrawString(GameManager.Misaki, "color palette", new Vector2(Boundaries.Width - 144, Boundaries.Height - 160), Color.White);
+            //GameManager.SpriteBatch.DrawString(GameManager.Misaki, "こんにちは", new Vector2(Boundaries.Width - 144, Boundaries.Height - 160), Color.White);
             GameManager.SpriteBatch.End();
         }
     }

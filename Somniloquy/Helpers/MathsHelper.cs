@@ -5,7 +5,7 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
 
-    public static class Commons {
+    public static class MathsHelper {
         public static float Lerp(float origin, float target, float lerpModifier) {
             return origin * (1 - lerpModifier) + target * lerpModifier;
         }

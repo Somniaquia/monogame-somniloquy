@@ -6,8 +6,10 @@ namespace Somniloquy {
     
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
-    using MonoGame.Extended;
     using Microsoft.Xna.Framework.Content;
+    
+    using MonoGame.Extended;
+    using MonoGame.Extended.BitmapFonts;
 
     public static class GameManager
     {
@@ -21,7 +23,7 @@ namespace Somniloquy {
         public static Dictionary<string, Texture2D> SpriteSheets { get; set; }
         public static Texture2D Pixel { get; set; }
         public static FunctionalSprite MonotextureSprite { get; set; }
-        public static SpriteFont Misaki { get; set; }
+        public static BitmapFont Misaki { get; set; }
 
         public static void InitializeDirectories(params (Type, string)[] directories) {
             string baseDirectory = Directory.GetCurrentDirectory();

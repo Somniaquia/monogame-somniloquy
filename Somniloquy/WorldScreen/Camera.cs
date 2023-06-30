@@ -22,20 +22,21 @@ namespace Somniloquy {
         }
 
         public void Move(Vector2 displacement) {
-            Position += displacement / Zoom * 4;
+            Position += displacement * 10 / MathF.Sqrt(Zoom);
         }
 
         public void UpdateTransformation() {
-            visiblePosition.X = Commons.Lerp(visiblePosition.X, Position.X, LerpModifier);
-            visiblePosition.Y = Commons.Lerp(visiblePosition.Y, Position.Y, LerpModifier);
+            visiblePosition.X = MathsHelper.Lerp(visiblePosition.X, Position.X, LerpModifier);
+            visiblePosition.Y = MathsHelper.Lerp(visiblePosition.Y, Position.Y, LerpModifier);
 
             Zoom = Zoom < 0.1f ? 0.1f : Zoom;
-            visibleZoom = Commons.Lerp(visibleZoom, Zoom, LerpModifier);
+            visibleZoom = MathsHelper.Lerp(visibleZoom, Zoom, LerpModifier);
 
-            Rotation = Commons.ModuloF(Rotation, 2 * 3.141592653589793f);
-            visibleRotation = Commons.Lerp(visibleRotation, Rotation, LerpModifier);
+            Rotation = MathsHelper.ModuloF(Rotation, 2 * 3.141592653589793f);
+            visibleRotation = MathsHelper.Lerp(visibleRotation, Rotation, LerpModifier);
 
             Viewport viewport = GameManager.GraphicsDeviceManager.GraphicsDevice.Viewport;
+
             Transform =
                 Matrix.CreateTranslation(new Vector3(-visiblePosition.X, -visiblePosition.Y, 0)) *
                 Matrix.CreateRotationZ(visibleRotation) *
@@ -50,6 +51,18 @@ namespace Somniloquy {
 
         public Vector2 ApplyInvertTransform(Vector2 transformedVector) {
             return Vector2.Transform(transformedVector, Matrix.Invert(Transform));
+        }
+
+        public (Vector2, Vector2) GetCameraBounds() {
+            Viewport viewport = GameManager.GraphicsDeviceManager.GraphicsDevice.Viewport;
+            Vector2 upperLeft = ApplyInvertTransform(Vector2.Zero);
+            //upperLeft.X += viewport.Width * 0.5f;
+            //upperLeft.Y += viewport.Height * 0.5f;
+
+            Vector2 bottomRight = ApplyInvertTransform(new Vector2(viewport.Width, viewport.Height));
+            bottomRight.X += viewport.Width * 0.5f;
+            bottomRight.Y += viewport.Height * 0.5f;
+            return (upperLeft, bottomRight);
         }
     }
 }
