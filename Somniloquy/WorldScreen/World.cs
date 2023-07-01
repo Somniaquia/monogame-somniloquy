@@ -7,12 +7,10 @@
     using MonoGame.Extended;
 
     public class Tile {
+        public int ID { get; set; }
         public FunctionalSprite FSprite { get; set; } = new();
-        public Color Color;
 
-        public Tile(Color color) {
-            Color = color;
-
+        public Tile() {
             Texture2D transparentSprite = new Texture2D(GameManager.GraphicsDeviceManager.GraphicsDevice, Layer.TileLength, Layer.TileLength);
             Color[] data = new Color[Layer.TileLength * Layer.TileLength];
             Array.Fill(data, Color.Transparent);
@@ -42,7 +40,7 @@
 
         public void Draw(Rectangle destination) {
             if (FSprite is null)
-                GameManager.DrawFilledRectangle(destination, Color, 0.5f);
+                GameManager.DrawFilledRectangle(destination, Color.DarkGray, 0.5f);
             else {
                 GameManager.SpriteBatch.Draw(
                     FSprite.CurrentAnimation.SpriteSheet, 
@@ -64,8 +62,8 @@
         public Layer ChildLayers { get; set; }
         public Point Dimensions { get; set; }
         public Dictionary<Point, Tile[,]> Chunks = new();
-        public static int ChunkLength = 16;
-        public static int TileLength = 8;
+        public static int ChunkLength { get; } = 16;
+        public static int TileLength { get; } = 8;
 
         public Point GetPositionInTile(Point pixelPosition) {
             return new Point(MathsHelper.Modulo(pixelPosition.X, TileLength), MathsHelper.Modulo(pixelPosition.Y, TileLength));
@@ -86,8 +84,7 @@
             int sy = (point1.Y < point2.Y) ? 1 : -1;
             int err = dx - dy;
 
-            while (true)
-            {
+            while (true) {
                 PaintPixel(new Point(point1.X, point1.Y), color, width);
 
                 if (point1.X == point2.X && point1.Y == point2.Y)
@@ -95,14 +92,12 @@
 
                 int err2 = 2 * err;
 
-                if (err2 > -dy)
-                {
+                if (err2 > -dy) {
                     err -= dy;
                     point1.X += sx;
                 }
 
-                if (err2 < dx)
-                {
+                if (err2 < dx) {
                     err += dx;
                     point1.Y += sy;
                 }
@@ -131,10 +126,10 @@
                     Color[] data = new Color[Layer.TileLength * Layer.TileLength];
                     Array.Fill(data, Color.Transparent);
 
-                    int startX = Math.Max(rectangle.X - startTileX * TileLength, 0);
-                    int startY = Math.Max(rectangle.Y - startTileY * TileLength, 0);
-                    int endX = Math.Max(rectangle.Right - endTileX * TileLength, 0);
-                    int endY = Math.Max(rectangle.Bottom - endTileY * TileLength, 0);
+                    int startX = Math.Max(rectangle.X - tileX * TileLength, 0);
+                    int startY = Math.Max(rectangle.Y - tileY * TileLength, 0);
+                    int endX = Math.Min(rectangle.Right - tileX * TileLength, TileLength - 1);
+                    int endY = Math.Min(rectangle.Bottom - tileY * TileLength, TileLength - 1);
 
                     for (int y = startY; y <= endY; y++) {
                         for (int x = startX; x <= endX; x++) {
@@ -144,7 +139,7 @@
 
                     tilewiseTexture.SetData(data);
                     if (GetTile(new Point(tileX, tileY)) is null) {
-                        SetTile(new Point(tileX, tileY), new Tile(Color.White * 0.2f), 1);
+                        SetTile(new Point(tileX, tileY), new Tile(), 1);
                     }
                     GetTile(new Point(tileX, tileY)).PaintOnCurrentFrame(tilewiseTexture);
                 }
@@ -224,8 +219,8 @@
         public void Draw(Camera camera) {
             var cameraBounds = camera.GetCameraBounds();
 
-            var startChunkPosition = GetChunkPositionOf(GetTilePositionOf(cameraBounds.Item1.ToPoint()));
-            var endChunkPosition = GetChunkPositionOf(GetTilePositionOf(cameraBounds.Item2.ToPoint()));
+            var startChunkPosition = GetChunkPositionOf(GetTilePositionOf(MathsHelper.ToPoint(cameraBounds.Item1)));
+            var endChunkPosition = GetChunkPositionOf(GetTilePositionOf(MathsHelper.ToPoint(cameraBounds.Item2)));
 
             for (int chunkY = startChunkPosition.Y; chunkY < endChunkPosition.Y; chunkY++) {
                 for (int chunkX = startChunkPosition.X; chunkX < endChunkPosition.X; chunkX++) {
@@ -268,8 +263,13 @@
         public List<Tile> Tiles { get; set; } = new();
 
         public static void Serialize(World world) {
-            // TODO: Add World Serialization logic
             string serialized = "";
+
+            // List of tiles - {key: ID - value: FSprite }
+            // Check for identical tiles and merge them in serialization
+
+            // List of layers - {key: ID - value: ChildLayers, Dimensions, Chunks }
+
             GameManager.WriteTextToFile(typeof(World), world.Name, serialized);
         }
 

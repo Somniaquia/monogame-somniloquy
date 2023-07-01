@@ -10,6 +10,10 @@ namespace Somniloquy {
             return origin * (1 - lerpModifier) + target * lerpModifier;
         }
         
+        public static Point ToPoint(Vector2 vector) {
+            return new Point((int)MathF.Floor(vector.X), (int)Math.Floor(vector.Y));
+        }
+
         public static float FloorDivideF(float dividend, float divisor) {
             return dividend >= 0 ? dividend / divisor : (dividend - divisor + 1) / divisor;
         }

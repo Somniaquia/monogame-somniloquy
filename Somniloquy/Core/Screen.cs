@@ -24,7 +24,7 @@ namespace Somniloquy {
 
         public virtual void Update() {
             if (Focusable) {
-                if (MathsHelper.IsWithinBoundaries(InputManager.GetMousePosition().ToPoint(), Boundaries)) {
+                if (MathsHelper.IsWithinBoundaries(MathsHelper.ToPoint(InputManager.GetMousePosition()), Boundaries)) {
                     if (InputManager.IsLeftButtonClicked()) {
                         InputManager.Focus = this;
                     }
@@ -36,7 +36,6 @@ namespace Somniloquy {
             }
 
             if (InputManager.Focus == this) {
-                // System.Console.WriteLine(this);
                 OnFocus();
             }
         }
@@ -59,6 +58,8 @@ namespace Somniloquy {
         public static Tile SelectedTile { get; set; } = null;
         public ColorChart ColorChart { get; private set; }
         public int animationFrame { get; set; } = 0;
+        
+        private Point mousePositionInWorld;
 
         public EditorScreen(Rectangle boundaries) : base(boundaries) {
             ColorChart = new ColorChart(new Rectangle(boundaries.Width - 144, boundaries.Height - 144, 128, 128));
@@ -75,9 +76,9 @@ namespace Somniloquy {
                 EditorState = EditorState.LayerEditMode;
             }
 
-            Vector2 mousePosition = Camera.ApplyInvertTransform(InputManager.GetMousePosition());
-            Vector2 previousMousePosition = Camera.ApplyInvertTransform(InputManager.GetPreviousMousePosition());
-
+            Point previousMousePositionInWorld = mousePositionInWorld;
+            mousePositionInWorld = MathsHelper.ToPoint(Camera.ApplyInvertTransform(InputManager.GetMousePosition()));
+            
             if (ActiveWorld.Layers.Count == 0) ActiveWorld.Layers.Add(new Layer());
             var layer = ActiveWorld.Layers[0];
 
@@ -90,19 +91,19 @@ namespace Somniloquy {
                     }
 
                     if (InputManager.IsLeftButtonClicked()) {
-                        if (layer.GetTile(layer.GetTilePositionOf(mousePosition.ToPoint())) is null) {
-                            layer.SetTile(layer.GetTilePositionOf(mousePosition.ToPoint()), new Tile(Color.White * 0.2f), Math.Max(1, (int)(InputManager.PenPressure * 5)));
+                        if (layer.GetTile(layer.GetTilePositionOf(mousePositionInWorld)) is null) {
+                            layer.SetTile(layer.GetTilePositionOf(mousePositionInWorld), new Tile(), Math.Max(1, (int)(InputManager.PenPressure * 5)));
                         }
 
-                        layer.PaintPixel(mousePosition.ToPoint(), color, Math.Max(1, (int)(InputManager.PenPressure * 5)));
+                        layer.PaintPixel(mousePositionInWorld, color, Math.Max(1, (int)(InputManager.PenPressure * 5)));
                     } else {
-                        layer.PaintLine(previousMousePosition.ToPoint(), mousePosition.ToPoint(), color, Math.Max(1, (int)(InputManager.PenPressure * 5)));
+                        layer.PaintLine(previousMousePositionInWorld, mousePositionInWorld, color, Math.Max(1, (int)(InputManager.PenPressure * 5)));
                     }
                 }
 
                 if (InputManager.IsRightButtonDown()) {
-                    if (layer.GetTile(layer.GetTilePositionOf(mousePosition.ToPoint())) is not null) {
-                        ColorChart.FetchPositionAndHueFromColor(layer.GetTile(layer.GetTilePositionOf(mousePosition.ToPoint())).GetColorAt(layer.GetPositionInTile(mousePosition.ToPoint())));
+                    if (layer.GetTile(layer.GetTilePositionOf(mousePositionInWorld)) is not null) {
+                        ColorChart.FetchPositionAndHueFromColor(layer.GetTile(layer.GetTilePositionOf(mousePositionInWorld)).GetColorAt(layer.GetPositionInTile(mousePositionInWorld)));
                     }
                 }
 
@@ -114,21 +115,21 @@ namespace Somniloquy {
                     }
 
                     if (InputManager.IsLeftButtonClicked()) {
-                        layer.SetTile(layer.GetTilePositionOf(mousePosition.ToPoint()), tile, Math.Max(1, (int) (InputManager.PenPressure * 5)));
+                        layer.SetTile(layer.GetTilePositionOf(mousePositionInWorld), tile, Math.Max(1, (int) (InputManager.PenPressure * 5)));
                     }
 
                     else {
                         layer.SetLine(
-                            layer.GetTilePositionOf(previousMousePosition.ToPoint()),
-                            layer.GetTilePositionOf(mousePosition.ToPoint()),
+                            layer.GetTilePositionOf(previousMousePositionInWorld),
+                            layer.GetTilePositionOf(mousePositionInWorld),
                             tile, Math.Max(1, (int) (5 * InputManager.PenPressure))
                         );
                     }
                 }
 
                 if (InputManager.IsRightButtonDown()) {
-                    if (layer.GetTile(layer.GetTilePositionOf(mousePosition.ToPoint())) is not null) {
-                        SelectedTile = layer.GetTile(layer.GetTilePositionOf(mousePosition.ToPoint()));
+                    if (layer.GetTile(layer.GetTilePositionOf(mousePositionInWorld)) is not null) {
+                        SelectedTile = layer.GetTile(layer.GetTilePositionOf(mousePositionInWorld));
                     }
                 }
             }

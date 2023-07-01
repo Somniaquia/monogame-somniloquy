@@ -134,6 +134,7 @@ namespace Somniloquy {
 
             foreach (KeyValuePair<string, Animation> entry in fSprite.Animations) {
                 serialized += $"{entry.Key} + || + {entry.Value.AnimationName} \n";
+                
             }
 
             GameManager.WriteTextToFile(typeof(FunctionalSprite), fSprite.SpriteName, serialized);
