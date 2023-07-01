@@ -48,10 +48,15 @@ namespace Somniloquy {
         }
     }
 
+    public enum EditorState { TexturePaintMode, MaterialSetMode, LayerEditMode, SpriteEditMode }
+
     public class EditorScreen : Screen {
+        public EditorState EditorState = EditorState.TexturePaintMode;
+
         public Camera Camera { get; private set; } = new Camera(8.0f);
         public World ActiveWorld { get; private set; } = new();
-        public static Color EditorColor { get; set; } = Color.AliceBlue;
+        public static Color SelectedColor { get; set; } = Color.AliceBlue;
+        public static Tile SelectedTile { get; set; } = null;
         public ColorChart ColorChart { get; private set; }
         public int animationFrame { get; set; } = 0;
 
@@ -62,60 +67,73 @@ namespace Somniloquy {
         }
 
         public override void OnFocus() {
+            if (InputManager.IsKeyPressed(Keys.F1)) {
+                EditorState = EditorState.TexturePaintMode; 
+            } else if (InputManager.IsKeyPressed(Keys.F2)) {
+                EditorState = EditorState.MaterialSetMode;
+            } else if (InputManager.IsKeyPressed(Keys.F3)) {
+                EditorState = EditorState.LayerEditMode;
+            }
+
             Vector2 mousePosition = Camera.ApplyInvertTransform(InputManager.GetMousePosition());
             Vector2 previousMousePosition = Camera.ApplyInvertTransform(InputManager.GetPreviousMousePosition());
 
-            if (InputManager.IsLeftButtonDown()) {
-                if (ActiveWorld.Layers.Count == 0) ActiveWorld.Layers.Add(new Layer());
-                var layer = ActiveWorld.Layers[0];
-                var color = EditorColor;
+            if (ActiveWorld.Layers.Count == 0) ActiveWorld.Layers.Add(new Layer());
+            var layer = ActiveWorld.Layers[0];
 
-                if (InputManager.IsKeyDown(Keys.LeftControl)) {
-                    color = Color.Transparent;
-                }
+            if (EditorState == EditorState.TexturePaintMode) {
+                if (InputManager.IsLeftButtonDown()) {
+                    var color = SelectedColor;
 
-                if (InputManager.IsLeftButtonClicked()) {
-                    if (layer.GetTile(layer.GetTilePositionOf(mousePosition.ToPoint())) is null) {
-                        ActiveWorld.Layers[0].SetTile(layer.GetTilePositionOf(mousePosition.ToPoint()), new Tile(EditorColor), Math.Max(1, (int)(InputManager.PenPressure * 5)));
+                    if (InputManager.IsKeyDown(Keys.LeftControl)) {
+                        color = Color.Transparent;
                     }
 
-                    layer.PaintPixel(mousePosition.ToPoint(), color, Math.Max(1, (int) (InputManager.PenPressure * 5)));
-                } else {
-                    layer.PaintLine(previousMousePosition.ToPoint(), mousePosition.ToPoint(), color, Math.Max(1, (int)(InputManager.PenPressure * 5)));
+                    if (InputManager.IsLeftButtonClicked()) {
+                        if (layer.GetTile(layer.GetTilePositionOf(mousePosition.ToPoint())) is null) {
+                            layer.SetTile(layer.GetTilePositionOf(mousePosition.ToPoint()), new Tile(Color.White * 0.2f), Math.Max(1, (int)(InputManager.PenPressure * 5)));
+                        }
+
+                        layer.PaintPixel(mousePosition.ToPoint(), color, Math.Max(1, (int)(InputManager.PenPressure * 5)));
+                    } else {
+                        layer.PaintLine(previousMousePosition.ToPoint(), mousePosition.ToPoint(), color, Math.Max(1, (int)(InputManager.PenPressure * 5)));
+                    }
                 }
 
-            }
-
-            // if (InputManager.IsLeftButtonDown()) {
-            //     Tile tile = null;
-            //     if (!InputManager.IsKeyDown(Keys.LeftControl)) {
-            //         tile = new Tile(EditorColor);
-            //     }
-
-            //     if (ActiveWorld.Layers.Count == 0) ActiveWorld.Layers.Add(new Layer());
-
-            //     if (InputManager.IsLeftButtonClicked()) {
-            //         ActiveWorld.Layers[0].SetTile(ActiveWorld.Layers[0].GetTilePositionOf(mousePosition.ToPoint()), tile, Math.Max(1, (int) (InputManager.PenPressure * 5)));
-            //     }
-
-            //     else
-            //         ActiveWorld.Layers[0].SetLine(
-            //             ActiveWorld.Layers[0].GetTilePositionOf(previousMousePosition.ToPoint()),
-            //             ActiveWorld.Layers[0].GetTilePositionOf(mousePosition.ToPoint()),
-            //             tile, Math.Max(1, (int) (5 * InputManager.PenPressure))
-            //         );
-            // }
-
-            if (InputManager.IsRightButtonDown()) {
-                if (ActiveWorld.Layers.Count != 0) {
-                    Tile tile = ActiveWorld.Layers[0].GetTile(ActiveWorld.Layers[0].GetTilePositionOf(mousePosition.ToPoint()));
-                    if (tile is not null)
-                        ColorChart.FetchPositionAndHueFromColor(tile.Color);
+                if (InputManager.IsRightButtonDown()) {
+                    if (layer.GetTile(layer.GetTilePositionOf(mousePosition.ToPoint())) is not null) {
+                        ColorChart.FetchPositionAndHueFromColor(layer.GetTile(layer.GetTilePositionOf(mousePosition.ToPoint())).GetColorAt(layer.GetPositionInTile(mousePosition.ToPoint())));
+                    }
                 }
 
+            } else if (EditorState == EditorState.MaterialSetMode) {
+                if (InputManager.IsLeftButtonDown()) {
+                    Tile tile = null;
+                    if (!InputManager.IsKeyDown(Keys.LeftControl)) {
+                        tile = SelectedTile;
+                    }
+
+                    if (InputManager.IsLeftButtonClicked()) {
+                        layer.SetTile(layer.GetTilePositionOf(mousePosition.ToPoint()), tile, Math.Max(1, (int) (InputManager.PenPressure * 5)));
+                    }
+
+                    else {
+                        layer.SetLine(
+                            layer.GetTilePositionOf(previousMousePosition.ToPoint()),
+                            layer.GetTilePositionOf(mousePosition.ToPoint()),
+                            tile, Math.Max(1, (int) (5 * InputManager.PenPressure))
+                        );
+                    }
+                }
+
+                if (InputManager.IsRightButtonDown()) {
+                    if (layer.GetTile(layer.GetTilePositionOf(mousePosition.ToPoint())) is not null) {
+                        SelectedTile = layer.GetTile(layer.GetTilePositionOf(mousePosition.ToPoint()));
+                    }
+                }
             }
 
-            if (InputManager.IsKeyPressed(Keys.Delete)) ActiveWorld.Layers[0] = new Layer();
+            if (InputManager.IsKeyPressed(Keys.Delete)) layer = new Layer();
 
             if (InputManager.IsKeyDown(Keys.S)) Camera.Move(new Vector2(0, 1));
             if (InputManager.IsKeyDown(Keys.W)) Camera.Move(new Vector2(0, -1));

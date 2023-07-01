@@ -87,13 +87,13 @@ namespace Somniloquy {
             }
 
             Chart.SetData(chartData);
-            EditorScreen.EditorColor = FetchColor(PositionOnChart);
+            EditorScreen.SelectedColor = FetchColor(PositionOnChart);
         }
 
         public override void OnFocus() {
             if (InputManager.IsLeftButtonDown()) {
                 PositionOnChart = Vector2.Transform(InputManager.GetMousePosition(), TransformMatrix);
-                EditorScreen.EditorColor = FetchColor(PositionOnChart);
+                EditorScreen.SelectedColor = FetchColor(PositionOnChart);
                 UpdateChart();
             }
         }
@@ -124,9 +124,9 @@ namespace Somniloquy {
         }
 
         public override void Draw() {
-            GameManager.DrawFilledRectangle(new Rectangle(Boundaries.X - 8, Boundaries.Y - 8, Boundaries.Width + 16, Boundaries.Height + 16), EditorScreen.EditorColor);
+            GameManager.DrawFilledRectangle(new Rectangle(Boundaries.X - 8, Boundaries.Y - 8, Boundaries.Width + 16, Boundaries.Height + 16), EditorScreen.SelectedColor);
             GameManager.SpriteBatch.Draw(Chart, Boundaries, Color.White);
-            GameManager.SpriteBatch.DrawPoint(new Vector2(Boundaries.X, Boundaries.Y) + PositionOnChart * Boundaries.Width, MathsHelper.InvertColor(EditorScreen.EditorColor), 8);
+            GameManager.SpriteBatch.DrawPoint(new Vector2(Boundaries.X, Boundaries.Y) + PositionOnChart * Boundaries.Width, MathsHelper.InvertColor(EditorScreen.SelectedColor), 8);
             base.Draw();
         }
     }

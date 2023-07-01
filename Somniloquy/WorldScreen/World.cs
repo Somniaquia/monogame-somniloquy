@@ -13,17 +13,27 @@
         public Tile(Color color) {
             Color = color;
 
-            Texture2D fallBackSprite = new Texture2D(GameManager.GraphicsDeviceManager.GraphicsDevice, Layer.TileLength, Layer.TileLength);
-            Color[] fallBackSpriteData = new Color[Layer.TileLength * Layer.TileLength];
-            Array.Fill(fallBackSpriteData, Color.White);
-            fallBackSprite.SetData(fallBackSpriteData);
+            Texture2D transparentSprite = new Texture2D(GameManager.GraphicsDeviceManager.GraphicsDevice, Layer.TileLength, Layer.TileLength);
+            Color[] data = new Color[Layer.TileLength * Layer.TileLength];
+            Array.Fill(data, Color.Transparent);
+            transparentSprite.SetData(data);
 
-            var fallbackAnimation = FSprite.AddAnimation("Fallback");
-            fallbackAnimation.AddFrame(fallBackSprite);
+            var defaultAnimation = FSprite.AddAnimation("Default");
+            defaultAnimation.AddFrame(transparentSprite);
         }
 
         public void PaintOnCurrentFrame(Texture2D texture) {
             FSprite.CurrentAnimation.PaintOnFrame(texture, 0);
+        }
+
+        public Color GetColorAt(Point point) {
+            Color[] data = new Color[FSprite.CurrentAnimation.SpriteSheet.Width * FSprite.CurrentAnimation.SpriteSheet.Height];
+            FSprite.CurrentAnimation.SpriteSheet.GetData(data);
+
+            return data[
+                (FSprite.CurrentAnimation.FrameBoundaries[FSprite.FrameInCurrentAnimation].Y + point.Y) * FSprite.CurrentAnimation.SpriteSheet.Width +
+                FSprite.CurrentAnimation.FrameBoundaries[FSprite.FrameInCurrentAnimation].X + point.X
+            ];
         }
 
         public void Update() {
@@ -38,7 +48,7 @@
                     FSprite.CurrentAnimation.SpriteSheet, 
                     destination, 
                     FSprite.CurrentAnimation.FrameBoundaries[FSprite.FrameInCurrentAnimation], 
-                    Color);
+                    Color.White);
             }
         }
     }
@@ -134,7 +144,7 @@
 
                     tilewiseTexture.SetData(data);
                     if (GetTile(new Point(tileX, tileY)) is null) {
-                        SetTile(new Point(tileX, tileY), new Tile(color), 1);
+                        SetTile(new Point(tileX, tileY), new Tile(Color.White * 0.2f), 1);
                     }
                     GetTile(new Point(tileX, tileY)).PaintOnCurrentFrame(tilewiseTexture);
                 }
