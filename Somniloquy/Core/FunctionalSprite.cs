@@ -49,7 +49,7 @@ namespace Somniloquy {
             return mergedTexture;
         }
 
-        public void MergeTextures(Texture2D texture1, Texture2D texture2, Rectangle boundaries) {
+        public void MergeTextures(Texture2D texture1, Texture2D texture2, Rectangle boundaries, bool ignoreTransparency) {
             if (boundaries.X + texture2.Width > texture1.Width || boundaries.Y + texture2.Height > texture1.Height) {
                 // Handle error or return if the smaller texture doesn't fit
                 return;
@@ -63,7 +63,7 @@ namespace Somniloquy {
 
             for (int y = 0; y < boundaries.Right; y++) {
                 for (int x = 0; x < boundaries.Bottom; x++) {
-                    if (textureData2[y * texture2.Width + x] == Color.Transparent) {
+                    if (ignoreTransparency && textureData2[y * texture2.Width + x] == Color.Transparent) {
                         continue;
                     }
                     textureData1[(boundaries.Y + y) * texture1.Width + (boundaries.X + x)] = textureData2[y * texture2.Width + x];
@@ -86,8 +86,21 @@ namespace Somniloquy {
             FrameAnchors.Add(new Point(0, 0));
         }
 
-        public void PaintOnFrame(Texture2D texture, int frameIndex) {
-            MergeTextures(SpriteSheet, texture, FrameBoundaries[frameIndex]);
+        public void PaintOnFrame(Texture2D texture, int frameIndex, bool ignoreTransparency = true) {
+            MergeTextures(SpriteSheet, texture, FrameBoundaries[frameIndex], ignoreTransparency);
+        }
+
+        public Texture2D GetFrameTexture(int frameIndex) {
+            Rectangle boundaries = FrameBoundaries[frameIndex];
+
+            Color[] data = new Color[boundaries.Width * boundaries.Height];
+            SpriteSheet.GetData(0, new Rectangle(boundaries.X, boundaries.Y, boundaries.Width, boundaries.Height), data, 0, boundaries.Width * boundaries.Height);
+            //Array.Fill(data, Color.Black);
+
+            Texture2D frameTexture = new Texture2D(GameManager.GraphicsDeviceManager.GraphicsDevice, boundaries.Width, boundaries.Height);
+            frameTexture.SetData(data);
+
+            return frameTexture;
         }
     }
 

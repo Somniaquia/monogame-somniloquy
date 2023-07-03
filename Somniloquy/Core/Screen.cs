@@ -47,18 +47,54 @@ namespace Somniloquy {
         }
     }
 
-    public enum EditorState { TexturePaintMode, MaterialSetMode, LayerEditMode, SpriteEditMode }
+    public enum EditorState { PaintMode, TileMode, LayerEditMode, SpriteEditMode }
 
+    /// <summary>
+    /// EditorScreen is a screen for... well... editing the worlds you create!
+    /// It has several states to allow easier world creations, and here are the list of the actions of each states:
+    /// 
+    /// Universal:
+    /// - W, A, S, D: Move around the world, as in play mode
+    /// - Space + Left Mouse Button: Move around the world, probably a more preferred way for artists of conventional art programs 
+    /// - Q, E: Zoom in and out to get a better view of what you're drawing
+    /// - Tab: Toggle PaintMode/TileMode
+    /// - Hold Alt: Select the topmost layer beneath the mouse
+    /// - +/-: Progress animation frames
+    /// - Ctrl + Z/ Ctrl + Shift + Z: Undo/Redo
+    /// 
+    /// PaintMode:
+    /// - [PaintCommand] Left Mouse Button: Draw pixels directly on tiles
+    /// - Alt + Left Mouse Button: Get the uppermost color beneath the mouse
+    /// - [PaintRectangleCommand] Shift + Left Mouse Button: Draw rectangles
+    /// - [PaintLineCommand] Ctrl + Left Mouse Button: Draw Lines (either 0, pi/6, pi/4, pi/4, pi/2 (and inversed) angles)
+    /// - [PaintFreeLineCommand] Ctrl + Shift + Left Mouse Button: Draw lines (free angle)
+    /// - Hold Z: When drawing, you erase instead
+    /// - I, J, K, L: Move around the color palette
+    /// - U, O: Change color palette's hue
+    /// -  
+    /// 
+    /// TileMode:
+    /// - [SetCommand] Left Mouse Button: Set tiles / tile patterns
+    /// - Alt + Left Mouse Button: Get uppermost tile beneath the mouse
+    /// - Alt + Shift + Left Mouse Button: Pick up tiles within specified rectangular boundary, get tile pattern
+    /// - [SetRectangleCommand] Shift + Left Mouse Button: Draw rectangles of tiles / tile patterns
+    /// - [SetCommand] Ctrl + Left Mouse Button: Draw lines of tiles (either 0, pi/6, pi/4, pi/4, pi/2 (and inversed) angles)
+    /// - Hold Z: When setting tiles, you remove the tile from the position instead
+    /// - 
+    /// 
+    /// </summary>
     public class EditorScreen : Screen {
-        public EditorState EditorState = EditorState.TexturePaintMode;
+        public EditorState EditorState = EditorState.PaintMode;
 
-        public Camera Camera { get; private set; } = new Camera(8.0f);
-        public World ActiveWorld { get; private set; } = new();
+        public World SelectedWorld { get; private set; } = new();
+        public Layer SelectedLayer { get; private set; } = null;
         public static Color SelectedColor { get; set; } = Color.AliceBlue;
         public static Tile SelectedTile { get; set; } = null;
-        public ColorChart ColorChart { get; private set; }
-        public int animationFrame { get; set; } = 0;
+        public static ICommand ActiveCommand { get; set; } = null;
+        public static int selectedAnimationFrame { get; set; } = 0;
         
+        public Camera Camera { get; private set; } = new Camera(8.0f);
+        public ColorChart ColorChart { get; private set; } = null;
         private Point mousePositionInWorld;
 
         public EditorScreen(Rectangle boundaries) : base(boundaries) {
@@ -69,9 +105,9 @@ namespace Somniloquy {
 
         public override void OnFocus() {
             if (InputManager.IsKeyPressed(Keys.F1)) {
-                EditorState = EditorState.TexturePaintMode; 
+                EditorState = EditorState.PaintMode; 
             } else if (InputManager.IsKeyPressed(Keys.F2)) {
-                EditorState = EditorState.MaterialSetMode;
+                EditorState = EditorState.TileMode;
             } else if (InputManager.IsKeyPressed(Keys.F3)) {
                 EditorState = EditorState.LayerEditMode;
             }
@@ -79,83 +115,106 @@ namespace Somniloquy {
             Point previousMousePositionInWorld = mousePositionInWorld;
             mousePositionInWorld = MathsHelper.ToPoint(Camera.ApplyInvertTransform(InputManager.GetMousePosition()));
             
-            if (ActiveWorld.Layers.Count == 0) ActiveWorld.Layers.Add(new Layer());
-            var layer = ActiveWorld.Layers[0];
-
-            if (EditorState == EditorState.TexturePaintMode) {
-                if (InputManager.IsLeftButtonDown()) {
-                    var color = SelectedColor;
-
-                    if (InputManager.IsKeyDown(Keys.LeftControl)) {
-                        color = Color.Transparent;
-                    }
-
-                    if (InputManager.IsLeftButtonClicked()) {
-                        if (layer.GetTile(layer.GetTilePositionOf(mousePositionInWorld)) is null) {
-                            layer.SetTile(layer.GetTilePositionOf(mousePositionInWorld), new Tile(), Math.Max(1, (int)(InputManager.PenPressure * 5)));
-                        }
-
-                        layer.PaintPixel(mousePositionInWorld, color, Math.Max(1, (int)(InputManager.PenPressure * 5)));
-                    } else {
-                        layer.PaintLine(previousMousePositionInWorld, mousePositionInWorld, color, Math.Max(1, (int)(InputManager.PenPressure * 5)));
-                    }
-                }
-
-                if (InputManager.IsRightButtonDown()) {
-                    if (layer.GetTile(layer.GetTilePositionOf(mousePositionInWorld)) is not null) {
-                        ColorChart.FetchPositionAndHueFromColor(layer.GetTile(layer.GetTilePositionOf(mousePositionInWorld)).GetColorAt(layer.GetPositionInTile(mousePositionInWorld)));
-                    }
-                }
-
-            } else if (EditorState == EditorState.MaterialSetMode) {
-                if (InputManager.IsLeftButtonDown()) {
-                    Tile tile = null;
-                    if (!InputManager.IsKeyDown(Keys.LeftControl)) {
-                        tile = SelectedTile;
-                    }
-
-                    if (InputManager.IsLeftButtonClicked()) {
-                        layer.SetTile(layer.GetTilePositionOf(mousePositionInWorld), tile, Math.Max(1, (int) (InputManager.PenPressure * 5)));
-                    }
-
-                    else {
-                        layer.SetLine(
-                            layer.GetTilePositionOf(previousMousePositionInWorld),
-                            layer.GetTilePositionOf(mousePositionInWorld),
-                            tile, Math.Max(1, (int) (5 * InputManager.PenPressure))
-                        );
-                    }
-                }
-
-                if (InputManager.IsRightButtonDown()) {
-                    if (layer.GetTile(layer.GetTilePositionOf(mousePositionInWorld)) is not null) {
-                        SelectedTile = layer.GetTile(layer.GetTilePositionOf(mousePositionInWorld));
-                    }
-                }
-            }
-
-            if (InputManager.IsKeyPressed(Keys.Delete)) layer = new Layer();
+            if (SelectedWorld.Layers.Count == 0) SelectedWorld.Layers.Add(new Layer());
+            SelectedLayer = SelectedWorld.Layers[0];
 
             if (InputManager.IsKeyDown(Keys.S)) Camera.Move(new Vector2(0, 1));
             if (InputManager.IsKeyDown(Keys.W)) Camera.Move(new Vector2(0, -1));
             if (InputManager.IsKeyDown(Keys.D)) Camera.Move(new Vector2(1, 0));
             if (InputManager.IsKeyDown(Keys.A)) Camera.Move(new Vector2(-1, 0));
-            if (InputManager.IsKeyDown(Keys.Q)) Camera.Rotation += 0.1f;
-            if (InputManager.IsKeyDown(Keys.E)) Camera.Rotation -= 0.1f;
+            if (InputManager.IsKeyDown(Keys.Q)) Camera.Zoom(-0.1f);
+            if (InputManager.IsKeyDown(Keys.E)) Camera.Zoom(0.1f);
 
-            if (InputManager.IsKeyDown(Keys.Space)) Camera.Zoom *= 1.1f;
-            if (InputManager.IsKeyDown(Keys.LeftShift)) Camera.Zoom *= 0.9f;
+            if (InputManager.IsKeyPressed(Keys.Delete)) SelectedWorld.Layers[0] = new Layer();
+
+            if (InputManager.IsKeyDown(Keys.LeftControl) && InputManager.IsKeyPressed(Keys.Z)) {
+                if (!InputManager.IsKeyDown(Keys.LeftShift)) {
+                    CommandManager.Undo();
+                } else {
+                    CommandManager.Redo();
+                }
+            }
+        
+            if (EditorState == EditorState.PaintMode) {
+                if (InputManager.IsLeftButtonDown()) {
+                    var color = SelectedColor;
+
+                    if (InputManager.IsKeyDown(Keys.LeftAlt)) {
+                        if (SelectedLayer.GetTile(SelectedLayer.GetTilePositionOf(mousePositionInWorld)) is not null) {
+                            ColorChart.FetchPositionAndHueFromColor(SelectedLayer.GetTile(SelectedLayer.GetTilePositionOf(mousePositionInWorld)).GetColorAt(SelectedLayer.GetPositionInTile(mousePositionInWorld)));
+                        }
+                    }
+
+                    if (InputManager.IsKeyDown(Keys.Z)) {
+                        color = Color.Transparent;
+                    }
+
+                    if (InputManager.IsLeftButtonClicked()) {
+                        ActiveCommand = new PaintCommand(selectedAnimationFrame);
+                        CommandManager.Push(ActiveCommand);
+                        SelectedLayer.PaintCircle(
+                            mousePositionInWorld, 
+                            color, Math.Max(1, (int)(InputManager.PenPressure * 5)), 
+                            (PaintCommand)ActiveCommand
+                        );
+                    } else {
+                        if (ActiveCommand is PaintCommand) {
+                            SelectedLayer.PaintLine(
+                                previousMousePositionInWorld, mousePositionInWorld, 
+                                color, Math.Max(1, (int)(InputManager.PenPressure * 5)), 
+                                (PaintCommand)ActiveCommand
+                            );
+                        }
+                    }
+                }
+
+            } else if (EditorState == EditorState.TileMode) {
+                if (InputManager.IsLeftButtonDown()) {
+                    Tile tile = null;
+
+                    if (InputManager.IsKeyDown(Keys.LeftAlt)) {
+                        if (SelectedLayer.GetTile(SelectedLayer.GetTilePositionOf(mousePositionInWorld)) is not null) {
+                            SelectedTile = SelectedLayer.GetTile(SelectedLayer.GetTilePositionOf(mousePositionInWorld));
+                        }
+                    }
+
+                    if (!InputManager.IsKeyDown(Keys.Z)) {
+                        tile = SelectedTile;
+                    }
+
+                    if (InputManager.IsLeftButtonClicked()) {
+                        ActiveCommand = new SetCommand(SelectedLayer);
+                        CommandManager.Push(ActiveCommand);
+                        SelectedLayer.SetCircle(
+                            SelectedLayer.GetTilePositionOf(mousePositionInWorld), 
+                            tile, Math.Max(1, (int) (InputManager.PenPressure * 5)), 
+                            (SetCommand)ActiveCommand
+                        );
+                    }
+
+                    else {
+                        if (ActiveCommand is SetCommand) {
+                            SelectedLayer.SetLine(
+                                SelectedLayer.GetTilePositionOf(previousMousePositionInWorld),
+                                SelectedLayer.GetTilePositionOf(mousePositionInWorld),
+                                tile, Math.Max(1, (int) (5 * InputManager.PenPressure)),
+                                (SetCommand)ActiveCommand
+                            );
+                        }
+                    }
+                }
+            }
         }
 
         public override void Update() {
             Camera.UpdateTransformation();
-            ActiveWorld?.Update();
+            SelectedWorld?.Update();
             base.Update();
         }
 
         public override void Draw() {
             GameManager.SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, transformMatrix: Camera.Transform);
-            ActiveWorld?.Draw(Camera);
+            SelectedWorld?.Draw(Camera);
 
             Vector2 mousePosition = Camera.ApplyInvertTransform(InputManager.GetMousePosition());
             GameManager.SpriteBatch.DrawPoint(mousePosition.X, mousePosition.Y, Color.Black);

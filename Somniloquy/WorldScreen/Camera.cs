@@ -10,27 +10,31 @@ namespace Somniloquy {
         public const float LerpModifier =  0.1f;
         public Vector2 Position = Vector2.Zero;
         private Vector2 visiblePosition = Vector2.Zero;
-        public float Zoom;
+        private float zoom;
         private float visibleZoom;
         public float Rotation = 0.0f;
         private float visibleRotation = 0.0f;
         public Matrix Transform { get; private set; }
 
         public Camera(float zoom=1.0f) {
-            Zoom = zoom;
+            this.zoom = zoom;
             visibleZoom = zoom;
         }
 
         public void Move(Vector2 displacement) {
-            Position += displacement * 10 / MathF.Sqrt(Zoom);
+            Position += displacement * 10 / MathF.Sqrt(zoom);
+        }
+
+        public void Zoom(float delta) {
+            zoom *= MathF.Pow(MathF.E, delta);
         }
 
         public void UpdateTransformation() {
             visiblePosition.X = MathsHelper.Lerp(visiblePosition.X, Position.X, LerpModifier);
             visiblePosition.Y = MathsHelper.Lerp(visiblePosition.Y, Position.Y, LerpModifier);
 
-            Zoom = Zoom < 0.1f ? 0.1f : Zoom;
-            visibleZoom = MathsHelper.Lerp(visibleZoom, Zoom, LerpModifier);
+            zoom = zoom < 0.1f ? 0.1f : zoom;
+            visibleZoom = MathsHelper.Lerp(visibleZoom, zoom, LerpModifier);
 
             Rotation = MathsHelper.ModuloF(Rotation, 2 * 3.141592653589793f);
             visibleRotation = MathsHelper.Lerp(visibleRotation, Rotation, LerpModifier);

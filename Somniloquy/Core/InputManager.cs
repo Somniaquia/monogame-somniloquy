@@ -41,6 +41,10 @@ namespace Somniloquy {
             for (int i = 0; i < count; i++) {
                 PenPressure = results[i].pkNormalPressure / maxPressure;
             }
+
+            // Keys[] pressedKeys = currentKeyboardState.GetPressedKeys();
+            // if (pressedKeys.Length > 0)
+            //     System.Console.WriteLine(pressedKeys[0]);
         }
 
         public static bool IsKeyDown(Keys key) => currentKeyboardState.IsKeyDown(key);
@@ -60,6 +64,6 @@ namespace Somniloquy {
         
         public static bool IsMiddleButtonDown() => currentMouseState.MiddleButton == ButtonState.Pressed;
         public static bool IsMiddleButtonClicked() => currentMouseState.MiddleButton == ButtonState.Pressed && previousMouseState.MiddleButton == ButtonState.Released;
-        public static int GetMiddleButtonDelta() => currentMouseState.ScrollWheelValue;       
+        public static int GetMiddleButtonDelta() => currentMouseState.ScrollWheelValue - previousMouseState.ScrollWheelValue;       
     }
 }
