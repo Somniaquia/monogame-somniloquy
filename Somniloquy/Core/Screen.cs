@@ -115,8 +115,7 @@ namespace Somniloquy {
             Point previousMousePositionInWorld = mousePositionInWorld;
             mousePositionInWorld = MathsHelper.ToPoint(Camera.ApplyInvertTransform(InputManager.GetMousePosition()));
             
-            if (SelectedWorld.Layers.Count == 0) SelectedWorld.Layers.Add(new Layer());
-            SelectedLayer = SelectedWorld.Layers[0];
+            if (SelectedWorld.Layers.Count == 0) SelectedLayer = SelectedWorld.AddLayer();
 
             if (InputManager.IsKeyDown(Keys.S)) Camera.Move(new Vector2(0, 1));
             if (InputManager.IsKeyDown(Keys.W)) Camera.Move(new Vector2(0, -1));
@@ -125,7 +124,12 @@ namespace Somniloquy {
             if (InputManager.IsKeyDown(Keys.Q)) Camera.Zoom(-0.1f);
             if (InputManager.IsKeyDown(Keys.E)) Camera.Zoom(0.1f);
 
-            if (InputManager.IsKeyPressed(Keys.Delete)) SelectedWorld.Layers[0] = new Layer();
+            if (InputManager.IsKeyPressed(Keys.Delete)) {
+                // TODO: This is not a proper implementation - work multi-layer support!!
+                CommandManager.Clear();
+                SelectedWorld.Layers.Clear();
+                SelectedWorld.DisposeTiles();
+            }
 
             if (InputManager.IsKeyDown(Keys.LeftControl) && InputManager.IsKeyPressed(Keys.Z)) {
                 if (!InputManager.IsKeyDown(Keys.LeftShift)) {

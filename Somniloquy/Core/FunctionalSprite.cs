@@ -46,10 +46,12 @@ namespace Somniloquy {
             Texture2D mergedTexture = new Texture2D(GameManager.GraphicsDeviceManager.GraphicsDevice, width, height);
             mergedTexture.SetData(data);
 
+            texture1.Dispose();
+            texture2.Dispose();
             return mergedTexture;
         }
 
-        public void MergeTextures(Texture2D texture1, Texture2D texture2, Rectangle boundaries, bool ignoreTransparency) {
+        public static void MergeTextures(Texture2D texture1, Texture2D texture2, Rectangle boundaries, bool ignoreTransparency) {
             if (boundaries.X + texture2.Width > texture1.Width || boundaries.Y + texture2.Height > texture1.Height) {
                 // Handle error or return if the smaller texture doesn't fit
                 return;
@@ -70,7 +72,10 @@ namespace Somniloquy {
                 }
             }
 
+            texture2.Dispose();
             texture1.SetData(textureData1);
+
+            return;
         }
 
         public void AddFrame(Texture2D frame) {
@@ -159,6 +164,14 @@ namespace Somniloquy {
             // Set fSprite properties
             
             return fSprite;
+        }
+
+        public void Dispose() {
+            foreach (var animation in Animations) {
+                animation.Value.SpriteSheet.Dispose();
+            }
+
+            Animations.Clear();
         }
     }
 }

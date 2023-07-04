@@ -59,11 +59,16 @@
     /// different layouts or looks for the same world in every visit, sometimes connecting a different world or triggering events such as jumpscares
     /// </summary>
     public class Layer {
+        public World ParentWorld { get; set; }
         public Layer ChildLayers { get; set; }
         public Point Dimensions { get; set; }
         public Dictionary<Point, Tile[,]> Chunks = new();
         public static int ChunkLength { get; } = 16;
         public static int TileLength { get; } = 8;
+
+        public Layer(World parentWorld) {
+            ParentWorld = parentWorld;
+        }
 
         public Point GetPositionInTile(Point pixelPosition) {
             return new Point(MathsHelper.Modulo(pixelPosition.X, TileLength), MathsHelper.Modulo(pixelPosition.Y, TileLength));
@@ -170,6 +175,10 @@
 
             if (!Chunks.ContainsKey(chunkPosition)) {
                 Chunks.Add(chunkPosition, new Tile[ChunkLength, ChunkLength]);
+            }
+
+            if (!ParentWorld.Tiles.Contains(tile)) {
+                ParentWorld.Tiles.Add(tile);
             }
 
             Chunks[chunkPosition][position.X - chunkPosition.X * ChunkLength, position.Y - chunkPosition.Y * ChunkLength] = tile;
@@ -309,10 +318,10 @@
             return world;
         }
 
-        public static World CreateNew() {
-            World world = new World();
-            world.Layers.Add(new Layer());
-            return world;
+        public Layer AddLayer() {
+            var layer = new Layer(this);
+            Layers.Add(layer);
+            return layer;
         }
 
         public void Update() {
@@ -325,6 +334,14 @@
             foreach (var layer in Layers) {
                 layer.Draw(camera);
             }
+        }
+
+        public void DisposeTiles() {
+            foreach (var tile in Tiles) {
+                tile.FSprite.Dispose();
+            }
+
+            Tiles.Clear();
         }
     }
 

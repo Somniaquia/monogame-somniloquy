@@ -30,11 +30,23 @@ namespace Somniloquy {
                 UndoHistory.Push(command);
             }
         }
+
+        public static void Clear() {
+            foreach (var command in UndoHistory) {
+                command.Clear();
+            } foreach (var command in RedoHistory) {
+                command.Clear();
+            }
+
+            UndoHistory.Clear();
+            RedoHistory.Clear();
+        }
     }
 
     public interface ICommand {
         public abstract void Redo();
         public abstract void Undo();
+        public abstract void Clear();
     }
 
     public class PaintCommand : ICommand {
@@ -46,6 +58,13 @@ namespace Somniloquy {
         }
 
         public void Append(Tile tile, Texture2D previousTexture, Texture2D subsequentTexture) {
+            for (int i = 0; i < affectedTiles.Count; i++) {
+                if (affectedTiles[i].Item1 == tile) {
+                    affectedTiles[i] = (tile, affectedTiles[i].Item2, subsequentTexture);
+                    return;
+                }
+            }
+
             affectedTiles.Add((tile, previousTexture, subsequentTexture));
         }
 
@@ -60,6 +79,14 @@ namespace Somniloquy {
                 affectedTiles[i].Item1.FSprite.CurrentAnimation.PaintOnFrame(affectedTiles[i].Item2, animationFrame, false);
             }
         }
+
+        public void Clear() {
+            foreach (var pair in affectedTiles) {
+                pair.Item2.Dispose();
+                pair.Item3.Dispose();
+            }
+            affectedTiles.Clear();
+        }
     }
 
     public class SetCommand : ICommand {
@@ -71,6 +98,13 @@ namespace Somniloquy {
         }
 
         public void Append(Point point, Tile previousTile, Tile subsequentTile) {
+            for (int i = 0; i < affectedPositions.Count; i++) {
+                if (affectedPositions[i].Item1.Equals(point)) {
+                    affectedPositions[i] = (point, affectedPositions[i].Item2, subsequentTile);
+                    return;
+                }
+            }
+
             affectedPositions.Add((point, previousTile, subsequentTile));
         }
 
@@ -84,6 +118,10 @@ namespace Somniloquy {
             for (int i = affectedPositions.Count - 1; i >= 0; i--) {
                 layer.SetTile(affectedPositions[i].Item1, affectedPositions[i].Item2);
             }
+        }
+
+        public void Clear() {
+            affectedPositions.Clear();
         }
     }
 }
