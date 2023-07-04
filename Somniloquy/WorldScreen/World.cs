@@ -20,6 +20,10 @@
             defaultAnimation.AddFrame(transparentTexture);
         }
 
+        ~Tile() {
+            FSprite.Dispose();
+        }
+
         public void PaintOnFrame(Texture2D texture, int frame) {
             FSprite.CurrentAnimation.PaintOnFrame(texture, frame);
         }
@@ -38,7 +42,7 @@
             
         }
 
-        public void Draw(Rectangle destination) {
+        public void Draw(Rectangle destination, float opacity = 1f) {
             if (FSprite is null)
                 GameManager.DrawFilledRectangle(destination, Color.DarkGray);
             else {
@@ -46,7 +50,8 @@
                     FSprite.CurrentAnimation.SpriteSheet, 
                     destination, 
                     FSprite.CurrentAnimation.FrameBoundaries[FSprite.FrameInCurrentAnimation], 
-                    Color.White);
+                    Color.White * opacity
+                );
             }
         }
     }
@@ -166,27 +171,33 @@
         #endregion
 
         #region Set Methods
-        public void SetTile(Point position, Tile tile, SetCommand command = null) {
-            if (command is not null) {
-                command.Append(position, GetTile(position), tile);
+        public void SetTile(Point position, Tile tile, SetCommand command = null, bool preview = false) {
+            if (preview) {
+                tile?.Draw(new Rectangle(position.X * TileLength, position.Y * TileLength, TileLength, TileLength), 0.5f);
+            } else {
+                if (command is not null) {
+                    command.Append(position, GetTile(position), tile);
+                }
+
+                Point chunkPosition = GetChunkPositionOf(position);
+
+                if (!Chunks.ContainsKey(chunkPosition)) {
+                    Chunks.Add(chunkPosition, new Tile[ChunkLength, ChunkLength]);
+                }
+
+                Chunks[chunkPosition][position.X - chunkPosition.X * ChunkLength, position.Y - chunkPosition.Y * ChunkLength] = tile;
+                
+                foreach (var existingTile in ParentWorld.Tiles) {
+                    if (object.ReferenceEquals(existingTile, tile)) return;
+                }
+
+                ParentWorld.Tiles.Add(tile);
             }
-
-            Point chunkPosition = GetChunkPositionOf(position);
-
-            if (!Chunks.ContainsKey(chunkPosition)) {
-                Chunks.Add(chunkPosition, new Tile[ChunkLength, ChunkLength]);
-            }
-
-            Chunks[chunkPosition][position.X - chunkPosition.X * ChunkLength, position.Y - chunkPosition.Y * ChunkLength] = tile;
-            
-            foreach (var existingTile in ParentWorld.Tiles) {
-                if (object.ReferenceEquals(existingTile, tile)) return;
-            }
-
-            ParentWorld.Tiles.Add(tile);
         }
 
-        public void SetLine(Point tilePos1, Point tilePos2, Tile tile, int width, SetCommand command = null) {
+        public void SetLine(Point tilePos1, Point tilePos2, Tile[,] tilePattern, Point tilePatternOffset, int width, SetCommand command = null, bool preview = false) {
+            Point originalTilePos = tilePos1;
+
             int dx = Math.Abs(tilePos2.X - tilePos1.X);
             int dy = Math.Abs(tilePos2.Y - tilePos1.Y);
             int sx = (tilePos1.X < tilePos2.X) ? 1 : -1;
@@ -194,7 +205,7 @@
             int err = dx - dy;
 
             while (true) {
-                SetCircle(new Point(tilePos1.X, tilePos1.Y), tile, width, command);
+                SetCircle(new Point(tilePos1.X, tilePos1.Y), tilePattern, width, tilePatternOffset + tilePos1 - originalTilePos, command, preview);
 
                 if (tilePos1.X == tilePos2.X && tilePos1.Y == tilePos2.Y)
                     break;
@@ -213,20 +224,36 @@
             }
         }
 
-        public void SetRectangle(Point tilePos1, Point tilePos2, Tile tile, SetCommand command = null) {
-            for (int y = tilePos1.Y; y < tilePos2.Y; y++) {
-                for (int x = tilePos1.X; x < tilePos2.X; x++) {
-                    SetTile(new Point(x, y), tile, command);
+        public void SetRectangle(Point tilePos1, Point tilePos2, Tile[,] tilePattern, Point tilePatternOffset, SetCommand command = null, bool preview = false) {
+            var pair = MathsHelper.ValidizePoints(tilePos1, tilePos2);
+            tilePos1 = pair.Item1;
+            tilePos2 = pair.Item2;
+
+            for (int y = tilePos1.Y; y <= tilePos2.Y; y++) {
+                for (int x = tilePos1.X; x <= tilePos2.X; x++) {
+                    SetTile(
+                        new Point(x, y), 
+                        tilePattern[
+                            MathsHelper.Modulo(tilePatternOffset.X + x - tilePos1.X, tilePattern.GetLength(0)),
+                            MathsHelper.Modulo(tilePatternOffset.Y + y - tilePos1.Y, tilePattern.GetLength(1))
+                        ], command, preview
+                    );
                 }
             }
         }
 
-        public void SetCircle(Point centerPosition, Tile tile, int width, SetCommand command = null) {
+        public void SetCircle(Point centerPosition, Tile[,] tilePattern, int width, Point tilePatternOffset, SetCommand command = null, bool preview = false) {
             for (int y = -(width - 1) / 2; y <= width / 2; y++) {
                 for (int x = -(width - 1) / 2; x <= width / 2; x++) {
                     Point position = new Point(centerPosition.X + x, centerPosition.Y + y);
                     if (Vector2.Distance(position.ToVector2(), centerPosition.ToVector2()) <= width) {
-                        SetTile(position, tile, command);
+                        SetTile(
+                            new Point(centerPosition.X + x, centerPosition.Y + y),
+                            tilePattern[
+                                MathsHelper.Modulo(tilePatternOffset.X + x, tilePattern.GetLength(0)),
+                                MathsHelper.Modulo(tilePatternOffset.Y + y, tilePattern.GetLength(1))
+                            ], command, preview
+                        );
                     }
                 }
             }   
@@ -240,6 +267,23 @@
             }
 
             return Chunks[chunkPosition][tilePosition.X - chunkPosition.X * ChunkLength, tilePosition.Y - chunkPosition.Y * ChunkLength];
+        }
+
+        public Tile[,] GetTiles(Point tilePosition1, Point tilePosition2) {
+            var point1 = MathsHelper.ValidizePoints(tilePosition1, tilePosition2).Item1;
+            var point2 = MathsHelper.ValidizePoints(tilePosition1, tilePosition2).Item2;
+
+            int columns = point2.X - point1.X + 1; int rows = point2.Y - point1.Y + 1;
+
+            var tiles = new Tile[columns, rows];
+
+            for (int y = 0; y < rows; y++) {
+                for (int x = 0; x < columns; x++) {
+                    tiles[x, y] = GetTile(point1 + new Point(x, y));
+                }
+            }
+
+            return tiles;
         }
 
         #endregion
@@ -268,10 +312,6 @@
 
                     var chunk = Chunks[new Point(chunkX, chunkY)];
 
-                    GameManager.SpriteBatch.DrawRectangle(new Rectangle(
-                                    (chunkX * ChunkLength) * TileLength,
-                                    (chunkY * ChunkLength) * TileLength,
-                                    TileLength * ChunkLength, TileLength * ChunkLength), Color.GhostWhite, layerDepth: 1);
                     for (int yInChunk = 0; yInChunk < ChunkLength; yInChunk++) {
                         for (int xInChunk = 0; xInChunk < ChunkLength; xInChunk++) {
                             chunk[xInChunk, yInChunk]?.Draw(
@@ -340,7 +380,9 @@
 
         public void DisposeTiles() {
             foreach (var tile in Tiles) {
-                tile.FSprite.Dispose();
+                if (tile is not null) {
+                    tile.FSprite.Dispose();
+                }
             }
 
             Tiles.Clear();

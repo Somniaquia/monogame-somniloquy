@@ -50,5 +50,36 @@ namespace Somniloquy {
             }
             return rectangle;
         }
+
+        public static (Point, Point) ValidizePoints(Point point1, Point point2) {
+            if (point1.X > point2.X) {
+                int x = point1.X;
+                point1.X = point2.X;
+                point2.X = x;
+            }
+
+            if (point1.Y > point2.Y) {
+                int y = point1.Y;
+                point1.Y = point2.Y;
+                point2.Y = y;
+            }
+
+            return (point1, point2);
+        }
+
+        public static Point AnchorPoint(Point point, Point anchor) {
+            if (point.X == anchor.X || point.Y == anchor.Y) return point;
+
+            float slope = (float)(point.Y - anchor.Y) / (point.X - anchor.X);
+            float distance = Vector2.Distance(point.ToVector2(), anchor.ToVector2());
+
+            if (MathF.Abs(slope) >= 1) {
+                slope = MathF.Round(slope);
+            } else {
+                slope = 1 / MathF.Round(1 / slope);
+            }
+
+            return new Point(point.X, (int)(anchor.Y + (point.X - anchor.X) * slope));
+        }
     }
 }

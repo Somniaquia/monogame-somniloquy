@@ -4,6 +4,7 @@ namespace Somniloquy {
 
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
+    using MonoGame.Extended;
 
     public class Camera
     {
@@ -55,6 +56,13 @@ namespace Somniloquy {
 
         public Vector2 ApplyInvertTransform(Vector2 transformedVector) {
             return Vector2.Transform(transformedVector, Matrix.Invert(Transform));
+        }
+
+        public Rectangle ApplyTransform(Rectangle originalRectangle) {
+            return new Rectangle(
+                Vector2.Transform(originalRectangle.Location.ToVector2(), Transform).ToPoint(),
+                Vector2.Transform((originalRectangle.Location + originalRectangle.Size).ToVector2(), Transform).ToPoint() - Vector2.Transform(originalRectangle.Location.ToVector2(), Transform).ToPoint()
+            );
         }
 
         public (Vector2, Vector2) GetCameraBounds() {
