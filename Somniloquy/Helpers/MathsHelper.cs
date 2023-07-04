@@ -37,5 +37,18 @@ namespace Somniloquy {
         public static Color InvertColor(Color color) {
             return new Color(255 - color.R, 255 - color.G, 255 - color.B);
         }
+    
+        public static Rectangle ValidizeRectangle(Rectangle rectangle) {
+            if (rectangle.Width < 0) {
+                rectangle.X = rectangle.X + rectangle.Width;
+                rectangle.Width = -rectangle.Width;
+            }
+
+            if (rectangle.Height < 0) {
+                rectangle.Y = rectangle.Y + rectangle.Height;
+                rectangle.Height = -rectangle.Height;
+            }
+            return rectangle;
+        }
     }
 }

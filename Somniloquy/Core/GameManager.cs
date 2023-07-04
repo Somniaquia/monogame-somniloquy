@@ -82,8 +82,37 @@ namespace Somniloquy {
                 Color.White);
         }
 
-        public static void DrawFilledRectangle(Rectangle destination, Color color, float layerDepth=0) {
-            SpriteBatch.Draw(Pixel, destination, null, color, 0f, Vector2.Zero, SpriteEffects.None, layerDepth:layerDepth);
+        public static void DrawFilledRectangle(Rectangle destination, Color color) {
+            SpriteBatch.Draw(Pixel, destination, null, color, 0f, Vector2.Zero, SpriteEffects.None, layerDepth:0);
+        }
+
+        public static void DrawPixelizedLine(Point position1, Point position2, Color color) {
+            int dx = Math.Abs(position2.X - position1.X);
+            int dy = Math.Abs(position2.Y - position1.Y);
+            int sx = (position1.X < position2.X) ? 1 : -1;
+            int sy = (position1.Y < position2.Y) ? 1 : -1;
+            int err = dx - dy;
+
+            while (true) {
+                SpriteBatch.DrawPoint(new Vector2(position1.X, position1.Y), color);
+
+                if (position1.X == position2.X && position1.Y == position2.Y)
+                    break;
+
+                int err2 = 2 * err;
+
+                if (err2 > -dy)
+                {
+                    err -= dy;
+                    position1.X += sx;
+                }
+
+                if (err2 < dx)
+                {
+                    err += dx;
+                    position1.Y += sy;
+                }
+            }
         }
     }
 }

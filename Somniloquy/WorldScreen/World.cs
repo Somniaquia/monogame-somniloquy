@@ -40,7 +40,7 @@
 
         public void Draw(Rectangle destination) {
             if (FSprite is null)
-                GameManager.DrawFilledRectangle(destination, Color.DarkGray, 0.5f);
+                GameManager.DrawFilledRectangle(destination, Color.DarkGray);
             else {
                 GameManager.SpriteBatch.Draw(
                     FSprite.CurrentAnimation.SpriteSheet, 
@@ -177,11 +177,13 @@
                 Chunks.Add(chunkPosition, new Tile[ChunkLength, ChunkLength]);
             }
 
-            if (!ParentWorld.Tiles.Contains(tile)) {
-                ParentWorld.Tiles.Add(tile);
+            Chunks[chunkPosition][position.X - chunkPosition.X * ChunkLength, position.Y - chunkPosition.Y * ChunkLength] = tile;
+            
+            foreach (var existingTile in ParentWorld.Tiles) {
+                if (object.ReferenceEquals(existingTile, tile)) return;
             }
 
-            Chunks[chunkPosition][position.X - chunkPosition.X * ChunkLength, position.Y - chunkPosition.Y * ChunkLength] = tile;
+            ParentWorld.Tiles.Add(tile);
         }
 
         public void SetLine(Point tilePos1, Point tilePos2, Tile tile, int width, SetCommand command = null) {
