@@ -5,6 +5,7 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
     using Microsoft.Xna.Framework.Input;
+
     using MonoGame.Extended;
     using MonoGame.Extended.BitmapFonts;
 
@@ -95,7 +96,7 @@ namespace Somniloquy {
         public static Color SelectedColor { get; set; } = Color.AliceBlue;
         public static Tile[,] TilePattern { get; set; } = new Tile[1, 1] { { null } };
         public static ICommand ActiveCommand { get; set; } = null;
-        public static int selectedAnimationFrame { get; set; } = 0;
+        public static int SelectedAnimationFrame { get; set; } = 0;
         
         public Camera Camera { get; private set; } = new Camera(8.0f);
         public ColorChart ColorChart { get; private set; } = null;
@@ -138,6 +139,17 @@ namespace Somniloquy {
             if (InputManager.IsKeyDown(Keys.Q)) Camera.Zoom(-0.1f);
             if (InputManager.IsKeyDown(Keys.E)) Camera.Zoom(0.1f);
 
+            if (InputManager.IsKeyDown(Keys.LeftControl) && InputManager.IsKeyPressed(Keys.S)) {
+                SerializationManager.Serialize<World>(SelectedWorld, "world1.txt");
+            }
+
+            if (InputManager.IsKeyDown(Keys.LeftControl) && InputManager.IsKeyPressed(Keys.L)) {
+                CommandManager.Clear();
+                SelectedWorld.Layers.Clear();
+                SelectedWorld.DisposeTiles();
+                SelectedWorld = SerializationManager.Deserialize<World>("world1.txt");
+            }
+
             if (InputManager.IsKeyPressed(Keys.Delete)) {
                 // TODO: This is not a proper implementation - work multi-layer support!!
                 CommandManager.Clear();
@@ -170,7 +182,7 @@ namespace Somniloquy {
                     }
 
                     if (InputManager.IsLeftButtonClicked()) {
-                        ActiveCommand = new PaintCommand(selectedAnimationFrame);
+                        ActiveCommand = new PaintCommand(SelectedAnimationFrame);
                         CommandManager.Push(ActiveCommand);
 
                         SelectedLayer.PaintRectangle(
@@ -185,7 +197,7 @@ namespace Somniloquy {
                     }
 
                     if (InputManager.IsLeftButtonClicked()) {
-                        ActiveCommand = new PaintCommand(selectedAnimationFrame);
+                        ActiveCommand = new PaintCommand(SelectedAnimationFrame);
                         CommandManager.Push(ActiveCommand);
                         if (InputManager.IsKeyDown(Keys.LeftShift)) {
                             SelectedLayer.PaintLine(
@@ -214,7 +226,7 @@ namespace Somniloquy {
                             var color = SelectedColor;
 
                             if (InputManager.IsLeftButtonClicked()) {
-                                ActiveCommand = new PaintCommand(selectedAnimationFrame);
+                                ActiveCommand = new PaintCommand(SelectedAnimationFrame);
                                 CommandManager.Push(ActiveCommand);
 
                                 SelectedLayer.PaintCircle(
@@ -223,11 +235,11 @@ namespace Somniloquy {
                                     (PaintCommand)ActiveCommand
                                 );
                             } else {
-                                if (ActiveCommand is PaintCommand) {
+                                if (ActiveCommand is PaintCommand command) {
                                     SelectedLayer.PaintLine(
                                         previousMousePositionInWorld, mousePositionInWorld, 
                                         color, Math.Max(1, (int)(InputManager.PenPressure * 5)), 
-                                        (PaintCommand)ActiveCommand
+                                        command
                                     );
                                 }
                             }
@@ -317,12 +329,12 @@ namespace Somniloquy {
                                     (SetCommand)ActiveCommand
                                 );
                             } else {
-                                if (ActiveCommand is SetCommand) {
+                                if (ActiveCommand is SetCommand command) {
                                     SelectedLayer.SetLine(
                                         previousMouseTilePosition,
                                         mouseTilePosition,
                                         TilePattern, previousMouseTilePosition - tilePatternOrigin, Math.Max(1, (int)(5 * InputManager.PenPressure)),
-                                        (SetCommand)ActiveCommand
+                                        command
                                     );
                                 }
                             }

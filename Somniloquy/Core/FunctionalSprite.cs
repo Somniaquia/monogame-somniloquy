@@ -1,6 +1,7 @@
 namespace Somniloquy {
     using System;
     using System.Collections.Generic;
+    using Newtonsoft.Json;
 
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
@@ -13,6 +14,7 @@ namespace Somniloquy {
     /// </summary> 
     public class Animation {
         public string AnimationName { get; private set; }
+        [JsonConverter(typeof(Texture2DConverter))]
         public Texture2D SpriteSheet { get; private set; }
         public List<Rectangle> FrameBoundaries { get; private set; } = new();
         public List<Point> FrameAnchors { get; private set; } = new();
@@ -43,7 +45,7 @@ namespace Somniloquy {
                 }
             }
 
-            Texture2D mergedTexture = new Texture2D(GameManager.GraphicsDeviceManager.GraphicsDevice, width, height);
+            Texture2D mergedTexture = new(GameManager.GraphicsDeviceManager.GraphicsDevice, width, height);
             mergedTexture.SetData(data);
 
             texture1.Dispose();
@@ -102,7 +104,9 @@ namespace Somniloquy {
             SpriteSheet.GetData(0, new Rectangle(boundaries.X, boundaries.Y, boundaries.Width, boundaries.Height), data, 0, boundaries.Width * boundaries.Height);
             //Array.Fill(data, Color.Black);
 
-            Texture2D frameTexture = new Texture2D(GameManager.GraphicsDeviceManager.GraphicsDevice, boundaries.Width, boundaries.Height);
+            Texture2D frameTexture = new(GameManager.GraphicsDeviceManager.GraphicsDevice,
+                                                   boundaries.Width,
+                                                   boundaries.Height);
             frameTexture.SetData(data);
 
             return frameTexture;
@@ -145,25 +149,6 @@ namespace Somniloquy {
         
         public void AdvanceFrames(int frames = 1) {
             FrameInCurrentAnimation = (FrameInCurrentAnimation + frames) % CurrentAnimation.FrameBoundaries.Count;
-        }
-
-        public static void Serialize(FunctionalSprite fSprite) {
-            string serialized = "";
-
-            foreach (KeyValuePair<string, Animation> entry in fSprite.Animations) {
-                serialized += $"{entry.Key} + || + {entry.Value.AnimationName} \n";
-                
-            }
-
-            GameManager.WriteTextToFile(typeof(FunctionalSprite), fSprite.SpriteName, serialized);
-        }
-
-        public static FunctionalSprite Deserialize(string serialized) {
-            var fSprite = new FunctionalSprite();
-
-            // Set fSprite properties
-            
-            return fSprite;
         }
 
         public void Dispose() {

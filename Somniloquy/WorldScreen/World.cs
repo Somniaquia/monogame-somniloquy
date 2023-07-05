@@ -5,13 +5,14 @@
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
     using MonoGame.Extended;
+    using Newtonsoft.Json;
 
     public class Tile {
         public int ID { get; set; }
         public FunctionalSprite FSprite { get; set; } = new();
 
         public Tile() {
-            Texture2D transparentTexture = new Texture2D(GameManager.GraphicsDeviceManager.GraphicsDevice, Layer.TileLength, Layer.TileLength);
+            Texture2D transparentTexture = new(GameManager.GraphicsDeviceManager.GraphicsDevice, Layer.TileLength, Layer.TileLength);
             Color[] data = new Color[Layer.TileLength * Layer.TileLength];
             Array.Fill(data, Color.Transparent);
             transparentTexture.SetData(data);
@@ -67,6 +68,7 @@
         public World ParentWorld { get; set; }
         public Layer ChildLayers { get; set; }
         public Point Dimensions { get; set; }
+        [JsonConverter(typeof(DictionaryConverter<Point, Tile[,]>))]
         public Dictionary<Point, Tile[,]> Chunks = new();
         public static int ChunkLength { get; } = 16;
         public static int TileLength { get; } = 8;
@@ -89,9 +91,7 @@
 
         #region Paint Methods
         public void PaintOnTile(Tile tile, Texture2D texture, int animationFrame, PaintCommand command = null) {
-            if (command is not null) {
-                command.Append(tile, tile.FSprite.CurrentAnimation.GetFrameTexture(animationFrame), texture);
-            }
+            command?.Append(tile, tile.FSprite.CurrentAnimation.GetFrameTexture(animationFrame), texture);
 
             tile.FSprite.CurrentAnimation.PaintOnFrame(texture, animationFrame);
         }
@@ -158,12 +158,12 @@
 
                     tilewiseTexture.SetData(data);
 
-                    Point position = new Point(tileX, tileY);
+                    Point position = new(tileX, tileY);
                     if (GetTile(position) is null) {
                         SetTile(position, new Tile());
                     }
 
-                    PaintOnTile(GetTile(position), tilewiseTexture, EditorScreen.selectedAnimationFrame, command);
+                    PaintOnTile(GetTile(position), tilewiseTexture, EditorScreen.SelectedAnimationFrame, command);
                 }
             }
         }
@@ -175,9 +175,7 @@
             if (preview) {
                 tile?.Draw(new Rectangle(position.X * TileLength, position.Y * TileLength, TileLength, TileLength), 0.5f);
             } else {
-                if (command is not null) {
-                    command.Append(position, GetTile(position), tile);
-                }
+                command?.Append(position, GetTile(position), tile);
 
                 Point chunkPosition = GetChunkPositionOf(position);
 
@@ -245,7 +243,7 @@
         public void SetCircle(Point centerPosition, Tile[,] tilePattern, int width, Point tilePatternOffset, SetCommand command = null, bool preview = false) {
             for (int y = -(width - 1) / 2; y <= width / 2; y++) {
                 for (int x = -(width - 1) / 2; x <= width / 2; x++) {
-                    Point position = new Point(centerPosition.X + x, centerPosition.Y + y);
+                    Point position = new(centerPosition.X + x, centerPosition.Y + y);
                     if (Vector2.Distance(position.ToVector2(), centerPosition.ToVector2()) <= width) {
                         SetTile(
                             new Point(centerPosition.X + x, centerPosition.Y + y),
@@ -340,26 +338,6 @@
         public List<Layer> Layers { get; set; } = new();
         public List<Tile> Tiles { get; set; } = new();
 
-        public static void Serialize(World world) {
-            string serialized = "";
-
-            // List of tiles - {key: ID - value: FSprite }
-            // Check for identical tiles and merge them in serialization
-
-            // List of layers - {key: ID - value: ChildLayers, Dimensions, Chunks }
-
-            GameManager.WriteTextToFile(typeof(World), world.Name, serialized);
-        }
-
-        public static World Deserialize(string worldName) {
-            string serialized = GameManager.ReadTextFromFile(typeof(World), worldName);
-            World world = new World();
-
-            // Set world properties
-
-            return world;
-        }
-
         public Layer AddLayer() {
             var layer = new Layer(this);
             Layers.Add(layer);
@@ -380,9 +358,7 @@
 
         public void DisposeTiles() {
             foreach (var tile in Tiles) {
-                if (tile is not null) {
-                    tile.FSprite.Dispose();
-                }
+                tile?.FSprite.Dispose();
             }
 
             Tiles.Clear();
@@ -402,7 +378,7 @@
         public static Dictionary<string, World> LoadedWorlds { get; private set; }
 
         public static void LoadWorld(string worldName) {
-            LoadedWorlds.Add(worldName, World.Deserialize(worldName));
+            LoadedWorlds.Add(worldName, SerializationManager.Deserialize<World>(worldName));
         }
 
         public static void UnloadWorld(string worldName) {

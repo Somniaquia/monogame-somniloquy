@@ -40,6 +40,7 @@
             activeScreens.Add(new EditorScreen(GameManager.WindowSize));
 
             InputManager.Initialize(Window);
+            SerializationManager.InitializeDirectories((typeof(World), "Worlds"));
         }
 
         protected override void LoadContent() {
@@ -47,7 +48,7 @@
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             GameManager.SpriteBatch = spriteBatch;
-            Texture2D pixel = new Texture2D(GraphicsDevice, 1, 1);
+            Texture2D pixel = new(GraphicsDevice, 1, 1);
             pixel.SetData(new[] { Color.White });
             GameManager.Pixel = pixel;
 
