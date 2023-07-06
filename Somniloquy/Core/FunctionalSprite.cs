@@ -5,6 +5,7 @@ namespace Somniloquy {
 
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
+    using System.Linq;
 
     /// <summary>
     /// An animation contains these information:
@@ -94,6 +95,7 @@ namespace Somniloquy {
         }
 
         public void PaintOnFrame(Texture2D texture, int frameIndex, bool ignoreTransparency = true) {
+            
             MergeTextures(SpriteSheet, texture, FrameBoundaries[frameIndex], ignoreTransparency);
         }
 
@@ -129,31 +131,36 @@ namespace Somniloquy {
         public string SpriteName { get; set; }
         public Dictionary<string, Animation> Animations { get; private set; } = new();
 
-        public Animation CurrentAnimation { get; set; }
+        private string CurrentAnimationName { get; set; } = null;
         public int FrameInCurrentAnimation { get; private set; } = 0;
 
         public Animation AddAnimation(string name) {
             var animation = new Animation(name);
             Animations.Add(name, animation);
-            CurrentAnimation = animation;
+            CurrentAnimationName = name;
             return animation;
         }
 
+        public Animation GetCurrentAnimation() {
+            CurrentAnimationName ??= Animations.Keys.First();
+            return Animations[CurrentAnimationName];
+        }
+
         public Rectangle GetSourceRectangle() {
-            return CurrentAnimation.FrameBoundaries[FrameInCurrentAnimation];
+            return GetCurrentAnimation().FrameBoundaries[FrameInCurrentAnimation];
         }
 
         public Point GetDestinationRectangleOffset() {
-            return CurrentAnimation.FrameAnchors[FrameInCurrentAnimation];
+            return GetCurrentAnimation().FrameAnchors[FrameInCurrentAnimation];
         }
         
         public void AdvanceFrames(int frames = 1) {
-            FrameInCurrentAnimation = (FrameInCurrentAnimation + frames) % CurrentAnimation.FrameBoundaries.Count;
+            FrameInCurrentAnimation = (FrameInCurrentAnimation + frames) % GetCurrentAnimation().FrameBoundaries.Count;
         }
 
         public void Dispose() {
             foreach (var animation in Animations) {
-                animation.Value.SpriteSheet.Dispose();
+                animation.Value.SpriteSheet?.Dispose();
             }
 
             Animations.Clear();

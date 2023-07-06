@@ -35,9 +35,9 @@ namespace Somniloquy {
 
         public static void DrawFunctionalSprite(FunctionalSprite fSprite, Rectangle destination, Effect spriteEffect) {
             SpriteBatch.Draw(
-                fSprite.CurrentAnimation.SpriteSheet,
+                fSprite.GetCurrentAnimation().SpriteSheet,
                 destination,
-                fSprite.CurrentAnimation.FrameBoundaries[fSprite.FrameInCurrentAnimation],
+                fSprite.GetCurrentAnimation().FrameBoundaries[fSprite.FrameInCurrentAnimation],
                 Color.White);
         }
 

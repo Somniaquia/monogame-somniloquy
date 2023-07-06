@@ -70,13 +70,13 @@ namespace Somniloquy {
 
         public void Redo() {
             foreach (var pair in affectedTiles) {
-                pair.Item1.FSprite.CurrentAnimation.PaintOnFrame(pair.Item3, animationFrame, true);
+                pair.Item1.FSprite.GetCurrentAnimation().PaintOnFrame(pair.Item3, animationFrame, true);
             }
         }
 
         public void Undo() {
             for (int i = affectedTiles.Count - 1; i >= 0; i--) {
-                affectedTiles[i].Item1.FSprite.CurrentAnimation.PaintOnFrame(affectedTiles[i].Item2, animationFrame, false);
+                affectedTiles[i].Item1.FSprite.GetCurrentAnimation().PaintOnFrame(affectedTiles[i].Item2, animationFrame, false);
             }
         }
 

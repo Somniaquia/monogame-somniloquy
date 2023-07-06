@@ -51,11 +51,10 @@ namespace Somniloquy {
 
                 var settings = new JsonSerializerSettings();
                 settings.Converters.Add(new PointConverter());
-                settings.Converters.Add(new DictionaryConverter<Point, string>());
 
                 return JsonConvert.DeserializeObject<T>(reader.ReadToEnd(), settings);
             } catch (Exception e) {
-                System.Console.Out.WriteLine($"Failed to read file: {directory} \n {e.Message}");
+                Console.Out.WriteLine($"Failed to read file: {directory} \n {e.Message}");
                 return default;
             }
         }
@@ -111,25 +110,40 @@ namespace Somniloquy {
         }
     }
 
-    public class DictionaryConverter<TKey, TValue> : JsonConverter<IDictionary<TKey, TValue>> {
+    public class ChunksConverter : JsonConverter<Dictionary<Point, Tile[,]>> {
         public override bool CanRead => true;
-        public override bool CanWrite => false;
+        public override bool CanWrite => true;
 
-        public override IDictionary<TKey, TValue> ReadJson(JsonReader reader, Type objectType, IDictionary<TKey, TValue> existingValue, bool hasExistingValue, JsonSerializer serializer) {
+        public override Dictionary<Point, Tile[,]> ReadJson(JsonReader reader, Type objectType, Dictionary<Point, Tile[,]> existingValue, bool hasExistingValue, JsonSerializer serializer) {
             var jObject = JObject.Load(reader);
-            var dictionary = new Dictionary<TKey, TValue>();
+            var chunks = new Dictionary<Point, Tile[,]>();
+
+            var settings = new JsonSerializerSettings();
+            settings.Converters.Add(new PointConverter());
 
             foreach (var property in jObject.Properties()) {
-                var key = property.Name;
-                var value = property.Value.ToObject<TValue>(serializer);
-                dictionary.Add((TKey)Convert.ChangeType(key, typeof(TKey)), value);
+                var key = JsonConvert.DeserializeObject<Point>(property.Name, settings);
+                var value = property.Value.ToObject<Tile[,]>(serializer);
+                chunks.Add(key, value);
             }
 
-            return dictionary;
+            return chunks;
         }
 
-        public override void WriteJson(JsonWriter writer, IDictionary<TKey, TValue> value, JsonSerializer serializer) {
-            throw new NotImplementedException();
+        public override void WriteJson(JsonWriter writer, Dictionary<Point, Tile[,]> value, JsonSerializer serializer) {
+            var jObject = new JObject();
+
+            var settings = new JsonSerializerSettings();
+            settings.Converters.Add(new PointConverter());
+
+            foreach (var kvp in value) {
+                var point = JsonConvert.SerializeObject(kvp.Key, settings);
+                var chunkToken = JToken.FromObject(kvp.Value, serializer);
+                jObject.Add(point, chunkToken);
+                Console.WriteLine(point);
+            }
+            
+            jObject.WriteTo(writer);
         }
     }
 
@@ -138,14 +152,11 @@ namespace Somniloquy {
         public override bool CanWrite => true;
 
         public override Texture2D ReadJson(JsonReader reader, Type objectType, Texture2D existingValue, bool hasExistingValue, JsonSerializer serializer) {
-            // Load the JSON object
             var jObject = JObject.Load(reader);
 
-            // Extract the necessary data for Texture2D creation
-            var bounds = jObject["Bounds"];
-            var width = (int)bounds["Width"];
-            var height = (int)bounds["Height"];
-            // Additional data extraction if needed
+            var width = (int)jObject["Bounds"]["Width"];
+            var height = (int)jObject["Bounds"]["Height"];
+            var data = (byte[])jObject["PixelData"]["PixelData"];
 
             var texture2D = new Texture2D(GameManager.GraphicsDeviceManager.GraphicsDevice, width, height);
             texture2D.SetData(data);
@@ -154,14 +165,16 @@ namespace Somniloquy {
         }
 
         public override void WriteJson(JsonWriter writer, Texture2D value, JsonSerializer serializer) {
-            // Create a JSON object to represent the Texture2D
-            var jObject = new JObject();
-            // Add necessary data to the object
-            jObject.Add("Bounds", new JObject(new JProperty("Width", value.Width), new JProperty("Height", value.Height)));
-            // Additional data serialization if needed
+            var data = new byte[value.Width * value.Height * 4];
+            value.GetData(data);
 
-            // Write the JSON object to the writer
+            var jObject = new JObject {
+                { "Bounds", new JObject(new JProperty("Width", value.Width), new JProperty("Height", value.Height)) },
+                { "PixelData", new JObject(new JProperty("PixelData", data))}
+            };
+
             jObject.WriteTo(writer);
+            // Console.WriteLine(jObject);
         }
     }
 }

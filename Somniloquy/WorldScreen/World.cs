@@ -8,7 +8,6 @@
     using Newtonsoft.Json;
 
     public class Tile {
-        public int ID { get; set; }
         public FunctionalSprite FSprite { get; set; } = new();
 
         public Tile() {
@@ -26,16 +25,16 @@
         }
 
         public void PaintOnFrame(Texture2D texture, int frame) {
-            FSprite.CurrentAnimation.PaintOnFrame(texture, frame);
+            FSprite.GetCurrentAnimation().PaintOnFrame(texture, frame);
         }
 
         public Color GetColorAt(Point point) {
-            Color[] data = new Color[FSprite.CurrentAnimation.SpriteSheet.Width * FSprite.CurrentAnimation.SpriteSheet.Height];
-            FSprite.CurrentAnimation.SpriteSheet.GetData(data);
+            Color[] data = new Color[FSprite.GetCurrentAnimation().SpriteSheet.Width * FSprite.GetCurrentAnimation().SpriteSheet.Height];
+            FSprite.GetCurrentAnimation().SpriteSheet.GetData(data);
 
             return data[
-                (FSprite.CurrentAnimation.FrameBoundaries[FSprite.FrameInCurrentAnimation].Y + point.Y) * FSprite.CurrentAnimation.SpriteSheet.Width +
-                FSprite.CurrentAnimation.FrameBoundaries[FSprite.FrameInCurrentAnimation].X + point.X
+                (FSprite.GetCurrentAnimation().FrameBoundaries[FSprite.FrameInCurrentAnimation].Y + point.Y) * FSprite.GetCurrentAnimation().SpriteSheet.Width +
+                FSprite.GetCurrentAnimation().FrameBoundaries[FSprite.FrameInCurrentAnimation].X + point.X
             ];
         }
 
@@ -48,9 +47,9 @@
                 GameManager.DrawFilledRectangle(destination, Color.DarkGray);
             else {
                 GameManager.SpriteBatch.Draw(
-                    FSprite.CurrentAnimation.SpriteSheet, 
+                    FSprite.GetCurrentAnimation().SpriteSheet, 
                     destination, 
-                    FSprite.CurrentAnimation.FrameBoundaries[FSprite.FrameInCurrentAnimation], 
+                    FSprite.GetCurrentAnimation().FrameBoundaries[FSprite.FrameInCurrentAnimation], 
                     Color.White * opacity
                 );
             }
@@ -65,11 +64,12 @@
     /// different layouts or looks for the same world in every visit, sometimes connecting a different world or triggering events such as jumpscares
     /// </summary>
     public class Layer {
+        [JsonIgnore]
         public World ParentWorld { get; set; }
         public Layer ChildLayers { get; set; }
         public Point Dimensions { get; set; }
-        [JsonConverter(typeof(DictionaryConverter<Point, Tile[,]>))]
-        public Dictionary<Point, Tile[,]> Chunks = new();
+        [JsonConverter(typeof(ChunksConverter))]
+        public Dictionary<Point, Tile[,]> Chunks { get; set; } = new();
         public static int ChunkLength { get; } = 16;
         public static int TileLength { get; } = 8;
 
@@ -91,9 +91,9 @@
 
         #region Paint Methods
         public void PaintOnTile(Tile tile, Texture2D texture, int animationFrame, PaintCommand command = null) {
-            command?.Append(tile, tile.FSprite.CurrentAnimation.GetFrameTexture(animationFrame), texture);
+            command?.Append(tile, tile.FSprite.GetCurrentAnimation().GetFrameTexture(animationFrame), texture);
 
-            tile.FSprite.CurrentAnimation.PaintOnFrame(texture, animationFrame);
+            tile.FSprite.GetCurrentAnimation().PaintOnFrame(texture, animationFrame);
         }
 
         public void PaintLine(Point point1, Point point2, Color color, int width, PaintCommand command = null) {
@@ -342,6 +342,12 @@
             var layer = new Layer(this);
             Layers.Add(layer);
             return layer;
+        }
+
+        public Tile AddTile() {
+            var tile = new Tile();
+            Tiles.Add(tile);
+            return tile;
         }
 
         public void Update() {

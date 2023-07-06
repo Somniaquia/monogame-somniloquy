@@ -61,12 +61,14 @@
 
             GameManager.GameTime = gameTime;
 
-            if (IsActive)
+            if (IsActive) {
                 InputManager.Update();
-            
-            foreach (var screen in activeScreens) {
-                screen.Update();
+
+                foreach (var screen in activeScreens) {
+                    screen.Update();
+                }
             }
+            
             base.Update(gameTime);
         }
 
