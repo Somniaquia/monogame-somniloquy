@@ -139,16 +139,14 @@ namespace Somniloquy {
             if (InputManager.IsKeyDown(Keys.Q)) Camera.Zoom(-0.1f);
             if (InputManager.IsKeyDown(Keys.E)) Camera.Zoom(0.1f);
 
-            if (InputManager.IsKeyPressed(Keys.Enter)) {
-                SerializationManager.Serialize<World>(SelectedWorld, "world1.txt");
-            }
-
             if (InputManager.IsKeyDown(Keys.LeftControl) && InputManager.IsKeyPressed(Keys.Enter)) {
                 CommandManager.Clear();
                 SelectedWorld.Layers.Clear();
                 SelectedWorld.DisposeTiles();
                 SelectedWorld = SerializationManager.Deserialize<World>("world1.txt");
-                Console.WriteLine("");
+                SelectedLayer = SelectedWorld.Layers[0];
+            } else if (InputManager.IsKeyPressed(Keys.Enter)) {
+                SerializationManager.Serialize<World>(SelectedWorld, "world1.txt");
             }
 
             if (InputManager.IsKeyPressed(Keys.Delete)) {

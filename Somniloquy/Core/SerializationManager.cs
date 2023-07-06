@@ -29,7 +29,8 @@ namespace Somniloquy {
             if (!Directory.Exists($"{Directories[typeof(T)]}")) Directory.CreateDirectory($"{Directories[typeof(T)]}");
             string directory = $"{Directories[typeof(T)]}/{fileName}";
 
-            JsonSerializerSettings settings = new() { ReferenceLoopHandling = ReferenceLoopHandling.Ignore };
+            // Required for storing references to 'parent classes' without causing a loop.
+            JsonSerializerSettings settings = new() { PreserveReferencesHandling = PreserveReferencesHandling.Objects };
 
             string serialized = JsonConvert.SerializeObject(instance, settings);
             
@@ -140,7 +141,6 @@ namespace Somniloquy {
                 var point = JsonConvert.SerializeObject(kvp.Key, settings);
                 var chunkToken = JToken.FromObject(kvp.Value, serializer);
                 jObject.Add(point, chunkToken);
-                Console.WriteLine(point);
             }
             
             jObject.WriteTo(writer);
@@ -156,8 +156,11 @@ namespace Somniloquy {
 
             var width = (int)jObject["Bounds"]["Width"];
             var height = (int)jObject["Bounds"]["Height"];
-            var data = (byte[])jObject["PixelData"]["PixelData"];
-
+            var base64Data = (string)jObject["PixelData"]["PixelData"];
+            byte[] data = Convert.FromBase64String(base64Data);
+            // for (int i = 0; i < data.Length; i++) {
+            //     Console.Write($" {data[i]}");
+            // }
             var texture2D = new Texture2D(GameManager.GraphicsDeviceManager.GraphicsDevice, width, height);
             texture2D.SetData(data);
 
@@ -170,11 +173,10 @@ namespace Somniloquy {
 
             var jObject = new JObject {
                 { "Bounds", new JObject(new JProperty("Width", value.Width), new JProperty("Height", value.Height)) },
-                { "PixelData", new JObject(new JProperty("PixelData", data))}
+                { "PixelData", new JObject(new JProperty("PixelData", data)) }
             };
 
             jObject.WriteTo(writer);
-            // Console.WriteLine(jObject);
         }
     }
 }

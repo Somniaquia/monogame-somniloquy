@@ -64,7 +64,6 @@
     /// different layouts or looks for the same world in every visit, sometimes connecting a different world or triggering events such as jumpscares
     /// </summary>
     public class Layer {
-        [JsonIgnore]
         public World ParentWorld { get; set; }
         public Layer ChildLayers { get; set; }
         public Point Dimensions { get; set; }

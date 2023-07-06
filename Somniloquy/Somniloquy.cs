@@ -40,7 +40,7 @@
             activeScreens.Add(new EditorScreen(GameManager.WindowSize));
 
             InputManager.Initialize(Window);
-            SerializationManager.InitializeDirectories((typeof(World), "Worlds"));
+            SerializationManager.InitializeDirectories((typeof(World), "Worlds"), (typeof(Texture2D), "Textures"));
         }
 
         protected override void LoadContent() {

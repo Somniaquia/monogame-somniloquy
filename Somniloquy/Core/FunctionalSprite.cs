@@ -14,11 +14,11 @@ namespace Somniloquy {
     /// - list of boundaries of sprites in a sprite sheet
     /// </summary> 
     public class Animation {
-        public string AnimationName { get; private set; }
+        public string AnimationName { get; set; }
         [JsonConverter(typeof(Texture2DConverter))]
-        public Texture2D SpriteSheet { get; private set; }
-        public List<Rectangle> FrameBoundaries { get; private set; } = new();
-        public List<Point> FrameAnchors { get; private set; } = new();
+        public Texture2D SpriteSheet { get; set; }
+        public List<Rectangle> FrameBoundaries { get; set; } = new();
+        public List<Point> FrameAnchors { get; set; } = new();
 
         public Animation(string name) {
             AnimationName = name;
