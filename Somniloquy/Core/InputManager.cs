@@ -51,6 +51,15 @@ namespace Somniloquy {
         public static bool IsKeyPressed(Keys key) => currentKeyboardState.IsKeyDown(key) && previousKeyboardState.IsKeyUp(key);
         public static bool IsKeyReleasesd(Keys key) => currentKeyboardState.IsKeyUp(key) && previousKeyboardState.IsKeyDown(key);
 
+        public static int? GetNumberKeyPress() {
+            foreach (var key in new Keys[] { Keys.D1, Keys.D2, Keys.D3, Keys.D4, Keys.D5, Keys.D5, Keys.D6, Keys.D7, Keys.D8, Keys.D9 }) {
+                if (IsKeyDown(key)) {
+                    return (int)(key - Keys.D1) + 1;
+                }
+            }
+            return null;
+        }
+
         public static Vector2 GetPreviousMousePosition() => new Vector2(previousMouseState.Position.X, previousMouseState.Position.Y);
         public static Vector2 GetMousePosition() => new Vector2(currentMouseState.Position.X, currentMouseState.Position.Y);
 
@@ -64,6 +73,6 @@ namespace Somniloquy {
         
         public static bool IsMiddleButtonDown() => currentMouseState.MiddleButton == ButtonState.Pressed;
         public static bool IsMiddleButtonClicked() => currentMouseState.MiddleButton == ButtonState.Pressed && previousMouseState.MiddleButton == ButtonState.Released;
-        public static int GetMiddleButtonDelta() => currentMouseState.ScrollWheelValue - previousMouseState.ScrollWheelValue;       
+        public static int GetMiddleButtonDelta() => currentMouseState.ScrollWheelValue - previousMouseState.ScrollWheelValue;
     }
 }

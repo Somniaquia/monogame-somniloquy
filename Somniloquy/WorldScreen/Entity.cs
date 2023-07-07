@@ -6,24 +6,12 @@ namespace Somniloquy
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Input;
 
-    public abstract class CollisionBounds {
-        public CollisionBounds ChildCollisionBounds { get; set; }
-    }
-
-    public class RectangleCollisionBounds : CollisionBounds {
-        public Rectangle Rectangle { get; set; }
-    }
-
-    public class CircularCollisionBounds : CollisionBounds {
-        public Vector2 Center { get; set; }
-        public float Radius { get; set; }
-    }
+    using MonoGame.Extended;
 
     public class Entity {
-        public string Name { get; private set; }
         public FunctionalSprite FSprite { get; private set; }
         public Vector2 Position { get; private set; }
-        public CollisionBounds CollisionBounds { get; private set; }
+        public CircleF CollisionBounds { get; private set; }
 
         public virtual void Update() {
             // Resolve Collisions
@@ -31,19 +19,35 @@ namespace Somniloquy
         }
 
         public virtual void Draw() {
-            var boundaries = new Rectangle();
-            GameManager.DrawFunctionalSprite(FSprite, boundaries, null);
+            GameManager.DrawFunctionalSprite(FSprite, FSprite.GetDestinationRectangle(MathsHelper.ToPoint(Position)), null);
+        }
+    }
+    
+    public class Affect {
+        public enum Emotions { Anticipation, Joy, Trust, Fear, Surprise, Sadness, Disgust, Anger}
+        public enum PrimaryDyads { Love, Submission, Alarm, Disappointment, Remorse, Contempt, Aggression, Optimism}
+        public enum SecondaryDyads { Guilt, Curiosity, Despair, SurpriseDisgust, Envy, Cynism, Pride, Fatalism }
+        public enum TertiaryDyads { Delight, Sentimentality, Shame, Outrage, Pessimism, Morbidness, Dominance, Anxiety }
+
+        public Dictionary<Emotions, float> EmotionIntensities = new();
+        public Dictionary<PrimaryDyads, float> PrimaryDyadIntensities = new();
+        public Dictionary<TertiaryDyads, float> TertiaryDyadIntensities = new();
+
+        public void Update() {
+            // Suppress conflicting emotions
+
         }
     }
 
     public class Player : Entity {
-        public bool Controllable { get; set; } = true;
+        public float Controllability { get; set; } = 1.0f;
+        public float Vividness { get; set; } = 1.0f;
+        public Affect Emotion { get; set; }
 
         // public Dictionary<Keys, Action>
 
-        public override void Update()
-        {
-            if (Controllable) {
+        public override void Update() {
+            if (Controllability >= 0.5f) {
 
             }
             base.Update();

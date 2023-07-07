@@ -10,8 +10,7 @@ namespace Somniloquy {
     using MonoGame.Extended;
     using MonoGame.Extended.BitmapFonts;
 
-    public static class GameManager
-    {
+    public static class GameManager {
         public static GraphicsDeviceManager GraphicsDeviceManager { get; set; }
         public static ContentManager ContentManager { get; set; }
         public static SpriteBatch SpriteBatch { get; set; }

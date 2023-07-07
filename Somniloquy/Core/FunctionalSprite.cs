@@ -18,7 +18,7 @@ namespace Somniloquy {
         [JsonConverter(typeof(Texture2DConverter))]
         public Texture2D SpriteSheet { get; set; }
         public List<Rectangle> FrameBoundaries { get; set; } = new();
-        public List<Point> FrameAnchors { get; set; } = new();
+        public List<Point> FrameCenters { get; set; } = new();
 
         public Animation(string name) {
             AnimationName = name;
@@ -54,12 +54,7 @@ namespace Somniloquy {
             return mergedTexture;
         }
 
-        public static void MergeTextures(Texture2D texture1, Texture2D texture2, Rectangle boundaries, bool ignoreTransparency) {
-            if (boundaries.X + texture2.Width > texture1.Width || boundaries.Y + texture2.Height > texture1.Height) {
-                // Handle error or return if the smaller texture doesn't fit
-                return;
-            }
-
+        public static Texture2D MergeTextures(Texture2D texture1, Texture2D texture2, Rectangle boundaries, bool ignoreTransparency) {
             Color[] textureData1 = new Color[texture1.Width * texture1.Height];
             texture1.GetData(textureData1);
 
@@ -75,10 +70,11 @@ namespace Somniloquy {
                 }
             }
 
-            texture2.Dispose();
-            texture1.SetData(textureData1);
+            //texture2.Dispose();
+            var newTexture = new Texture2D(GameManager.GraphicsDeviceManager.GraphicsDevice, texture1.Width, texture1.Height);
+            newTexture.SetData(textureData1);
 
-            return;
+            return newTexture;
         }
 
         public void AddFrame(Texture2D frame) {
@@ -91,12 +87,11 @@ namespace Somniloquy {
             }
 
             // TODO: Calculate  anchors
-            FrameAnchors.Add(new Point(0, 0));
+            FrameCenters.Add(new Point(0, 0));
         }
 
         public void PaintOnFrame(Texture2D texture, int frameIndex, bool ignoreTransparency = true) {
-            
-            MergeTextures(SpriteSheet, texture, FrameBoundaries[frameIndex], ignoreTransparency);
+            SpriteSheet = MergeTextures(SpriteSheet, texture, FrameBoundaries[frameIndex], ignoreTransparency);
         }
 
         public Texture2D GetFrameTexture(int frameIndex) {
@@ -150,8 +145,10 @@ namespace Somniloquy {
             return GetCurrentAnimation().FrameBoundaries[FrameInCurrentAnimation];
         }
 
-        public Point GetDestinationRectangleOffset() {
-            return GetCurrentAnimation().FrameAnchors[FrameInCurrentAnimation];
+        public Rectangle GetDestinationRectangle(Point point) {
+            var offset = GetCurrentAnimation().FrameCenters[FrameInCurrentAnimation];
+            var boundaries = GetCurrentAnimation().FrameBoundaries[FrameInCurrentAnimation];
+            return new Rectangle(point.X + offset.X, point.Y + offset.Y, boundaries.Width, boundaries.Height);
         }
         
         public void AdvanceFrames(int frames = 1) {

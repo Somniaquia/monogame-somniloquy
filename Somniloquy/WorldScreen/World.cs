@@ -9,10 +9,22 @@
 
     public class Tile {
         public FunctionalSprite FSprite { get; set; } = new();
+        public List<Point> CollisionBoundsVertices { get; set; } = new();
 
+        // For loading worlds from Ceddi-Edition
         public Tile() {
-            Texture2D transparentTexture = new(GameManager.GraphicsDeviceManager.GraphicsDevice, Layer.TileLength, Layer.TileLength);
-            Color[] data = new Color[Layer.TileLength * Layer.TileLength];
+            Texture2D transparentTexture = new(GameManager.GraphicsDeviceManager.GraphicsDevice, 8, 8);
+            Color[] data = new Color[8 * 8];
+            Array.Fill(data, Color.Transparent);
+            transparentTexture.SetData(data);
+
+            var defaultAnimation = FSprite.AddAnimation("Default");
+            defaultAnimation.AddFrame(transparentTexture);
+        }
+
+        public Tile(int tileLength = 8) {
+            Texture2D transparentTexture = new(GameManager.GraphicsDeviceManager.GraphicsDevice, tileLength, tileLength);
+            Color[] data = new Color[tileLength * tileLength];
             Array.Fill(data, Color.Transparent);
             transparentTexture.SetData(data);
 
@@ -69,8 +81,8 @@
         public Point Dimensions { get; set; }
         [JsonConverter(typeof(ChunksConverter))]
         public Dictionary<Point, Tile[,]> Chunks { get; set; } = new();
-        public static int ChunkLength { get; } = 16;
-        public static int TileLength { get; } = 8;
+        public int ChunkLength { get; } = 16;
+        public int TileLength { get; } = 8;
 
         public Layer(World parentWorld) {
             ParentWorld = parentWorld;
@@ -91,7 +103,7 @@
         #region Paint Methods
         public void PaintOnTile(Tile tile, Texture2D texture, int animationFrame, PaintCommand command = null) {
             command?.Append(tile, tile.FSprite.GetCurrentAnimation().GetFrameTexture(animationFrame), texture);
-
+            
             tile.FSprite.GetCurrentAnimation().PaintOnFrame(texture, animationFrame);
         }
 
@@ -140,8 +152,8 @@
 
             for (int tileY = startTileY; tileY <= endTileY; tileY++) {
                 for (int tileX = startTileX; tileX <= endTileX; tileX++) {
-                    var tilewiseTexture = new Texture2D(GameManager.GraphicsDeviceManager.GraphicsDevice, Layer.TileLength, Layer.TileLength);
-                    Color[] data = new Color[Layer.TileLength * Layer.TileLength];
+                    var tilewiseTexture = new Texture2D(GameManager.GraphicsDeviceManager.GraphicsDevice, TileLength, TileLength);
+                    Color[] data = new Color[TileLength * TileLength];
                     Array.Fill(data, Color.Transparent);
 
                     int startX = Math.Max(rectangle.X - tileX * TileLength, 0);
@@ -159,7 +171,7 @@
 
                     Point position = new(tileX, tileY);
                     if (GetTile(position) is null) {
-                        SetTile(position, new Tile());
+                        SetTile(position, new Tile(TileLength));
                     }
 
                     PaintOnTile(GetTile(position), tilewiseTexture, EditorScreen.SelectedAnimationFrame, command);
@@ -256,6 +268,26 @@
             }   
         }
 
+        public void SetFill(Point tilePosition, Tile[,] tilePattern, SetCommand command = null) {
+            var positionStack = new Stack<Point>();
+            positionStack.Push(tilePosition);
+
+            while (positionStack.Count != 0) {
+                var position = positionStack.Pop();
+                SetTile(position, tilePattern[
+                        MathsHelper.Modulo(position.X - tilePosition.X, tilePattern.GetLength(0)),
+                        MathsHelper.Modulo(position.Y - tilePosition.Y, tilePattern.GetLength(1))
+                    ], command
+                );
+
+                foreach (var positionOffset in new Point[] { new Point(-1, 0), new Point(1, 0) , new Point(0, -1) , new Point(0, 1) }) {
+                    if (GetTile(position + positionOffset) is null) {
+                        positionStack.Push(position + positionOffset);
+                    }
+                }
+            }
+        }
+
         public Tile GetTile(Point tilePosition) {
             Point chunkPosition = GetChunkPositionOf(tilePosition);
 
@@ -295,7 +327,7 @@
             // }
         }
 
-        public void Draw(Camera camera) {
+        public void Draw(Camera camera, float opacity = 1f) {
             var cameraBounds = camera.GetCameraBounds();
 
             var startChunkPosition = GetChunkPositionOf(GetTilePositionOf(MathsHelper.ToPoint(cameraBounds.Item1)));
@@ -315,7 +347,7 @@
                                 new Rectangle(
                                     (chunkX * ChunkLength + xInChunk) * TileLength,
                                     (chunkY * ChunkLength + yInChunk) * TileLength,
-                                    TileLength, TileLength));
+                                    TileLength, TileLength), opacity);
                         }
                     }
                 }
@@ -337,14 +369,14 @@
         public List<Layer> Layers { get; set; } = new();
         public List<Tile> Tiles { get; set; } = new();
 
-        public Layer AddLayer() {
+        public Layer NewLayer() {
             var layer = new Layer(this);
             Layers.Add(layer);
             return layer;
         }
 
-        public Tile AddTile() {
-            var tile = new Tile();
+        public Tile NewTile(int tileLength) {
+            var tile = new Tile(tileLength);
             Tiles.Add(tile);
             return tile;
         }
@@ -355,51 +387,12 @@
             }
         }
 
-        public void Draw(Camera camera) {
-            foreach (var layer in Layers) {
-                layer.Draw(camera);
-            }
-        }
-
         public void DisposeTiles() {
             foreach (var tile in Tiles) {
                 tile?.FSprite.Dispose();
             }
 
             Tiles.Clear();
-        }
-    }
-
-    /// <summary>
-    /// WorldLoader handles updating and rendering of multiple worlds.
-    /// The WorldLoader handles these functionalities:
-    /// - Load in worlds that are currently present and unload those that are not
-    /// - Update and draw worlds at are currently loaded
-    /// 
-    /// The WorldLoader doesn't handle these functionalities:
-    /// - Serialization/Deserialization of the worlds - as the World class does them instead
-    /// </summary>
-    internal static class WorldManager {
-        public static Dictionary<string, World> LoadedWorlds { get; private set; }
-
-        public static void LoadWorld(string worldName) {
-            LoadedWorlds.Add(worldName, SerializationManager.Deserialize<World>(worldName));
-        }
-
-        public static void UnloadWorld(string worldName) {
-            LoadedWorlds.Remove(worldName);
-        }
-
-        public static void Update() {
-            foreach (var entry in LoadedWorlds) {
-                entry.Value.Update();
-            }
-        }
-
-        public static void Draw(Camera camera) {
-            foreach (var entry in LoadedWorlds) {
-                entry.Value.Draw(camera);
-            }
         }
     }
 }

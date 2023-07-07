@@ -11,8 +11,8 @@ namespace Somniloquy {
         public static Stack<ICommand> RedoHistory = new();
 
         public static void Push(ICommand command) {
-            CommandManager.UndoHistory.Push(command);
-            CommandManager.RedoHistory.Clear();
+            UndoHistory.Push(command);
+            RedoHistory.Clear();
         }
 
         public static void Undo() {
@@ -70,7 +70,7 @@ namespace Somniloquy {
 
         public void Redo() {
             foreach (var pair in affectedTiles) {
-                pair.Item1.FSprite.GetCurrentAnimation().PaintOnFrame(pair.Item3, animationFrame, true);
+                pair.Item1.FSprite.GetCurrentAnimation().PaintOnFrame(pair.Item3, animationFrame, false);
             }
         }
 
