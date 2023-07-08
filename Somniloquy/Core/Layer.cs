@@ -7,67 +7,6 @@
     using MonoGame.Extended;
     using Newtonsoft.Json;
 
-    public class Tile {
-        public FunctionalSprite FSprite { get; set; } = new();
-        public List<Point> CollisionBoundsVertices { get; set; } = new();
-
-        // For loading worlds from Ceddi-Edition
-        public Tile() {
-            Texture2D transparentTexture = new(GameManager.GraphicsDeviceManager.GraphicsDevice, 8, 8);
-            Color[] data = new Color[8 * 8];
-            Array.Fill(data, Color.Transparent);
-            transparentTexture.SetData(data);
-
-            var defaultAnimation = FSprite.AddAnimation("Default");
-            defaultAnimation.AddFrame(transparentTexture);
-        }
-
-        public Tile(int tileLength = 8) {
-            Texture2D transparentTexture = new(GameManager.GraphicsDeviceManager.GraphicsDevice, tileLength, tileLength);
-            Color[] data = new Color[tileLength * tileLength];
-            Array.Fill(data, Color.Transparent);
-            transparentTexture.SetData(data);
-
-            var defaultAnimation = FSprite.AddAnimation("Default");
-            defaultAnimation.AddFrame(transparentTexture);
-        }
-
-        ~Tile() {
-            FSprite.Dispose();
-        }
-
-        public void PaintOnFrame(Texture2D texture, int frame) {
-            FSprite.GetCurrentAnimation().PaintOnFrame(texture, frame);
-        }
-
-        public Color GetColorAt(Point point) {
-            Color[] data = new Color[FSprite.GetCurrentAnimation().SpriteSheet.Width * FSprite.GetCurrentAnimation().SpriteSheet.Height];
-            FSprite.GetCurrentAnimation().SpriteSheet.GetData(data);
-
-            return data[
-                (FSprite.GetCurrentAnimation().FrameBoundaries[FSprite.FrameInCurrentAnimation].Y + point.Y) * FSprite.GetCurrentAnimation().SpriteSheet.Width +
-                FSprite.GetCurrentAnimation().FrameBoundaries[FSprite.FrameInCurrentAnimation].X + point.X
-            ];
-        }
-
-        public void Update() {
-            
-        }
-
-        public void Draw(Rectangle destination, float opacity = 1f) {
-            if (FSprite is null)
-                GameManager.DrawFilledRectangle(destination, Color.DarkGray);
-            else {
-                GameManager.SpriteBatch.Draw(
-                    FSprite.GetCurrentAnimation().SpriteSheet, 
-                    destination, 
-                    FSprite.GetCurrentAnimation().FrameBoundaries[FSprite.FrameInCurrentAnimation], 
-                    Color.White * opacity
-                );
-            }
-        }
-    }
-
     /// <summary>
     /// A Layer is the building block of a world.
     /// Layers show and hide based on various events, such as player's approachment or interaction with certain objects, 
@@ -88,12 +27,12 @@
             ParentWorld = parentWorld;
         }
 
-        public Point GetPositionInTile(Point pixelPosition) {
-            return new Point(MathsHelper.Modulo(pixelPosition.X, TileLength), MathsHelper.Modulo(pixelPosition.Y, TileLength));
+        public Point GetPositionInTile(Point worldPosition) {
+            return new Point(MathsHelper.Modulo(worldPosition.X, TileLength), MathsHelper.Modulo(worldPosition.Y, TileLength));
         }
 
-        public Point GetTilePositionOf(Point pixelPosition) {
-            return new Point(MathsHelper.FloorDivide(pixelPosition.X, TileLength), MathsHelper.FloorDivide(pixelPosition.Y, TileLength));
+        public Point GetTilePositionOf(Point worldPosition) {
+            return new Point(MathsHelper.FloorDivide(worldPosition.X, TileLength), MathsHelper.FloorDivide(worldPosition.Y, TileLength));
         }
 
         public Point GetChunkPositionOf(Point tilePosition) {
@@ -101,10 +40,10 @@
         }
 
         #region Paint Methods
-        public void PaintOnTile(Tile tile, Texture2D texture, int animationFrame, PaintCommand command = null) {
-            command?.Append(tile, tile.FSprite.GetCurrentAnimation().GetFrameTexture(animationFrame), texture);
-            
-            tile.FSprite.GetCurrentAnimation().PaintOnFrame(texture, animationFrame);
+        public void PaintOnTile(Tile tile, Color?[,] colors, int animationFrame, PaintCommand command = null) {
+            var oldTexture = tile.FSprite.GetCurrentAnimation().GetFrameColors(animationFrame);
+            tile.FSprite.GetCurrentAnimation().PaintOnFrame(colors, animationFrame);
+            command?.Append(tile, oldTexture, tile.FSprite.GetCurrentAnimation().GetFrameColors(animationFrame));
         }
 
         public void PaintLine(Point point1, Point point2, Color color, int width, PaintCommand command = null) {
@@ -152,9 +91,7 @@
 
             for (int tileY = startTileY; tileY <= endTileY; tileY++) {
                 for (int tileX = startTileX; tileX <= endTileX; tileX++) {
-                    var tilewiseTexture = new Texture2D(GameManager.GraphicsDeviceManager.GraphicsDevice, TileLength, TileLength);
-                    Color[] data = new Color[TileLength * TileLength];
-                    Array.Fill(data, Color.Transparent);
+                    var colors = new Color?[TileLength, TileLength];
 
                     int startX = Math.Max(rectangle.X - tileX * TileLength, 0);
                     int startY = Math.Max(rectangle.Y - tileY * TileLength, 0);
@@ -163,19 +100,56 @@
 
                     for (int y = startY; y <= endY; y++) {
                         for (int x = startX; x <= endX; x++) {
-                            data[y * TileLength + x] = color;
+                            colors[x, y] = color;
                         }
                     }
-
-                    tilewiseTexture.SetData(data);
 
                     Point position = new(tileX, tileY);
                     if (GetTile(position) is null) {
                         SetTile(position, new Tile(TileLength));
                     }
 
-                    PaintOnTile(GetTile(position), tilewiseTexture, EditorScreen.SelectedAnimationFrame, command);
+                    PaintOnTile(GetTile(position), colors, EditorScreen.SelectedAnimationFrame, command);
                 }
+            }
+        }
+
+        public void PaintFill(Point positionInWorld, Color color, PaintCommand command = null) {
+            var positionStack = new Stack<Point>();
+            positionStack.Push(positionInWorld);
+
+            Dictionary<Tile, Color?[,]> tileColors = new() {
+                { GetTile(positionInWorld), GetTile(positionInWorld).FSprite.GetCurrentAnimation().GetFrameColors(EditorScreen.SelectedAnimationFrame) }
+            };
+
+            var targetColor = GetTile(GetTilePositionOf(positionInWorld)).GetColorAt(GetPositionInTile(positionInWorld));
+
+            while (positionStack.Count != 0) {
+                var position = positionStack.Pop();
+                var tile = GetTile(GetTilePositionOf(position));
+
+                foreach (var positionOffset in new Point[] { new Point(-1, 0), new Point(1, 0), new Point(0, -1), new Point(0, 1) }) {
+                    var checkingPosition = position + positionOffset;
+                    var checkingTile = GetTile(GetTilePositionOf(checkingPosition));
+                    
+                    if (!tileColors.ContainsKey(tile)) {
+                        tileColors.Add(tile, tile.FSprite.GetCurrentAnimation().GetFrameColors(0));
+                    }
+
+                    if (tileColors[checkingTile][checkingPosition.X, checkingPosition.Y] == targetColor) {
+                        positionStack.Push(checkingPosition);
+                    }
+                }
+
+                if (positionStack.Count > 10000) {
+                    command.Undo();
+                    CommandManager.UndoHistory.Pop();
+                    return;
+                }
+            }
+
+            foreach (var pair in tileColors) {
+                PaintOnTile(pair.Key, pair.Value, EditorScreen.SelectedAnimationFrame, command);
             }
         }
 
@@ -285,6 +259,12 @@
                         positionStack.Push(position + positionOffset);
                     }
                 }
+
+                if (positionStack.Count > 10000) {
+                    command.Undo();
+                    CommandManager.UndoHistory.Pop();
+                    break;
+                }
             }
         }
 
@@ -352,47 +332,6 @@
                     }
                 }
             }
-        }
-    }
-
-    /// <summary>
-    /// A World stores multiple map layers, which are the building blocks of a world. 
-    /// World includes variables and functionalities of:
-    /// - world rules, which determine how the particular world behave in the game
-    /// -- this includes camera panning, entity physics, TODO: Think about what would fit world rules
-    /// World does not include:
-    /// - tile and entity data of the world. Those are saved in layers instead.
-    /// To summarize, a world is merely a container for layers that should be grouped for sharing similar themes or behaviors
-    /// </summary>
-    public class World {
-        public string Name { get; set; }
-        public List<Layer> Layers { get; set; } = new();
-        public List<Tile> Tiles { get; set; } = new();
-
-        public Layer NewLayer() {
-            var layer = new Layer(this);
-            Layers.Add(layer);
-            return layer;
-        }
-
-        public Tile NewTile(int tileLength) {
-            var tile = new Tile(tileLength);
-            Tiles.Add(tile);
-            return tile;
-        }
-
-        public void Update() {
-            foreach (var layer in Layers) {
-                layer.Update();
-            }
-        }
-
-        public void DisposeTiles() {
-            foreach (var tile in Tiles) {
-                tile?.FSprite.Dispose();
-            }
-
-            Tiles.Clear();
         }
     }
 }

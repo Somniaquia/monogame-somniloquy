@@ -54,25 +54,20 @@ namespace Somniloquy {
             return mergedTexture;
         }
 
-        public static Texture2D MergeTextures(Texture2D texture1, Texture2D texture2, Rectangle boundaries, bool ignoreTransparency) {
-            Color[] textureData1 = new Color[texture1.Width * texture1.Height];
-            texture1.GetData(textureData1);
+        public static Texture2D MergeTextures(Texture2D texture, Color?[,] colors, Rectangle boundaries) {
+            Color[] textureData = new Color[texture.Width * texture.Height];
+            texture.GetData(textureData);
 
-            Color[] textureData2 = new Color[texture2.Width * texture2.Height];
-            texture2.GetData(textureData2);
-
-            for (int y = 0; y < boundaries.Right; y++) {
-                for (int x = 0; x < boundaries.Bottom; x++) {
-                    if (ignoreTransparency && textureData2[y * texture2.Width + x] == Color.Transparent) {
-                        continue;
+            for (int y = 0; y < boundaries.Bottom; y++) {
+                for (int x = 0; x < boundaries.Right; x++) {
+                    if (colors[x, y] is not null) {
+                        textureData[(boundaries.Y + y) * texture.Width + (boundaries.X + x)] = colors[x, y].Value;
                     }
-                    textureData1[(boundaries.Y + y) * texture1.Width + (boundaries.X + x)] = textureData2[y * texture2.Width + x];
                 }
             }
 
-            //texture2.Dispose();
-            var newTexture = new Texture2D(GameManager.GraphicsDeviceManager.GraphicsDevice, texture1.Width, texture1.Height);
-            newTexture.SetData(textureData1);
+            var newTexture = new Texture2D(GameManager.GraphicsDeviceManager.GraphicsDevice, texture.Width, texture.Height);
+            newTexture.SetData(textureData);
 
             return newTexture;
         }
@@ -90,23 +85,23 @@ namespace Somniloquy {
             FrameCenters.Add(new Point(0, 0));
         }
 
-        public void PaintOnFrame(Texture2D texture, int frameIndex, bool ignoreTransparency = true) {
-            SpriteSheet = MergeTextures(SpriteSheet, texture, FrameBoundaries[frameIndex], ignoreTransparency);
+        public void PaintOnFrame(Color?[,] colors, int frameIndex) {
+            SpriteSheet = MergeTextures(SpriteSheet, colors, FrameBoundaries[frameIndex]);
         }
 
-        public Texture2D GetFrameTexture(int frameIndex) {
+        public Color?[,] GetFrameColors(int frameIndex) {
             Rectangle boundaries = FrameBoundaries[frameIndex];
 
-            Color[] data = new Color[boundaries.Width * boundaries.Height];
+            var data = new Color[boundaries.Width * boundaries.Height];
             SpriteSheet.GetData(0, new Rectangle(boundaries.X, boundaries.Y, boundaries.Width, boundaries.Height), data, 0, boundaries.Width * boundaries.Height);
-            //Array.Fill(data, Color.Black);
 
-            Texture2D frameTexture = new(GameManager.GraphicsDeviceManager.GraphicsDevice,
-                                                   boundaries.Width,
-                                                   boundaries.Height);
-            frameTexture.SetData(data);
-
-            return frameTexture;
+            var colors = new Color?[boundaries.Width, boundaries.Height];
+            for (int y = 0; y < boundaries.Height; y++) {
+                for (int x = 0; x < boundaries.Width; x++) {
+                    colors[x, y] = data[y * boundaries.Width + x];
+                }
+            }
+            return colors;
         }
     }
 

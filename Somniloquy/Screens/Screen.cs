@@ -28,7 +28,7 @@ namespace Somniloquy {
         public virtual void Update() {
             if (Focusable) {
                 if (MathsHelper.IsWithinBoundaries(MathsHelper.ToPoint(InputManager.GetMousePosition()), Boundaries)) {
-                    if (InputManager.IsLeftButtonClicked()) {
+                    if (!InputManager.IsLeftButtonDown()) {
                         InputManager.Focus = this;
                     }
                 }

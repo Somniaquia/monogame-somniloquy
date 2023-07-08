@@ -51,40 +51,36 @@ namespace Somniloquy {
 
     public class PaintCommand : ICommand {
         private int animationFrame;
-        private List<(Tile, Texture2D, Texture2D)> affectedTiles = new();
+        private List<(Tile, Color?[,], Color?[,])> affectedTiles = new();
 
         public PaintCommand(int animationFrame) {
             this.animationFrame = animationFrame;
         }
 
-        public void Append(Tile tile, Texture2D previousTexture, Texture2D subsequentTexture) {
+        public void Append(Tile tile, Color?[,] previousColors, Color?[,] subsequentColors) {
             for (int i = 0; i < affectedTiles.Count; i++) {
-                if (affectedTiles[i].Item1 == tile) {
-                    affectedTiles[i] = (tile, affectedTiles[i].Item2, subsequentTexture);
+                if (ReferenceEquals(affectedTiles[i].Item1, tile)) {
+                    affectedTiles[i] = (tile, affectedTiles[i].Item2, subsequentColors);
                     return;
                 }
             }
 
-            affectedTiles.Add((tile, previousTexture, subsequentTexture));
+            affectedTiles.Add((tile, previousColors, subsequentColors));
         }
 
         public void Redo() {
             foreach (var pair in affectedTiles) {
-                pair.Item1.FSprite.GetCurrentAnimation().PaintOnFrame(pair.Item3, animationFrame, false);
+                pair.Item1.FSprite.GetCurrentAnimation().PaintOnFrame(pair.Item3, animationFrame);
             }
         }
 
         public void Undo() {
             for (int i = affectedTiles.Count - 1; i >= 0; i--) {
-                affectedTiles[i].Item1.FSprite.GetCurrentAnimation().PaintOnFrame(affectedTiles[i].Item2, animationFrame, false);
+                affectedTiles[i].Item1.FSprite.GetCurrentAnimation().PaintOnFrame(affectedTiles[i].Item2, animationFrame);
             }
         }
 
         public void Clear() {
-            foreach (var pair in affectedTiles) {
-                pair.Item2.Dispose();
-                pair.Item3.Dispose();
-            }
             affectedTiles.Clear();
         }
     }

@@ -124,9 +124,11 @@ namespace Somniloquy {
         }
 
         public override void Draw() {
-            GameManager.DrawFilledRectangle(new Rectangle(Boundaries.X - 8, Boundaries.Y - 8, Boundaries.Width + 16, Boundaries.Height + 16), EditorScreen.SelectedColor);
-            GameManager.SpriteBatch.Draw(Chart, Boundaries, Color.White);
-            GameManager.SpriteBatch.DrawPoint(new Vector2(Boundaries.X, Boundaries.Y) + PositionOnChart * Boundaries.Width, MathsHelper.InvertColor(EditorScreen.SelectedColor), 8);
+            if (EditorScreen.CurrrentEditorState == EditorScreen.EditorState.PaintMode) {
+                GameManager.DrawFilledRectangle(new Rectangle(Boundaries.X - 8, Boundaries.Y - 8, Boundaries.Width + 16, Boundaries.Height + 16), EditorScreen.SelectedColor);
+                GameManager.SpriteBatch.Draw(Chart, Boundaries, Color.White);
+                GameManager.SpriteBatch.DrawPoint(new Vector2(Boundaries.X, Boundaries.Y) + PositionOnChart * Boundaries.Width, MathsHelper.InvertColor(EditorScreen.SelectedColor), 8);
+            }
             base.Draw();
         }
     }
