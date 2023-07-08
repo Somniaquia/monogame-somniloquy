@@ -201,7 +201,7 @@ namespace Somniloquy {
                         if (InputManager.IsLeftButtonDown() && SelectedLayer.GetTile(mouseTilePosition) is not null) {
                             ColorChart.FetchPositionAndHueFromColor(SelectedLayer.GetTile(mouseTilePosition).GetColorAt(SelectedLayer.GetPositionInTile(mouseWorldPosition)));
                         }
-                    } else if (InputManager.IsKeyDown(Keys.F) && InputManager.IsLeftButtonDown()) {
+                    } else if (InputManager.IsKeyDown(Keys.F) && InputManager.IsLeftButtonClicked()) {
                         ActiveCommand = new PaintCommand(SelectedAnimationFrame);
                         CommandManager.Push(ActiveCommand);
 
@@ -301,7 +301,7 @@ namespace Somniloquy {
                                 TilePattern[0, 0] = SelectedLayer.GetTile(mouseTilePosition);
                             }
                         }
-                    } else if (InputManager.IsKeyDown(Keys.F) && InputManager.IsLeftButtonDown()) {
+                    } else if (InputManager.IsKeyDown(Keys.F) && InputManager.IsLeftButtonClicked()) {
                         ActiveCommand = new SetCommand(SelectedLayer);
                         CommandManager.Push(ActiveCommand);
 

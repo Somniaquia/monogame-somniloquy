@@ -118,30 +118,33 @@
             var positionStack = new Stack<Point>();
             positionStack.Push(positionInWorld);
 
+            var initialTile = GetTile(GetTilePositionOf(positionInWorld), true);
             Dictionary<Tile, Color?[,]> tileColors = new() {
-                { GetTile(positionInWorld), GetTile(positionInWorld).FSprite.GetCurrentAnimation().GetFrameColors(EditorScreen.SelectedAnimationFrame) }
+                { initialTile, initialTile.FSprite.GetCurrentAnimation().GetFrameColors(EditorScreen.SelectedAnimationFrame) }
             };
 
             var targetColor = GetTile(GetTilePositionOf(positionInWorld)).GetColorAt(GetPositionInTile(positionInWorld));
+            if (targetColor == color) return;
 
             while (positionStack.Count != 0) {
                 var position = positionStack.Pop();
                 var tile = GetTile(GetTilePositionOf(position));
+                tileColors[tile][MathsHelper.Modulo(position.X, TileLength), MathsHelper.Modulo(position.Y, TileLength)] = color;
 
                 foreach (var positionOffset in new Point[] { new Point(-1, 0), new Point(1, 0), new Point(0, -1), new Point(0, 1) }) {
                     var checkingPosition = position + positionOffset;
-                    var checkingTile = GetTile(GetTilePositionOf(checkingPosition));
+                    var checkingTile = GetTile(GetTilePositionOf(checkingPosition), true);
                     
-                    if (!tileColors.ContainsKey(tile)) {
-                        tileColors.Add(tile, tile.FSprite.GetCurrentAnimation().GetFrameColors(0));
+                    if (!tileColors.ContainsKey(checkingTile)) {
+                        tileColors.Add(checkingTile, checkingTile.FSprite.GetCurrentAnimation().GetFrameColors(0));
                     }
 
-                    if (tileColors[checkingTile][checkingPosition.X, checkingPosition.Y] == targetColor) {
+                    if (tileColors[checkingTile][MathsHelper.Modulo(checkingPosition.X, TileLength), MathsHelper.Modulo(checkingPosition.Y, TileLength)] == targetColor) {
                         positionStack.Push(checkingPosition);
                     }
                 }
 
-                if (positionStack.Count > 10000) {
+                if (positionStack.Count >= 10000) {
                     command.Undo();
                     CommandManager.UndoHistory.Pop();
                     return;
@@ -246,6 +249,9 @@
             var positionStack = new Stack<Point>();
             positionStack.Push(tilePosition);
 
+            var targetTile = GetTile(tilePosition);
+            if (ReferenceEquals(targetTile, tilePattern[0, 0])) return;
+
             while (positionStack.Count != 0) {
                 var position = positionStack.Pop();
                 SetTile(position, tilePattern[
@@ -255,12 +261,12 @@
                 );
 
                 foreach (var positionOffset in new Point[] { new Point(-1, 0), new Point(1, 0) , new Point(0, -1) , new Point(0, 1) }) {
-                    if (GetTile(position + positionOffset) is null) {
+                    if (ReferenceEquals(GetTile(position + positionOffset), targetTile)) {
                         positionStack.Push(position + positionOffset);
                     }
                 }
 
-                if (positionStack.Count > 10000) {
+                if (positionStack.Count >= 10000) {
                     command.Undo();
                     CommandManager.UndoHistory.Pop();
                     break;
@@ -268,11 +274,17 @@
             }
         }
 
-        public Tile GetTile(Point tilePosition) {
+        public Tile GetTile(Point tilePosition, bool createIfNull = false) {
             Point chunkPosition = GetChunkPositionOf(tilePosition);
 
             if (!Chunks.ContainsKey(chunkPosition)) {
-                return null;
+                if (createIfNull) SetTile(tilePosition, ParentWorld.NewTile(TileLength));
+                else return null;
+            }
+
+            if (Chunks[chunkPosition][tilePosition.X - chunkPosition.X * ChunkLength, tilePosition.Y - chunkPosition.Y * ChunkLength] is null) {
+                if (createIfNull) SetTile(tilePosition, ParentWorld.NewTile(TileLength));
+                else return null;
             }
 
             return Chunks[chunkPosition][tilePosition.X - chunkPosition.X * ChunkLength, tilePosition.Y - chunkPosition.Y * ChunkLength];
