@@ -14,7 +14,6 @@
     public class Somniloquy : Game {
         private GraphicsDeviceManager graphicsDeviceManager;
         private SpriteBatch spriteBatch;
-        private List<Screen> activeScreens = new();
 
         public Somniloquy() {
             graphicsDeviceManager = new GraphicsDeviceManager(this);
@@ -37,10 +36,11 @@
 
         protected override void Initialize() {
             base.Initialize();
-            activeScreens.Add(new EditorScreen(GameManager.WindowSize));
-
             InputManager.Initialize(Window);
             SerializationManager.InitializeDirectories((typeof(World), "Worlds"), (typeof(Texture2D), "Textures"));
+            SoundManager.Initialize("Content\\Loops");
+
+            ScreenManager.AddScreen(new EditorScreen(GameManager.WindowSize));
         }
 
         protected override void LoadContent() {
@@ -63,22 +63,20 @@
 
             if (IsActive) {
                 InputManager.Update();
-
-                foreach (var screen in activeScreens) {
-                    screen.Update();
-                }
+                ScreenManager.Update();
             }
+
+            SoundManager.Update();
             
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime) {
-            GraphicsDevice.Clear(Color.Black);
-
-            foreach (var screen in activeScreens) {
-                screen.Draw();
+            if (IsActive) {
+                GraphicsDevice.Clear(Color.Black);
+                ScreenManager.Draw();
+                base.Draw(gameTime);
             }
-            base.Draw(gameTime);
         }
     }
 }

@@ -48,10 +48,10 @@ namespace Somniloquy {
                 if (pitch < 2f) pitch += 0.001f;
                 SoundManager.SetPitch(music, pitch);
             } else if (InputManager.IsKeyDown(Keys.Up)) {
-                SoundManager.CenterFrequency *= 1.001f;
+                SoundManager.CenterFrequency *= 1.01f;
             }
             else if (InputManager.IsKeyDown(Keys.Down)) {
-                SoundManager.CenterFrequency /= 1.001f;
+                SoundManager.CenterFrequency /= 1.01f;
             }
 
             foreach (var entry in LoadedWorlds) {

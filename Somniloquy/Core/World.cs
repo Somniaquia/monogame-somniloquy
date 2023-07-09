@@ -1,7 +1,7 @@
 namespace Somniloquy {
     using System;
     using System.Collections.Generic;
-
+    using System.Linq;
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
     using MonoGame.Extended;
@@ -37,6 +37,10 @@ namespace Somniloquy {
             foreach (var layer in Layers) {
                 layer.Update();
             }
+        }
+
+        public void RemoveUnnecessaryTiles() {
+            Tiles = Tiles.Distinct().ToList();
         }
 
         public void DisposeTiles() {
