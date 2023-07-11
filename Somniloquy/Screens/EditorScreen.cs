@@ -63,10 +63,13 @@ namespace Somniloquy {
         
         public Camera Camera { get; set; } = new Camera(8.0f);
         public ColorChart ColorChart { get; private set; } = null;
-        private Point previousMousePositionInWorld;
+        private Point previousWorldPosition;
         private Point mouseWorldPosition;
-        private Point previousMouseTilePosition;
+        private Point previousTilePosition;
         private Point mouseTilePosition;
+        private Point previousPositionInTile;
+        private Point mousePositionInTile;
+
         private Point tilePatternOrigin = Point.Zero;
 
         private Point? firstPositionInWorld = null;
@@ -95,11 +98,14 @@ namespace Somniloquy {
                 CurrrentEditorAction = EditorAction.PropertiesIdle;
             }
 
-            previousMousePositionInWorld = mouseWorldPosition;
+            previousWorldPosition = mouseWorldPosition;
             mouseWorldPosition = MathsHelper.ToPoint(Camera.ApplyInvertTransform(InputManager.GetMousePosition()));
 
-            previousMouseTilePosition = SelectedLayer.GetTilePositionOf(previousMousePositionInWorld);
+            previousTilePosition = SelectedLayer.GetTilePositionOf(previousWorldPosition);
             mouseTilePosition = SelectedLayer.GetTilePositionOf(mouseWorldPosition);
+
+            previousPositionInTile = SelectedLayer.GetPositionInTile(previousWorldPosition);
+            mousePositionInTile = SelectedLayer.GetPositionInTile(mouseWorldPosition);
 
             if (InputManager.IsKeyDown(Keys.S)) Camera.Move(new Vector2(0, 1));
             if (InputManager.IsKeyDown(Keys.W)) Camera.Move(new Vector2(0, -1));
@@ -175,7 +181,7 @@ namespace Somniloquy {
                         CommandManager.Push(ActiveCommand);
 
                         SelectedLayer.PaintRectangle(
-                            MathsHelper.ValidizeRectangle(new Rectangle(firstPositionInWorld.Value, previousMousePositionInWorld - firstPositionInWorld.Value)),
+                            MathsHelper.ValidizeRectangle(new Rectangle(firstPositionInWorld.Value, previousWorldPosition - firstPositionInWorld.Value)),
                             SelectedColor, (PaintCommand)ActiveCommand
                         );
                         firstPositionInWorld = mouseWorldPosition;
@@ -206,7 +212,7 @@ namespace Somniloquy {
                 
                     if (InputManager.IsKeyDown(Keys.LeftAlt)) {
                         if (InputManager.IsLeftButtonDown() && SelectedLayer.GetTile(mouseTilePosition) is not null) {
-                            ColorChart.FetchPositionAndHueFromColor(SelectedLayer.GetTile(mouseTilePosition).GetColorAt(SelectedLayer.GetPositionInTile(mouseWorldPosition)));
+                            ColorChart.FetchPositionAndHueFromColor(SelectedLayer.GetTile(mouseTilePosition).GetColorAt(mousePositionInTile));
                         }
                     } else if (InputManager.IsKeyDown(Keys.F)) {
                         if (InputManager.IsLeftButtonClicked()) {
@@ -231,7 +237,7 @@ namespace Somniloquy {
                             } else {
                                 if (ActiveCommand is PaintCommand command) {
                                     SelectedLayer.PaintLine(
-                                        previousMousePositionInWorld, mouseWorldPosition, 
+                                        previousWorldPosition, mouseWorldPosition, 
                                         color, Math.Max(1, (int)InputManager.GetPenPressure()), 
                                         command
                                     );
@@ -332,14 +338,22 @@ namespace Somniloquy {
                             } else {
                                 if (ActiveCommand is SetCommand command) {
                                     SelectedLayer.SetLine(
-                                        previousMouseTilePosition,
+                                        previousTilePosition,
                                         mouseTilePosition,
-                                        TilePattern, previousMouseTilePosition - tilePatternOrigin, Math.Max(1, (int)InputManager.GetPenPressure()),
+                                        TilePattern, previousTilePosition - tilePatternOrigin, Math.Max(1, (int)InputManager.GetPenPressure()),
                                         command
                                     );
                                 }
                             }
                         }
+                    }
+                }
+            } else if (CurrrentEditorState == EditorState.PropertiesMode) {
+                if (InputManager.GetNumberKeyPress() is not null) {
+                    if (InputManager.IsLeftButtonClicked()) {
+                        var tile = SelectedLayer.GetTile(SelectedLayer.GetTilePositionOf(mouseWorldPosition));
+
+                        tile.CollisionVertices[InputManager.GetNumberKeyPress().Value - 1] = mousePositionInTile;
                     }
                 }
             }
@@ -348,7 +362,7 @@ namespace Somniloquy {
         private void GetTopmostLayerBeneathMouse() {
             for (int i = LoadedWorld.Layers.Count - 1; i >= 0; i--) {
                 var layer = LoadedWorld.Layers[i];
-                if (layer.GetTile(mouseTilePosition) is null || layer.GetTile(mouseTilePosition).GetColorAt(SelectedLayer.GetPositionInTile(mouseWorldPosition)) == Color.Transparent) {
+                if (layer.GetTile(mouseTilePosition) is null || layer.GetTile(mouseTilePosition).GetColorAt(mousePositionInTile) == Color.Transparent) {
                     continue;
                 } else {
                     SelectedLayer = LoadedWorld.Layers[i];
@@ -387,6 +401,9 @@ namespace Somniloquy {
                     break;
                 case EditorAction.TileLine:
                     SelectedLayer.SetLine(firstPositionInWorld.Value, mouseTilePosition, TilePattern, Point.Zero, 1, preview: true);
+                    break;
+                case EditorAction.PropertiesIdle:
+                    GameManager.SpriteBatch.DrawPoint(mouseWorldPosition.ToVector2(), Color.Blue * 0.5f);
                     break;
             }
         }
@@ -431,8 +448,10 @@ namespace Somniloquy {
         public override void Draw() {
             GameManager.SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, transformMatrix: Camera.Transform);
             foreach (var layer in LoadedWorld.Layers) {
-                var opacity = ReferenceEquals(layer, SelectedLayer) ? 1f : 0.5f;
-                layer.Draw(Camera, opacity);
+                float opacity = ReferenceEquals(layer, SelectedLayer) ? 1f : 0.5f;
+                bool drawCollisionBounds = CurrrentEditorState == EditorState.PropertiesMode;
+                
+                layer.Draw(Camera, opacity, drawCollisionBounds);
             }
             if (SelectedLayer is not null) DrawPreviews();
 

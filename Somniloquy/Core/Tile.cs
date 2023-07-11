@@ -22,7 +22,7 @@ namespace Somniloquy {
             var defaultAnimation = FSprite.AddAnimation("Default");
             defaultAnimation.AddFrame(transparentTexture);
 
-            CollisionVertices = new Point[4] { new Point(0, 0), new Point(8, 0), new Point(8, 8), new Point(0, 8) };
+            CollisionVertices = new Point[4] { new Point(0, 0), new Point(7, 0), new Point(7, 7), new Point(0, 7) };
         }
 
         public Tile(int tileLength = 8) {
@@ -34,7 +34,7 @@ namespace Somniloquy {
             var defaultAnimation = FSprite.AddAnimation("Default");
             defaultAnimation.AddFrame(transparentTexture);
 
-            CollisionVertices = new Point[4] { new Point(0, 0), new Point(8, 0), new Point(8, 8), new Point(0, 8) };
+            CollisionVertices = new Point[4] { new Point(0, 0), new Point(7, 0), new Point(7, 7), new Point(0, 7) };
         }
 
         ~Tile() {
@@ -49,7 +49,7 @@ namespace Somniloquy {
             
         }
 
-        public void Draw(Rectangle destination, float opacity = 1f) {
+        public void Draw(Rectangle destination, float opacity = 1f, bool drawCollisionBounds = false) {
             if (FSprite is null)
                 GameManager.DrawFilledRectangle(destination, Color.DarkGray);
             else {
@@ -59,6 +59,12 @@ namespace Somniloquy {
                     FSprite.GetCurrentAnimation().FrameBoundaries[FSprite.FrameInCurrentAnimation], 
                     Color.White * opacity
                 );
+            }
+
+            if (drawCollisionBounds) {
+                foreach (var vertex in CollisionVertices) {
+                    GameManager.SpriteBatch.DrawPoint(new Vector2(destination.X + vertex.X, destination.Y + vertex.Y), Color.Blue);
+                }
             }
         }
     }

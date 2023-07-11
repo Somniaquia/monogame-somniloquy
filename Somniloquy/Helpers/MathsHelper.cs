@@ -105,5 +105,30 @@ namespace Somniloquy {
 
             return false;
         }
+        
+        /// <summary>
+        /// Checks if an edge starting with V1 and ends at V2 intersects with a circel
+        /// </summary>
+        /// <param name="">The edge to check collisions on</param>
+        /// <param name="">The circle to check collisions on</param>
+        /// <returns></returns>
+        public static bool Intersects((Vector2, Vector2) edge, CircleF circle) {
+            Vector2 closestPointOnEdge = GetClosestPointOnLine((edge.Item1, edge.Item2), circle.Center);
+            float distanceSquared = Vector2.DistanceSquared(closestPointOnEdge, circle.Center);
+            float radiusSquared = circle.Radius * circle.Radius;
+
+            return distanceSquared <= radiusSquared;
+        }
+
+        public static Vector2 GetClosestPointOnLine((Vector2, Vector2) line, Vector2 point) {
+            float lineLengthSquared = (line.Item2 - line.Item1).LengthSquared();
+
+            if (lineLengthSquared == 0f) {
+                return line.Item1;
+            }
+
+            float t = MathHelper.Clamp(Vector2.Dot(point - line.Item1, line.Item2 - line.Item1) / lineLengthSquared, 0f, 1f);
+            return line.Item1 + t * (line.Item2 - line.Item1);
+        }
     }
 }

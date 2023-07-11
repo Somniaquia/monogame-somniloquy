@@ -319,7 +319,7 @@
             // }
         }
 
-        public void Draw(Camera camera, float opacity = 1f) {
+        public void Draw(Camera camera, float opacity = 1f, bool drawCollisionBounds = false) {
             var cameraBounds = camera.GetCameraBounds();
 
             var startChunkPosition = GetChunkPositionOf(GetTilePositionOf(MathsHelper.ToPoint(cameraBounds.Item1)));
@@ -339,7 +339,7 @@
                                 new Rectangle(
                                     (chunkX * ChunkLength + xInChunk) * TileLength,
                                     (chunkY * ChunkLength + yInChunk) * TileLength,
-                                    TileLength, TileLength), opacity);
+                                    TileLength, TileLength), opacity, drawCollisionBounds);
                         }
                     }
                 }
