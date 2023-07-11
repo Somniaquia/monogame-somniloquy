@@ -35,6 +35,8 @@ namespace Somniloquy {
 
         public void Update() {
             foreach (var layer in Layers) {
+
+            
                 layer.Update();
             }
         }

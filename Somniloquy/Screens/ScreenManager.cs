@@ -21,6 +21,7 @@ namespace Somniloquy {
                 Camera = editorScreen.Camera
             };
             gameScreen.LoadedWorlds.Add(editorScreen.LoadedWorld);
+            gameScreen.AddPlayer();
 
             ActiveScreens.Remove(editorScreen);
             ActiveScreens.Add(gameScreen);

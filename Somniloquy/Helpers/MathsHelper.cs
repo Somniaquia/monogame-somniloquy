@@ -4,6 +4,7 @@ namespace Somniloquy {
 
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
+    using MonoGame.Extended;
 
     public static class MathsHelper {
         public static float Lerp(float origin, float target, float lerpModifier) {
@@ -53,15 +54,11 @@ namespace Somniloquy {
 
         public static (Point, Point) ValidizePoints(Point point1, Point point2) {
             if (point1.X > point2.X) {
-                int x = point1.X;
-                point1.X = point2.X;
-                point2.X = x;
+                (point2.X, point1.X) = (point1.X, point2.X);
             }
 
             if (point1.Y > point2.Y) {
-                int y = point1.Y;
-                point1.Y = point2.Y;
-                point2.Y = y;
+                (point2.Y, point1.Y) = (point1.Y, point2.Y);
             }
 
             return (point1, point2);
@@ -80,6 +77,33 @@ namespace Somniloquy {
             }
 
             return new Point(point.X, (int)(anchor.Y + (point.X - anchor.X) * slope));
+        }
+
+        public static Point ToPoint(Point2 point) {
+            return new Point((int)point.X, (int)point.Y);
+        }
+
+        internal static bool IntersectsOrAdjacent(Rectangle rect1, Rectangle rect2) {
+            if (rect1.X < rect2.X + rect2.Width &&
+                rect1.X + rect1.Width > rect2.X &&
+                rect1.Y < rect2.Y + rect2.Height &&
+                rect1.Y + rect1.Height > rect2.Y) {
+                return true;
+            }
+
+            // Check if the rectangles are adjacent horizontally
+            if ((rect1.Right == rect2.Left || rect1.Left == rect2.Right) &&
+                rect1.Top < rect2.Bottom && rect1.Bottom > rect2.Top) {
+                return true;
+            }
+
+            // Check if the rectangles are adjacent vertically
+            if ((rect1.Bottom == rect2.Top || rect1.Top == rect2.Bottom) &&
+                rect1.Left < rect2.Right && rect1.Right > rect2.Left) {
+                return true;
+            }
+
+            return false;
         }
     }
 }

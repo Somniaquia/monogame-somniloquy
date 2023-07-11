@@ -9,7 +9,8 @@ namespace Somniloquy {
 
     public class Tile {
         public FunctionalSprite FSprite { get; set; } = new();
-        public List<Point> CollisionBoundsVertices { get; set; } = new();
+        [JsonIgnore]
+        public Point[] CollisionVertices { get; set; }
 
         // For loading worlds from Ceddi-Edition
         public Tile() {
@@ -20,6 +21,8 @@ namespace Somniloquy {
 
             var defaultAnimation = FSprite.AddAnimation("Default");
             defaultAnimation.AddFrame(transparentTexture);
+
+            CollisionVertices = new Point[4] { new Point(0, 0), new Point(8, 0), new Point(8, 8), new Point(0, 8) };
         }
 
         public Tile(int tileLength = 8) {
@@ -30,6 +33,8 @@ namespace Somniloquy {
 
             var defaultAnimation = FSprite.AddAnimation("Default");
             defaultAnimation.AddFrame(transparentTexture);
+
+            CollisionVertices = new Point[4] { new Point(0, 0), new Point(8, 0), new Point(8, 8), new Point(0, 8) };
         }
 
         ~Tile() {
