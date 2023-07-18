@@ -115,10 +115,13 @@ namespace Somniloquy {
             updatedChart = false;
             if (InputManager.IsKeyDown(Keys.U)) { Hue--; updatedChart = true; }
             if (InputManager.IsKeyDown(Keys.O)) { Hue++; updatedChart = true; }
-            if (InputManager.IsKeyDown(Keys.I)) { PositionOnChart += new Vector2(0, -0.01f); updatedChart = true; }
-            if (InputManager.IsKeyDown(Keys.K)) { PositionOnChart += new Vector2(0, 0.01f); updatedChart = true; }
-            if (InputManager.IsKeyDown(Keys.J)) { PositionOnChart += new Vector2(-0.01f, 0); updatedChart = true; }
-            if (InputManager.IsKeyDown(Keys.L)) { PositionOnChart += new Vector2(0.01f, 0); updatedChart = true; }
+
+            float updateSpeed = InputManager.IsLeftButtonDown() ? 0.001f : 0.01f;
+
+            if (InputManager.IsKeyDown(Keys.I)) { PositionOnChart += new Vector2(0, -updateSpeed); updatedChart = true; }
+            if (InputManager.IsKeyDown(Keys.K)) { PositionOnChart += new Vector2(0, updateSpeed); updatedChart = true; }
+            if (InputManager.IsKeyDown(Keys.J)) { PositionOnChart += new Vector2(-updateSpeed, 0); updatedChart = true; }
+            if (InputManager.IsKeyDown(Keys.L)) { PositionOnChart += new Vector2(updateSpeed, 0); updatedChart = true; }
 
             if (updatedChart) UpdateChart();
         }

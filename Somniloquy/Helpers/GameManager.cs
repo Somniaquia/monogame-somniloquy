@@ -59,14 +59,12 @@ namespace Somniloquy {
 
                 int err2 = 2 * err;
 
-                if (err2 > -dy)
-                {
+                if (err2 > -dy) {
                     err -= dy;
                     position1.X += sx;
                 }
 
-                if (err2 < dx)
-                {
+                if (err2 < dx) {
                     err += dx;
                     position1.Y += sy;
                 }

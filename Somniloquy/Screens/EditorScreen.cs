@@ -2,6 +2,8 @@ namespace Somniloquy {
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
+
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
     using Microsoft.Xna.Framework.Input;
@@ -53,6 +55,7 @@ namespace Somniloquy {
 
         public static EditorState CurrrentEditorState = EditorState.PaintMode;
         public static EditorAction CurrrentEditorAction = EditorAction.PaintIdle;
+        public static bool Sync = false;
 
         public World LoadedWorld { get; set; } = new();
         public Layer SelectedLayer { get; set; } = null;
@@ -132,6 +135,10 @@ namespace Somniloquy {
                 }
             }
 
+            if (InputManager.IsKeyPressed(Keys.Tab)) {
+                Sync = !Sync;
+            }
+
             if (InputManager.IsKeyDown(Keys.LeftControl) && InputManager.IsKeyPressed(Keys.N)) {
                 SelectedLayer = LoadedWorld.NewLayer();
             }
@@ -182,7 +189,7 @@ namespace Somniloquy {
 
                         SelectedLayer.PaintRectangle(
                             MathsHelper.ValidizeRectangle(new Rectangle(firstPositionInWorld.Value, previousWorldPosition - firstPositionInWorld.Value)),
-                            SelectedColor, (PaintCommand)ActiveCommand
+                            SelectedColor, (PaintCommand)ActiveCommand, Sync
                         );
                         firstPositionInWorld = mouseWorldPosition;
                     }
@@ -197,13 +204,13 @@ namespace Somniloquy {
                         if (InputManager.IsKeyDown(Keys.LeftShift)) {
                             SelectedLayer.PaintLine(
                                 firstPositionInWorld.Value, MathsHelper.AnchorPoint(mouseWorldPosition, firstPositionInWorld.Value),
-                                SelectedColor, 1, (PaintCommand)ActiveCommand
+                                SelectedColor, 1, (PaintCommand)ActiveCommand, Sync
                             );
                             firstPositionInWorld = MathsHelper.AnchorPoint(mouseWorldPosition, firstPositionInWorld.Value);
                         } else {
                             SelectedLayer.PaintLine(
                                 firstPositionInWorld.Value, mouseWorldPosition,
-                                SelectedColor, 1, (PaintCommand)ActiveCommand
+                                SelectedColor, 1, (PaintCommand)ActiveCommand, Sync
                             );
                             firstPositionInWorld = mouseWorldPosition;
                         }
@@ -219,7 +226,7 @@ namespace Somniloquy {
                             ActiveCommand = new PaintCommand(SelectedAnimationFrame);
                             CommandManager.Push(ActiveCommand);
 
-                            SelectedLayer.PaintFill(mouseWorldPosition, SelectedColor, (PaintCommand)ActiveCommand);
+                            SelectedLayer.PaintFill(mouseWorldPosition, SelectedColor, (PaintCommand)ActiveCommand, Sync);
                         }
                     } else {
                         if (InputManager.IsLeftButtonDown()) {
@@ -232,14 +239,14 @@ namespace Somniloquy {
                                 SelectedLayer.PaintCircle(
                                     mouseWorldPosition, 
                                     color, Math.Max(1, (int)InputManager.GetPenPressure()), 
-                                    (PaintCommand)ActiveCommand
+                                    (PaintCommand)ActiveCommand, Sync
                                 );
                             } else {
                                 if (ActiveCommand is PaintCommand command) {
                                     SelectedLayer.PaintLine(
                                         previousWorldPosition, mouseWorldPosition, 
                                         color, Math.Max(1, (int)InputManager.GetPenPressure()), 
-                                        command
+                                        command, Sync
                                     );
                                 }
                             }
@@ -349,11 +356,23 @@ namespace Somniloquy {
                     }
                 }
             } else if (CurrrentEditorState == EditorState.PropertiesMode) {
+                var tile = SelectedLayer.GetTile(SelectedLayer.GetTilePositionOf(mouseWorldPosition));
+                if (tile is null) return;
+                
                 if (InputManager.GetNumberKeyPress() is not null) {
                     if (InputManager.IsLeftButtonClicked()) {
-                        var tile = SelectedLayer.GetTile(SelectedLayer.GetTilePositionOf(mouseWorldPosition));
-
+                        if (tile.CollisionVertices.Length < InputManager.GetNumberKeyPress().Value) return;
                         tile.CollisionVertices[InputManager.GetNumberKeyPress().Value - 1] = mousePositionInTile;
+                    }
+                } else {
+                    if (InputManager.IsLeftButtonClicked()) {
+                        if (tile.CollisionVertices.Contains(mousePositionInTile)) return;
+                        tile.CollisionVertices = tile.CollisionVertices.Concat(new[] { mousePositionInTile }).ToArray();
+                    } else if (InputManager.IsRightButtonClicked()) {
+                        if (tile.CollisionVertices.Length == 0) return;
+                        var newArray = new Point[tile.CollisionVertices.Length - 1];
+                        Array.Copy(tile.CollisionVertices, newArray, newArray.Length);
+                        tile.CollisionVertices = newArray;
                     }
                 }
             }

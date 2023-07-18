@@ -40,13 +40,25 @@
         }
 
         #region Paint Methods
+        public void PaintOnTile(Point tilePosition, Color?[,] colors, int animationFrame, PaintCommand command = null, bool sync = false) {
+            if (sync) {
+                var previousTile = GetTile(tilePosition);
+                //SetTile(tilePosition, ParentWorld.NewTile(TileLength), command);
+                SetTile(tilePosition, ParentWorld.NewTile(TileLength));
+                PaintOnTile(GetTile(tilePosition), previousTile.FSprite.GetCurrentAnimation().GetFrameColors(previousTile.FSprite.FrameInCurrentAnimation), animationFrame, command);
+            }
+
+            var tile = GetTile(tilePosition);
+            PaintOnTile(tile, colors, animationFrame, command);
+        }
+
         public void PaintOnTile(Tile tile, Color?[,] colors, int animationFrame, PaintCommand command = null) {
             var oldTexture = tile.FSprite.GetCurrentAnimation().GetFrameColors(animationFrame);
             tile.FSprite.GetCurrentAnimation().PaintOnFrame(colors, animationFrame);
             command?.Append(tile, oldTexture, tile.FSprite.GetCurrentAnimation().GetFrameColors(animationFrame));
         }
 
-        public void PaintLine(Point point1, Point point2, Color color, int width, PaintCommand command = null) {
+        public void PaintLine(Point point1, Point point2, Color color, int width, PaintCommand command = null, bool sync = false) {
             int dx = Math.Abs(point2.X - point1.X);
             int dy = Math.Abs(point2.Y - point1.Y);
             int sx = (point1.X < point2.X) ? 1 : -1;
@@ -54,7 +66,7 @@
             int err = dx - dy;
 
             while (true) {
-                PaintCircle(new Point(point1.X, point1.Y), color, width, command);
+                PaintCircle(new Point(point1.X, point1.Y), color, width, command, sync);
 
                 if (point1.X == point2.X && point1.Y == point2.Y)
                     break;
@@ -73,17 +85,17 @@
             }
         }
 
-        public void PaintCircle(Point point, Color color, int width, PaintCommand command = null) {
+        public void PaintCircle(Point point, Color color, int width, PaintCommand command = null, bool sync = false) {
             // TODO: Add brush shape other than a square
             int left = point.X - (width - 1) / 2;
             int right = point.X + width / 2;
             int top = point.Y - (width - 1) / 2;
             int bottom = point.Y + width / 2;
 
-            PaintRectangle(new Rectangle(left, top, right - left, bottom - top), color, command);
+            PaintRectangle(new Rectangle(left, top, right - left, bottom - top), color, command, sync);
         }
 
-        public void PaintRectangle(Rectangle rectangle, Color color, PaintCommand command) {
+        public void PaintRectangle(Rectangle rectangle, Color color, PaintCommand command, bool sync = false) {
             int startTileX = MathsHelper.FloorDivide(rectangle.X, TileLength);
             int startTileY = MathsHelper.FloorDivide(rectangle.Y, TileLength);
             int endTileX = MathsHelper.FloorDivide(rectangle.Right, TileLength);
@@ -109,21 +121,24 @@
                         SetTile(position, new Tile(TileLength));
                     }
 
-                    PaintOnTile(GetTile(position), colors, EditorScreen.SelectedAnimationFrame, command);
+                    PaintOnTile(position, colors, EditorScreen.SelectedAnimationFrame, command, sync);
                 }
             }
         }
 
-        public void PaintFill(Point positionInWorld, Color color, PaintCommand command = null) {
+        public void PaintFill(Point positionInWorld, Color color, PaintCommand command = null, bool sync = false) {
             var positionStack = new Stack<Point>();
             positionStack.Push(positionInWorld);
 
-            var initialTile = GetTile(GetTilePositionOf(positionInWorld), true);
-            Dictionary<Tile, Color?[,]> tileColors = new() {
-                { initialTile, initialTile.FSprite.GetCurrentAnimation().GetFrameColors(EditorScreen.SelectedAnimationFrame) }
-            };
+            var initialTile = GetTile(GetTilePositionOf(positionInWorld));
+            Dictionary<Tile, Color?[,]> tileColors = new();
+            var targetColor = Color.Transparent;
 
-            var targetColor = GetTile(GetTilePositionOf(positionInWorld)).GetColorAt(GetPositionInTile(positionInWorld));
+            if (initialTile is not null) {
+                tileColors.Add(initialTile, initialTile.FSprite.GetCurrentAnimation().GetFrameColors(EditorScreen.SelectedAnimationFrame));
+                targetColor = GetTile(GetTilePositionOf(positionInWorld)).GetColorAt(GetPositionInTile(positionInWorld));
+            }
+
             if (targetColor == color) return;
 
             while (positionStack.Count != 0) {
@@ -133,14 +148,20 @@
 
                 foreach (var positionOffset in new Point[] { new Point(-1, 0), new Point(1, 0), new Point(0, -1), new Point(0, 1) }) {
                     var checkingPosition = position + positionOffset;
-                    var checkingTile = GetTile(GetTilePositionOf(checkingPosition), true);
+                    var checkingTile = GetTile(GetTilePositionOf(checkingPosition));
                     
-                    if (!tileColors.ContainsKey(checkingTile)) {
-                        tileColors.Add(checkingTile, checkingTile.FSprite.GetCurrentAnimation().GetFrameColors(0));
-                    }
+                    if (checkingTile is null) {
+                        if (targetColor == Color.Transparent) {
+                            positionStack.Push(checkingPosition);
+                        }
+                    } else {
+                        if (!tileColors.ContainsKey(checkingTile)) {
+                            tileColors.Add(checkingTile, checkingTile.FSprite.GetCurrentAnimation().GetFrameColors(0));
+                        }
 
-                    if (tileColors[checkingTile][MathsHelper.Modulo(checkingPosition.X, TileLength), MathsHelper.Modulo(checkingPosition.Y, TileLength)] == targetColor) {
-                        positionStack.Push(checkingPosition);
+                        if (tileColors[checkingTile][MathsHelper.Modulo(checkingPosition.X, TileLength), MathsHelper.Modulo(checkingPosition.Y, TileLength)] == targetColor) {
+                            positionStack.Push(checkingPosition);
+                        }
                     }
                 }
 
@@ -274,17 +295,11 @@
             }
         }
 
-        public Tile GetTile(Point tilePosition, bool createIfNull = false) {
+        public Tile GetTile(Point tilePosition) {
             Point chunkPosition = GetChunkPositionOf(tilePosition);
 
             if (!Chunks.ContainsKey(chunkPosition)) {
-                if (createIfNull) SetTile(tilePosition, ParentWorld.NewTile(TileLength));
-                else return null;
-            }
-
-            if (Chunks[chunkPosition][tilePosition.X - chunkPosition.X * ChunkLength, tilePosition.Y - chunkPosition.Y * ChunkLength] is null) {
-                if (createIfNull) SetTile(tilePosition, ParentWorld.NewTile(TileLength));
-                else return null;
+                return null;
             }
 
             return Chunks[chunkPosition][tilePosition.X - chunkPosition.X * ChunkLength, tilePosition.Y - chunkPosition.Y * ChunkLength];

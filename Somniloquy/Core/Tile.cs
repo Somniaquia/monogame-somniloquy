@@ -4,13 +4,12 @@ namespace Somniloquy {
 
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
+
     using MonoGame.Extended;
-    using Newtonsoft.Json;
 
     public class Tile {
         public FunctionalSprite FSprite { get; set; } = new();
-        [JsonIgnore]
-        public Point[] CollisionVertices { get; set; }
+        public Point[] CollisionVertices { get; set; } = new Point[4] { new Point(0, 0), new Point(7, 0), new Point(7, 7), new Point(0, 7) };
 
         // For loading worlds from Ceddi-Edition
         public Tile() {
@@ -21,8 +20,6 @@ namespace Somniloquy {
 
             var defaultAnimation = FSprite.AddAnimation("Default");
             defaultAnimation.AddFrame(transparentTexture);
-
-            CollisionVertices = new Point[4] { new Point(0, 0), new Point(7, 0), new Point(7, 7), new Point(0, 7) };
         }
 
         public Tile(int tileLength = 8) {
@@ -33,8 +30,6 @@ namespace Somniloquy {
 
             var defaultAnimation = FSprite.AddAnimation("Default");
             defaultAnimation.AddFrame(transparentTexture);
-
-            CollisionVertices = new Point[4] { new Point(0, 0), new Point(7, 0), new Point(7, 7), new Point(0, 7) };
         }
 
         ~Tile() {
@@ -64,6 +59,16 @@ namespace Somniloquy {
             if (drawCollisionBounds) {
                 foreach (var vertex in CollisionVertices) {
                     GameManager.SpriteBatch.DrawPoint(new Vector2(destination.X + vertex.X, destination.Y + vertex.Y), Color.Blue);
+                }
+
+                for (int i = 0; i < CollisionVertices.Length; i++) {
+                    var vertex1 = CollisionVertices[i];
+                    var vertex2 = CollisionVertices[(i + 1) % CollisionVertices.Length];
+                    GameManager.SpriteBatch.DrawLine(
+                        new Vector2(destination.X + vertex1.X, destination.Y + vertex1.Y),
+                        new Vector2(destination.X + vertex2.X, destination.Y + vertex2.Y),
+                        Color.Blue * 0.5f
+                    );
                 }
             }
         }

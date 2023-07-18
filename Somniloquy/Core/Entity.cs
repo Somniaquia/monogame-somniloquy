@@ -111,7 +111,7 @@ namespace Somniloquy
 
         public override void Update() {
             Velocity = Vector2.Zero;
-            float speed = 0.7f;
+            float speed = 1f;
 
             if (Controllability >= 0.5f) {
                 if (InputManager.IsKeyDown(Keys.W)) {

@@ -130,5 +130,43 @@ namespace Somniloquy {
             float t = MathHelper.Clamp(Vector2.Dot(point - line.Item1, line.Item2 - line.Item1) / lineLengthSquared, 0f, 1f);
             return line.Item1 + t * (line.Item2 - line.Item1);
         }
+
+        public static float CalculateGaussian(float x, float sigma) {
+            const float pi = 3.14159265358979323846f;
+            return (float)(1.0 / Math.Sqrt(2 * pi * sigma * sigma) * Math.Exp(-(x * x) / (2 * sigma * sigma)));
+        }
+
+        public static float[] GetSampleWeights(int sampleCount = 11) {
+            float[] sampleWeights = new float[sampleCount];
+
+            float totalWeights = 0.0f;
+            float sigma = sampleCount / 2.0f; // You might want to adjust this value
+
+            for (int i = 0; i < sampleCount; i++) {
+                float x = i - sampleCount / 2;
+                sampleWeights[i] = CalculateGaussian(x, sigma);
+                totalWeights += sampleWeights[i];
+            }
+
+            // Normalize the weights
+            for (int i = 0; i < sampleCount; i++) {
+                sampleWeights[i] /= totalWeights;
+            }
+
+            return sampleWeights;
+        }
+
+        public static float[] GetSampleOffsets(int direction = 0, int sampleCount = 11) {
+            float[] sampleOffsets = new float[sampleCount];
+
+            var length = direction == 0 ? GameManager.WindowSize.X : GameManager.WindowSize.Y;
+            float delta = 1.0f / (float)length; // Assuming you're applying the blur horizontally first
+
+            for (int i = 0; i < sampleCount; i++) {
+                sampleOffsets[i] = (i - sampleCount / 2) * delta;
+            }
+
+            return sampleOffsets;
+        }
     }
 }
