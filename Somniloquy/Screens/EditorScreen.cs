@@ -102,7 +102,7 @@ namespace Somniloquy {
             }
 
             previousWorldPosition = mouseWorldPosition;
-            mouseWorldPosition = MathsHelper.ToPoint(Camera.ApplyInvertTransform(InputManager.GetMousePosition()));
+            mouseWorldPosition = Utils.ToPoint(Camera.ApplyInvertTransform(InputManager.GetMousePosition()));
 
             previousTilePosition = SelectedLayer.GetTilePositionOf(previousWorldPosition);
             mouseTilePosition = SelectedLayer.GetTilePositionOf(mouseWorldPosition);
@@ -122,7 +122,6 @@ namespace Somniloquy {
                     if (File.Exists($"Worlds/world{InputManager.GetNumberKeyPress()}.txt")) {
                         CommandManager.Clear();
                         LoadedWorld.Layers.Clear();
-                        LoadedWorld.DisposeTiles();
                         LoadedWorld = SerializationManager.Deserialize<World>($"world{InputManager.GetNumberKeyPress()}.txt");
                         SelectedLayer = LoadedWorld.Layers[0];
                     }
@@ -151,7 +150,6 @@ namespace Somniloquy {
                 // TODO: This is not a proper implementation - work multi-layer support!!
                 CommandManager.Clear();
                 LoadedWorld.Layers.Clear();
-                LoadedWorld.DisposeTiles();
                 TilePattern = new Tile[1, 1] { { null } };
             }
 
@@ -188,7 +186,7 @@ namespace Somniloquy {
                         CommandManager.Push(ActiveCommand);
 
                         SelectedLayer.PaintRectangle(
-                            MathsHelper.ValidizeRectangle(new Rectangle(firstPositionInWorld.Value, previousWorldPosition - firstPositionInWorld.Value)),
+                            Utils.ValidizeRectangle(new Rectangle(firstPositionInWorld.Value, previousWorldPosition - firstPositionInWorld.Value)),
                             SelectedColor, (PaintCommand)ActiveCommand, Sync
                         );
                         firstPositionInWorld = mouseWorldPosition;
@@ -203,10 +201,10 @@ namespace Somniloquy {
                         CommandManager.Push(ActiveCommand);
                         if (InputManager.IsKeyDown(Keys.LeftShift)) {
                             SelectedLayer.PaintLine(
-                                firstPositionInWorld.Value, MathsHelper.AnchorPoint(mouseWorldPosition, firstPositionInWorld.Value),
+                                firstPositionInWorld.Value, Utils.AnchorPoint(mouseWorldPosition, firstPositionInWorld.Value),
                                 SelectedColor, 1, (PaintCommand)ActiveCommand, Sync
                             );
-                            firstPositionInWorld = MathsHelper.AnchorPoint(mouseWorldPosition, firstPositionInWorld.Value);
+                            firstPositionInWorld = Utils.AnchorPoint(mouseWorldPosition, firstPositionInWorld.Value);
                         } else {
                             SelectedLayer.PaintLine(
                                 firstPositionInWorld.Value, mouseWorldPosition,
@@ -300,11 +298,11 @@ namespace Somniloquy {
                         CommandManager.Push(ActiveCommand);
                         if (InputManager.IsKeyDown(Keys.LeftShift)) {
                             SelectedLayer.SetLine(
-                                firstPositionInWorld.Value, MathsHelper.AnchorPoint(mouseTilePosition, firstPositionInWorld.Value),
+                                firstPositionInWorld.Value, Utils.AnchorPoint(mouseTilePosition, firstPositionInWorld.Value),
                                 TilePattern, Point.Zero, 1, (SetCommand)ActiveCommand
                             );
-                            tilePatternOrigin = MathsHelper.AnchorPoint(mouseTilePosition, firstPositionInWorld.Value) - firstPositionInWorld.Value;
-                            firstPositionInWorld = MathsHelper.AnchorPoint(mouseWorldPosition, firstPositionInWorld.Value);
+                            tilePatternOrigin = Utils.AnchorPoint(mouseTilePosition, firstPositionInWorld.Value) - firstPositionInWorld.Value;
+                            firstPositionInWorld = Utils.AnchorPoint(mouseWorldPosition, firstPositionInWorld.Value);
                         } else {
                             SelectedLayer.SetLine(
                                 firstPositionInWorld.Value, mouseTilePosition,
@@ -402,11 +400,11 @@ namespace Somniloquy {
                     GameManager.SpriteBatch.DrawPoint(mouseWorldPosition.ToVector2(), SelectedColor * 0.5f);
                     break;
                 case EditorAction.PaintRectangle:
-                    GameManager.DrawFilledRectangle(MathsHelper.ValidizeRectangle(new Rectangle(firstPositionInWorld.Value, mouseWorldPosition - firstPositionInWorld.Value + new Point(1, 1))), SelectedColor * 0.5f);
+                    GameManager.DrawFilledRectangle(Utils.ValidizeRectangle(new Rectangle(firstPositionInWorld.Value, mouseWorldPosition - firstPositionInWorld.Value + new Point(1, 1))), SelectedColor * 0.5f);
                     break;
                 case EditorAction.PaintLine:
                     if (InputManager.IsKeyDown(Keys.LeftShift)) {
-                        GameManager.DrawPixelizedLine(firstPositionInWorld.Value, MathsHelper.AnchorPoint(mouseWorldPosition, firstPositionInWorld.Value), SelectedColor * 0.5f);
+                        GameManager.DrawPixelizedLine(firstPositionInWorld.Value, Utils.AnchorPoint(mouseWorldPosition, firstPositionInWorld.Value), SelectedColor * 0.5f);
                     } else {
                         GameManager.DrawPixelizedLine(firstPositionInWorld.Value, mouseWorldPosition, SelectedColor * 0.5f);
                     }
@@ -441,7 +439,7 @@ namespace Somniloquy {
             );
             
             if (CurrrentEditorAction == EditorAction.TileSelection) {
-                var rectangle = MathsHelper.ValidizeRectangle(new Rectangle(
+                var rectangle = Utils.ValidizeRectangle(new Rectangle(
                     tilePosition.X * SelectedLayer.TileLength,
                     tilePosition.Y * SelectedLayer.TileLength,
                     (firstPositionInWorld.Value.X - tilePosition.X) * SelectedLayer.TileLength,

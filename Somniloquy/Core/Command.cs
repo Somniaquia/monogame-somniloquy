@@ -52,7 +52,7 @@ namespace Somniloquy {
     public class PaintCommand : ICommand {
         private int animationFrame;
         private List<(Tile, Color?[,], Color?[,])> affectedTiles = new();
-
+        // TODO: Add Undo/Redo for animations
         public PaintCommand(int animationFrame) {
             this.animationFrame = animationFrame;
         }
@@ -70,13 +70,13 @@ namespace Somniloquy {
 
         public void Redo() {
             foreach (var pair in affectedTiles) {
-                pair.Item1.FSprite.GetCurrentAnimation().PaintOnFrame(pair.Item3, animationFrame);
+                pair.Item1.Sprite.PaintOnFrame(pair.Item3);
             }
         }
 
         public void Undo() {
             for (int i = affectedTiles.Count - 1; i >= 0; i--) {
-                affectedTiles[i].Item1.FSprite.GetCurrentAnimation().PaintOnFrame(affectedTiles[i].Item2, animationFrame);
+                affectedTiles[i].Item1.Sprite.PaintOnFrame(affectedTiles[i].Item2);
             }
         }
 

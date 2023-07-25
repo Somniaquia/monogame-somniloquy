@@ -18,8 +18,9 @@ namespace Somniloquy {
     /// </summary>
     public class World {
         public string Name { get; set; }
-        public List<Layer> Layers { get; set; } = new();
+        public SpriteSheet SpriteSheet { get; set; }
         public List<Tile> Tiles { get; set; } = new();
+        public List<Layer> Layers { get; set; } = new();
 
         public Layer NewLayer() {
             var layer = new Layer(this);
@@ -43,14 +44,6 @@ namespace Somniloquy {
 
         public void RemoveUnnecessaryTiles() {
             Tiles = Tiles.Distinct().ToList();
-        }
-
-        public void DisposeTiles() {
-            foreach (var tile in Tiles) {
-                tile?.FSprite.Dispose();
-            }
-
-            Tiles.Clear();
         }
     }
 }

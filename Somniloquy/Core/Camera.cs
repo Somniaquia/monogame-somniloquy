@@ -31,16 +31,16 @@ namespace Somniloquy {
         }
 
         public void UpdateTransformation() {
-            visiblePosition.X = MathsHelper.Lerp(visiblePosition.X, Position.X, LerpModifier);
-            visiblePosition.Y = MathsHelper.Lerp(visiblePosition.Y, Position.Y, LerpModifier);
+            visiblePosition.X = Utils.Lerp(visiblePosition.X, Position.X, LerpModifier);
+            visiblePosition.Y = Utils.Lerp(visiblePosition.Y, Position.Y, LerpModifier);
 
             zoom = zoom < 0.1f ? 0.1f : zoom;
-            visibleZoom = MathsHelper.Lerp(visibleZoom, zoom, LerpModifier);
+            visibleZoom = Utils.Lerp(visibleZoom, zoom, LerpModifier);
 
-            Rotation = MathsHelper.ModuloF(Rotation, 2 * 3.141592653589793f);
-            visibleRotation = MathsHelper.Lerp(visibleRotation, Rotation, LerpModifier);
+            Rotation = Utils.ModuloF(Rotation, 2 * 3.141592653589793f);
+            visibleRotation = Utils.Lerp(visibleRotation, Rotation, LerpModifier);
 
-            Viewport viewport = GameManager.GraphicsDeviceManager.GraphicsDevice.Viewport;
+            Viewport viewport = GameManager.GraphicsDevice.Viewport;
 
             Transform =
                 Matrix.CreateTranslation(new Vector3(-visiblePosition.X, -visiblePosition.Y, 0)) *
@@ -66,7 +66,7 @@ namespace Somniloquy {
         }
 
         public (Vector2, Vector2) GetCameraBounds() {
-            Viewport viewport = GameManager.GraphicsDeviceManager.GraphicsDevice.Viewport;
+            Viewport viewport = GameManager.GraphicsDevice.Viewport;
             Vector2 upperLeft = ApplyInvertTransform(Vector2.Zero);
             //upperLeft.X += viewport.Width * 0.5f;
             //upperLeft.Y += viewport.Height * 0.5f;

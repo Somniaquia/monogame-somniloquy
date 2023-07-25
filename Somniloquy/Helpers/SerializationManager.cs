@@ -161,7 +161,7 @@ namespace Somniloquy {
             // for (int i = 0; i < data.Length; i++) {
             //     Console.Write($" {data[i]}");
             // }
-            var texture2D = new Texture2D(GameManager.GraphicsDeviceManager.GraphicsDevice, width, height);
+            var texture2D = new Texture2D(GameManager.GraphicsDevice, width, height);
             texture2D.SetData(data);
 
             return texture2D;

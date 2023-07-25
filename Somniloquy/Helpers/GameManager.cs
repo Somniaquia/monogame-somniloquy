@@ -12,6 +12,7 @@ namespace Somniloquy {
 
     public static class GameManager {
         public static GraphicsDeviceManager GraphicsDeviceManager { get; set; }
+        public static GraphicsDevice GraphicsDevice { get; set; }
         public static ContentManager ContentManager { get; set; }
         public static SpriteBatch SpriteBatch { get; set; }
         public static GameTime GameTime { get; set; }
@@ -19,7 +20,6 @@ namespace Somniloquy {
         public static Rectangle WindowSize { get; set; }
         public static Dictionary<string, Texture2D> SpriteSheets { get; set; }
         public static Texture2D Pixel { get; set; }
-        public static FunctionalSprite MonotextureSprite { get; set; }
         public static BitmapFont Misaki { get; set; }
 
         public static void SaveImage(Texture2D texture, string filePath) {
@@ -31,15 +31,6 @@ namespace Somniloquy {
             using FileStream fileStream = new(filePath, FileMode.Open);
             return Texture2D.FromStream(GraphicsDeviceManager.GraphicsDevice, fileStream);
         }
-
-        public static void DrawFunctionalSprite(FunctionalSprite fSprite, Rectangle destination, Effect spriteEffect) {
-            SpriteBatch.Draw(
-                fSprite.GetCurrentAnimation().SpriteSheet,
-                destination,
-                fSprite.GetCurrentAnimation().FrameBoundaries[fSprite.FrameInCurrentAnimation],
-                Color.White);
-        }
-
         public static void DrawFilledRectangle(Rectangle destination, Color color) {
             SpriteBatch.Draw(Pixel, destination, null, color, 0f, Vector2.Zero, SpriteEffects.None, layerDepth:0);
         }

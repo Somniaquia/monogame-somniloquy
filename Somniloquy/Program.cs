@@ -1,2 +1,2 @@
-﻿using var game = new Somniloquy.Somniloquy();
-game.Run();
+﻿using var somniloquy = new Somniloquy.Somniloquy();
+somniloquy.Run();

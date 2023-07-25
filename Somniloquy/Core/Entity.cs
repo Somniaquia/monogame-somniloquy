@@ -10,21 +10,19 @@ namespace Somniloquy
     using Newtonsoft.Json.Serialization;
 
     public class Entity {
-        public FunctionalSprite FSprite { get; set; }
         public CircleF CollisionBounds { get; set; }
         public Vector2 Velocity { get; set; }
         public Layer CurrentLayer { get; set; }
 
         public virtual void Update() {
-            // Resolve Collisions
-            FSprite?.AdvanceFrames();
+            
         }
 
         public Vector2 ResolveCollisions(Vector2 potentialPosition) {
-            Point startTilePosition = CurrentLayer.GetTilePositionOf(MathsHelper.ToPoint(CollisionBounds.Center));
+            Point startTilePosition = CurrentLayer.GetTilePositionOf(Utils.ToPoint(CollisionBounds.Center));
             Point endTilePosition = CurrentLayer.GetTilePositionOf(potentialPosition.ToPoint());
 
-            var pair = MathsHelper.ValidizePoints(startTilePosition, endTilePosition);
+            var pair = Utils.ValidizePoints(startTilePosition, endTilePosition);
             startTilePosition = pair.Item1 - new Point(1, 1);
             endTilePosition = pair.Item2 + new Point(1, 1);
 
@@ -56,9 +54,9 @@ namespace Somniloquy
                     for (var i = 0; i < vertices.Length; i++) {
                         var v1 = vertices[i].ToVector2() + new Vector2(x, y) * CurrentLayer.TileLength;
                         var v2 = vertices[(i + 1) % vertices.Length].ToVector2() + new Vector2(x, y) * CurrentLayer.TileLength;
-                        if (!MathsHelper.Intersects((v1, v2), CollisionBounds)) continue;
+                        if (!Utils.Intersects((v1, v2), CollisionBounds)) continue;
 
-                        Vector2 closestPointOnEdge = MathsHelper.GetClosestPointOnLine((v1, v2), potentialPosition);
+                        Vector2 closestPointOnEdge = Utils.GetClosestPointOnLine((v1, v2), potentialPosition);
                         float distanceToEdge = (closestPointOnEdge - potentialPosition).Length();
 
                         if (distanceToEdge < CollisionBounds.Radius && distanceToEdge > 0) {
@@ -76,11 +74,11 @@ namespace Somniloquy
         }
 
         public virtual void Draw() {
-            if (FSprite is not null) {
-                GameManager.DrawFunctionalSprite(FSprite, FSprite.GetDestinationRectangle(MathsHelper.ToPoint(CollisionBounds.Center)), null);
-            } else {
+            //if (FSprite is not null) {
+            //    GameManager.DrawFunctionalSprite(FSprite, FSprite.GetDestinationRectangle(MathsHelper.ToPoint(CollisionBounds.Center)), null);
+            //} else {
                 GameManager.SpriteBatch.DrawCircle(CollisionBounds, 32, Color.White);
-            }
+            //}
         }
     }
     

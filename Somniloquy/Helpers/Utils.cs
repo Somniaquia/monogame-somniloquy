@@ -6,7 +6,7 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework.Graphics;
     using MonoGame.Extended;
 
-    public static class MathsHelper {
+    public static class Utils {
         public static float Lerp(float origin, float target, float lerpModifier) {
             return origin * (1 - lerpModifier) + target * lerpModifier;
         }
@@ -167,6 +167,58 @@ namespace Somniloquy {
             }
 
             return sampleOffsets;
+        }
+
+        public static T[,] ConvertTo2D<T>(T[] oneDimensionalArray, int newWidth) {
+            int length = oneDimensionalArray.Length;
+            int newHeight = (length + newWidth - 1) / newWidth;
+
+            T[,] result = new T[newWidth, newHeight];
+
+            for (int i = 0; i < length; i++) {
+                int x = i % newWidth;
+                int y = i / newWidth;
+
+                result[x, y] = oneDimensionalArray[i];
+            }
+
+            return result;
+        }
+
+
+        public static Color?[,] ToNullableColors(Color[,] colors) {
+            int width = colors.GetLength(0);
+            int height = colors.GetLength(1);
+
+            Color?[,] result = new Color?[width, height];
+
+            for (int i = 0; i < width; i++) {
+                for (int j = 0; j < height; j++) {
+                    result[i, j] = colors[i, j];
+                }
+            }
+
+            return result;
+        }
+
+        public static Color[,] FromNullableColors(Color?[,] nullableColors) {
+            int width = nullableColors.GetLength(0);
+            int height = nullableColors.GetLength(1);
+
+            Color[,] result = new Color[width, height];
+
+            for (int i = 0; i < width; i++) {
+                for (int j = 0; j < height; j++) {
+                    if (nullableColors[i, j].HasValue) {
+                        result[i, j] = nullableColors[i, j].Value;
+                    }
+                    else {
+                        result[i, j] = Color.Transparent;
+                    }
+                }
+            }
+
+            return result;
         }
     }
 }

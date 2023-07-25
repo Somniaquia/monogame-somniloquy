@@ -30,6 +30,7 @@
             Window.Position = new Point(0, 0);
 
             GameManager.GraphicsDeviceManager = graphicsDeviceManager;
+            GameManager.GraphicsDevice = graphicsDeviceManager.GraphicsDevice;
             GameManager.ContentManager = Content;
             GameManager.WindowSize = new Rectangle(0, 0, graphicsDeviceManager.PreferredBackBufferWidth, graphicsDeviceManager.PreferredBackBufferHeight);
         }

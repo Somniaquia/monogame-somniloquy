@@ -73,10 +73,10 @@ namespace Somniloquy {
 
         public void UpdateChart() {
             PositionOnChart = new Vector2((MathF.Max(MathF.Min(1, PositionOnChart.X), 0)), MathF.Max(MathF.Min(1, PositionOnChart.Y), 0));
-            Hue = MathsHelper.Modulo(Hue, 360);
+            Hue = Utils.Modulo(Hue, 360);
 
             if (Chart == null)
-                Chart = new Texture2D(GameManager.GraphicsDeviceManager.GraphicsDevice, Boundaries.Width, Boundaries.Height);
+                Chart = new Texture2D(GameManager.GraphicsDevice, Boundaries.Width, Boundaries.Height);
 
             Color[] chartData = new Color[Boundaries.Width * Boundaries.Height];
 
@@ -130,7 +130,7 @@ namespace Somniloquy {
             if (EditorScreen.CurrrentEditorState == EditorScreen.EditorState.PaintMode) {
                 GameManager.DrawFilledRectangle(new Rectangle(Boundaries.X - 8, Boundaries.Y - 8, Boundaries.Width + 16, Boundaries.Height + 16), EditorScreen.SelectedColor);
                 GameManager.SpriteBatch.Draw(Chart, Boundaries, Color.White);
-                GameManager.SpriteBatch.DrawPoint(new Vector2(Boundaries.X, Boundaries.Y) + PositionOnChart * Boundaries.Width, MathsHelper.InvertColor(EditorScreen.SelectedColor), 8);
+                GameManager.SpriteBatch.DrawPoint(new Vector2(Boundaries.X, Boundaries.Y) + PositionOnChart * Boundaries.Width, Utils.InvertColor(EditorScreen.SelectedColor), 8);
             }
             base.Draw();
         }
