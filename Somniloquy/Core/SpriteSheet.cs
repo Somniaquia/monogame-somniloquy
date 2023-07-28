@@ -18,13 +18,21 @@ namespace Somniloquy {
         public SpriteSheet(Point frameSize, int sheetWidth = 16) {
             FrameSize = frameSize;
             SheetWidth = sheetWidth;
-            Texture = new Texture2D(GameManager.GraphicsDevice, sheetWidth, 1);
+            
+            Texture = new Texture2D(GameManager.GraphicsDevice, frameSize.X * sheetWidth, frameSize.Y);
+            Color[] transparent = new Color[frameSize.X * sheetWidth * frameSize.Y];
+            Array.Fill(transparent, Color.Transparent);
+            Texture.SetData(transparent);
+
+            PointerPosition = new Point(1, 0);
         }
 
-        public Point AddFrame() {
-            if (PointerPosition.X == SheetWidth) {
+        public Point AdvancePointerPosition() {
+            if (PointerPosition.X == SheetWidth - 1) {
                 ExpandTexture(FrameSize.Y);
                 PointerPosition = new Point(0, PointerPosition.Y + 1);
+            } else {
+                PointerPosition += new Point(1, 0);
             }
 
             return PointerPosition;
@@ -38,16 +46,14 @@ namespace Somniloquy {
             expandedTexture.SetData(0, new Rectangle(0, 0, Texture.Width, Texture.Height), originalColors, 0, originalColors.Length);
 
             Color[] newColors = new Color[Texture.Width * additionalHeight];
-            for (int i = 0; i < newColors.Length; i++) {
-                newColors[i] = Color.Transparent;
-            }
+            Array.Fill(newColors, Color.Transparent);
             expandedTexture.SetData(0, new Rectangle(0, Texture.Height, Texture.Width, additionalHeight), newColors, 0, newColors.Length);
 
             Texture.Dispose();
             Texture = expandedTexture;
         }
 
-        public void ModifyTexture(Color?[,] colors, Rectangle destination) {
+        private void ModifyTexture(Color?[,] colors, Rectangle destination) {
             Color[] colorsWithinMargin = new Color[destination.Width * destination.Height];
             Texture.GetData(0, destination, colorsWithinMargin, 0, colorsWithinMargin.Length);
 

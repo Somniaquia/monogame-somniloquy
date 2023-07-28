@@ -22,6 +22,10 @@ namespace Somniloquy {
         public List<Tile> Tiles { get; set; } = new();
         public List<Layer> Layers { get; set; } = new();
 
+        public World() {
+            SpriteSheet = new(new Point(8, 8));
+        }
+
         public Layer NewLayer() {
             var layer = new Layer(this);
             Layers.Add(layer);
@@ -29,15 +33,13 @@ namespace Somniloquy {
         }
 
         public Tile NewTile(int tileLength) {
-            var tile = new Tile(tileLength);
+            var tile = new Tile(SpriteSheet, tileLength);
             Tiles.Add(tile);
             return tile;
         }
 
         public void Update() {
             foreach (var layer in Layers) {
-
-            
                 layer.Update();
             }
         }

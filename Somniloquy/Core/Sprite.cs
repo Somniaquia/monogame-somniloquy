@@ -21,13 +21,18 @@ namespace Somniloquy {
         public Animation CurrentAnimation;
         public int CurrentAnimationFrame;
 
+        public Sprite(SpriteSheet spriteSheet) {
+            SpriteSheet = spriteSheet;
+        }
+
         public void AddAnimation(string name) {
             var animation = new Animation();
             Animations.Add(name, animation);
+            CurrentAnimation = animation;
         }
 
         public void AddFrame(string animationName, Point framePosition, Point frameOffset) {
-            Animations[animationName].FramePositions.Add(framePosition);
+            Animations[animationName].FramePositions.Add(SpriteSheet.AdvancePointerPosition());
             Animations[animationName].FrameOffsets.Add(frameOffset);
         }
 
@@ -40,7 +45,7 @@ namespace Somniloquy {
         }
 
         public void Draw(Rectangle destination, float opacity = 1f) {
-            GameManager.SpriteBatch.Draw(SpriteSheet.Texture, destination, new Rectangle(CurrentAnimation.FramePositions[CurrentAnimationFrame], SpriteSheet.FrameSize), Color.White * opacity);
+            GameManager.SpriteBatch.Draw(SpriteSheet.Texture, destination, new Rectangle(CurrentAnimation.FramePositions[CurrentAnimationFrame] * SpriteSheet.FrameSize, SpriteSheet.FrameSize), Color.White * opacity);
         }
     }
 }

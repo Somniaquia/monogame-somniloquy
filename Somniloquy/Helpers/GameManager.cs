@@ -18,7 +18,7 @@ namespace Somniloquy {
         public static GameTime GameTime { get; set; }
 
         public static Rectangle WindowSize { get; set; }
-        public static Dictionary<string, Texture2D> SpriteSheets { get; set; }
+        public static Dictionary<string, Texture2D> Textures { get; set; }
         public static Texture2D Pixel { get; set; }
         public static BitmapFont Misaki { get; set; }
 

@@ -8,10 +8,12 @@ namespace Somniloquy {
     using MonoGame.Extended;
 
     public class Tile {
-        public Sprite Sprite { get; set; } = new();
+        public Sprite Sprite { get; set; }
         public Point[] CollisionVertices { get; set; } = new Point[4] { new Point(0, 0), new Point(7, 0), new Point(7, 7), new Point(0, 7) };
 
-        public Tile(int tileLength = 8) {
+        public Tile(SpriteSheet spriteSheet, int tileLength = 8) {
+            Sprite = new(spriteSheet);
+            
             Sprite.AddAnimation("Default");
             Sprite.AddFrame("Default", Point.Zero, Point.Zero);
         }

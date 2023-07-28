@@ -117,8 +117,9 @@
                     }
 
                     Point position = new(tileX, tileY);
+                    var tile = GetTile(position);
                     if (GetTile(position) is null) {
-                        SetTile(position, new Tile(TileLength));
+                        SetTile(position, ParentWorld.NewTile(8));
                     }
 
                     PaintOnTile(position, colors, command, sync);

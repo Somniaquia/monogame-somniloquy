@@ -20,8 +20,8 @@
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
 
-            graphicsDeviceManager.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
-            graphicsDeviceManager.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
+            graphicsDeviceManager.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width/2;
+            graphicsDeviceManager.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height/2;
             graphicsDeviceManager.HardwareModeSwitch = false;
             graphicsDeviceManager.IsFullScreen = false;
             graphicsDeviceManager.ApplyChanges();
