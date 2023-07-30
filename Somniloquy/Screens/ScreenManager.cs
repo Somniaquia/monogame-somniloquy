@@ -18,19 +18,17 @@ namespace Somniloquy {
 
         public static void ToGameScreen(EditorScreen editorScreen) {
             GameScreen gameScreen = new(GameManager.WindowSize) {
-                Camera = editorScreen.Camera
+                WorldScreen = editorScreen.WorldScreen
             };
-            gameScreen.LoadedWorlds.Add(editorScreen.LoadedWorld);
             gameScreen.AddPlayer();
 
             ActiveScreens.Remove(editorScreen);
             ActiveScreens.Add(gameScreen);
         }
 
-        public static void ToEditorScreen(GameScreen gameScreen) {
+        public static void ToEditorScreen(GameScreen gameScreen) {            
             EditorScreen editorScreen = new(GameManager.WindowSize) {
-                Camera = gameScreen.Camera,
-                LoadedWorld = gameScreen.LoadedWorlds[0]
+                WorldScreen = gameScreen.WorldScreen
             };
 
             ActiveScreens.Remove(gameScreen);

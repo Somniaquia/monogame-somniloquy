@@ -15,7 +15,7 @@ namespace Somniloquy {
             Sprite = new(spriteSheet);
             
             Sprite.AddAnimation("Default");
-            Sprite.AddFrame("Default", Point.Zero, Point.Zero);
+            Sprite.AddFrame("Default", Sprite.SpriteSheet.AssignPointerPosition(), Point.Zero);
         }
 
         public Color GetColorAt(Point positionInTile) {

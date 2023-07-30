@@ -8,17 +8,22 @@ namespace Somniloquy {
     using MonoGame.Extended;
 
     public class ColorChart : Screen {
-        public ColorChart(Rectangle boundaries) : base(boundaries) { }
+        public EditorScreen EditorScreen { get; set; }
+        
         public Texture2D Chart { get; set; }
         public int Hue { get; set; } = 0;
         public Vector2 PositionOnChart { get; set; } = Vector2.Zero;
         private bool updatedChart = false;
 
+        public ColorChart(Rectangle boundaries, EditorScreen editorScreen) : base(boundaries) {
+            EditorScreen = editorScreen;
+        }
+
         public static Color ColorFromHSV(float hue, float saturation, float value) {
             int hi = Convert.ToInt32(Math.Floor(hue / 60)) % 6;
             hue = hue / 60 - (float)Math.Floor(hue / 60);
 
-            value = value * 255;
+            value *= 255;
             int v = Convert.ToInt32(value);
             int p = Convert.ToInt32(value * (1 - saturation));
             int q = Convert.ToInt32(value * (1 - hue * saturation));
@@ -72,11 +77,10 @@ namespace Somniloquy {
         }
 
         public void UpdateChart() {
-            PositionOnChart = new Vector2((MathF.Max(MathF.Min(1, PositionOnChart.X), 0)), MathF.Max(MathF.Min(1, PositionOnChart.Y), 0));
+            PositionOnChart = new Vector2(MathF.Max(MathF.Min(1, PositionOnChart.X), 0), MathF.Max(MathF.Min(1, PositionOnChart.Y), 0));
             Hue = Utils.Modulo(Hue, 360);
 
-            if (Chart == null)
-                Chart = new Texture2D(GameManager.GraphicsDevice, Boundaries.Width, Boundaries.Height);
+            Chart ??= new Texture2D(GameManager.GraphicsDevice, Boundaries.Width, Boundaries.Height);
 
             Color[] chartData = new Color[Boundaries.Width * Boundaries.Height];
 
@@ -103,9 +107,9 @@ namespace Somniloquy {
         }
 
         public void FetchPositionAndHueFromColor(Color desiredColor) {
-            var hsvPair = HSVFromColor(desiredColor);
-            PositionOnChart = new Vector2(hsvPair.saturation, 1 - hsvPair.value);
-            Hue = (int) hsvPair.hue;
+            var (hue, saturation, value) = HSVFromColor(desiredColor);
+            PositionOnChart = new Vector2(saturation, 1 - value);
+            Hue = (int) hue;
             UpdateChart();
         }
 
@@ -127,12 +131,14 @@ namespace Somniloquy {
         }
 
         public override void Draw() {
-            if (EditorScreen.CurrrentEditorState == EditorScreen.EditorState.PaintMode) {
+            GameManager.SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp);
+            if (EditorScreen.CurrentEditorState == EditorState.PaintMode) {
                 GameManager.DrawFilledRectangle(new Rectangle(Boundaries.X - 8, Boundaries.Y - 8, Boundaries.Width + 16, Boundaries.Height + 16), EditorScreen.SelectedColor);
                 GameManager.SpriteBatch.Draw(Chart, Boundaries, Color.White);
-                GameManager.SpriteBatch.DrawPoint(new Vector2(Boundaries.X, Boundaries.Y) + PositionOnChart * Boundaries.Width, Utils.InvertColor(EditorScreen.SelectedColor), 8);
+                GameManager.SpriteBatch.DrawPoint(new Vector2(Boundaries.X, Boundaries.Y) + new Vector2(PositionOnChart.X * Boundaries.Width, PositionOnChart.Y * Boundaries.Height), Utils.InvertColor(EditorScreen.SelectedColor), 8);
             }
             base.Draw();
+            GameManager.SpriteBatch.End();
         }
     }
 }

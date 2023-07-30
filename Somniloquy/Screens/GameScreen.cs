@@ -10,6 +10,8 @@ namespace Somniloquy {
     using MonoGame.Extended.BitmapFonts;
 
     public class GameScreen : Screen {
+        public WorldScreen WorldScreen { get; set; }
+
         public List<World> LoadedWorlds { get; set; } = new();
         public List<Entity> Entities { get; set; } = new();
         public Camera Camera { get; set; } = new Camera(8.0f);

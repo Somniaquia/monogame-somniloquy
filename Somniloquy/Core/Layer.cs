@@ -190,7 +190,7 @@
                 Point chunkPosition = GetChunkPositionOf(position);
 
                 if (!Chunks.ContainsKey(chunkPosition)) {
-                    Chunks.Add(chunkPosition, new Tile[ChunkLength, ChunkLength]);
+                    AddChunk(chunkPosition);
                 }
 
                 Chunks[chunkPosition][position.X - chunkPosition.X * ChunkLength, position.Y - chunkPosition.Y * ChunkLength] = tile;
@@ -201,6 +201,16 @@
 
                 ParentWorld.Tiles.Add(tile);
             }
+        }
+
+        private void AddChunk(Point chunkPosition) {
+            var chunk = new Tile[ChunkLength, ChunkLength];
+            // for (int y = 0; y < ChunkLength; y++) {
+            //     for (int x = 0; x < ChunkLength; x++) {
+            //         chunk[x, y] = ParentWorld.DefaultTile;
+            //     }
+            // }
+            Chunks.Add(chunkPosition, chunk);
         }
 
         public void SetLine(Point tilePos1, Point tilePos2, Tile[,] tilePattern, Point tilePatternOffset, int width, SetCommand command = null, bool preview = false) {

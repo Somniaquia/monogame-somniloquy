@@ -220,5 +220,14 @@ namespace Somniloquy {
 
             return result;
         }
+
+        public static Rectangle ResizeRectangle(Rectangle target, Direction direction, float ratio, float offset) {
+            if (direction == Direction.Horizontal) {
+                return new Rectangle(target.X + (int)(target.Width * offset), target.Y, (int) (target.Width * ratio), target.Height);
+            } else {
+                return new Rectangle(target.X, target.Y + (int)(target.Height * offset), target.Width, (int)(target.Height * ratio));
+            }
+           
+        }
     }
 }

@@ -24,10 +24,12 @@ namespace Somniloquy {
             Array.Fill(transparent, Color.Transparent);
             Texture.SetData(transparent);
 
-            PointerPosition = new Point(1, 0);
+            PointerPosition = new Point(0, 0);
         }
 
-        public Point AdvancePointerPosition() {
+        public Point AssignPointerPosition() {
+            var assigningPosition = PointerPosition;
+
             if (PointerPosition.X == SheetWidth - 1) {
                 ExpandTexture(FrameSize.Y);
                 PointerPosition = new Point(0, PointerPosition.Y + 1);
@@ -35,7 +37,7 @@ namespace Somniloquy {
                 PointerPosition += new Point(1, 0);
             }
 
-            return PointerPosition;
+            return assigningPosition;
         }
         
         private void ExpandTexture(int additionalHeight) {

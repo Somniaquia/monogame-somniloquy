@@ -8,12 +8,15 @@ namespace Somniloquy {
 
     using MonoGame.Extended;
     using MonoGame.Extended.BitmapFonts;
-    using MonoGame.Extended.Screens;
 
-    public abstract class Screen {
+    public enum Direction { Horizontal, Vertical }
+
+    public class Screen {
         public Rectangle Boundaries { get; set; }
         public Matrix TransformMatrix { get; protected set; }
-        public List<Screen> ChildScreens { get; set; } = new();
+
+        public Direction DividingDirection = Direction.Horizontal;
+        public Dictionary<int, Screen> ChildScreens { get; set; } = new();
         public bool Focusable { get; protected set; } = true;
 
         public Screen(Rectangle boundaries) {
@@ -23,7 +26,7 @@ namespace Somniloquy {
                 Matrix.CreateScale(1f / boundaries.Width, 1f / boundaries.Height, 1f);
         }
 
-        public abstract void OnFocus();
+        public virtual void OnFocus() { }
 
         public virtual void Update() {
             if (Focusable) {
@@ -35,7 +38,7 @@ namespace Somniloquy {
             }
 
             foreach (var child in ChildScreens) {
-                child.Update();
+                child.Value.Update();
             }
 
             if (InputManager.Focus == this) {
@@ -45,7 +48,7 @@ namespace Somniloquy {
 
         public virtual void Draw() {
             foreach (var child in ChildScreens) {
-                child.Draw();
+                child.Value.Draw();
             }
         }
     }

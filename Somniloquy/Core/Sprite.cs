@@ -32,7 +32,7 @@ namespace Somniloquy {
         }
 
         public void AddFrame(string animationName, Point framePosition, Point frameOffset) {
-            Animations[animationName].FramePositions.Add(SpriteSheet.AdvancePointerPosition());
+            Animations[animationName].FramePositions.Add(framePosition);
             Animations[animationName].FrameOffsets.Add(frameOffset);
         }
 

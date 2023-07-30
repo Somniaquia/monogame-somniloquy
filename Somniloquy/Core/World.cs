@@ -22,8 +22,11 @@ namespace Somniloquy {
         public List<Tile> Tiles { get; set; } = new();
         public List<Layer> Layers { get; set; } = new();
 
+        public Tile DefaultTile { get; set; }
+
         public World() {
             SpriteSheet = new(new Point(8, 8));
+            DefaultTile = NewTile(8);
         }
 
         public Layer NewLayer() {
