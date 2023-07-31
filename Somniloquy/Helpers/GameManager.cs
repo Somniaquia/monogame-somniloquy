@@ -2,6 +2,7 @@ namespace Somniloquy {
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Runtime.InteropServices;
 
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
@@ -21,6 +22,13 @@ namespace Somniloquy {
         public static Dictionary<string, Texture2D> Textures { get; set; }
         public static Texture2D Pixel { get; set; }
         public static BitmapFont Misaki { get; set; }
+
+        [DllImport("user32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
+        public static void FocusWindow() {
+            var process = System.Diagnostics.Process.GetCurrentProcess();
+            SetForegroundWindow(process.MainWindowHandle);
+        }
 
         public static void SaveImage(Texture2D texture, string filePath) {
             using FileStream fileStream = new(filePath, FileMode.Create);

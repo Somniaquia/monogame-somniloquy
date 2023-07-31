@@ -100,6 +100,8 @@ namespace Somniloquy {
                 EditorScreen.SelectedColor = FetchColor(PositionOnChart);
                 UpdateChart();
             }
+
+            base.OnFocus();
         }
 
         private Color FetchColor(Vector2 positionOnChart) {

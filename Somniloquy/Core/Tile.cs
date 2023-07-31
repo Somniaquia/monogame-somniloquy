@@ -11,15 +11,15 @@ namespace Somniloquy {
         public Sprite Sprite { get; set; }
         public Point[] CollisionVertices { get; set; } = new Point[4] { new Point(0, 0), new Point(7, 0), new Point(7, 7), new Point(0, 7) };
 
-        public Tile(SpriteSheet spriteSheet, int tileLength = 8) {
+        public Tile(SpriteSheet spriteSheet, int frameIndexInSpriteSheet) {
             Sprite = new(spriteSheet);
             
             Sprite.AddAnimation("Default");
-            Sprite.AddFrame("Default", Sprite.SpriteSheet.AssignPointerPosition(), Point.Zero);
+            Sprite.AddFrame("Default", frameIndexInSpriteSheet, Point.Zero);
         }
 
         public Color GetColorAt(Point positionInTile) {
-            return Sprite.SpriteSheet.GetPixelColor(positionInTile + Sprite.CurrentAnimation.FramePositions[Sprite.CurrentAnimationFrame]);
+            return Sprite.SpriteSheet.GetPixelColor(positionInTile + new Point(0, Sprite.CurrentAnimation.FrameIndices[Sprite.CurrentAnimationFrame] * Layer.TileLength));
         }
 
         public void Update() {
@@ -27,8 +27,8 @@ namespace Somniloquy {
         }
 
         public void Draw(Rectangle destination, float opacity = 1f, bool drawCollisionBounds = false) {
-            if (Sprite is null)
-                GameManager.DrawFilledRectangle(destination, Color.DarkGray);
+            if (Sprite is null || Sprite.Animations.Count == 0)
+                GameManager.DrawFilledRectangle(destination, Color.AliceBlue);
             else {
                 Sprite.Draw(destination, opacity);
             }

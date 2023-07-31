@@ -26,8 +26,9 @@ namespace Somniloquy {
         }
 
         public static void Serialize<T>(object instance, string fileName) {
-            if (!Directory.Exists($"{Directories[typeof(T)]}")) Directory.CreateDirectory($"{Directories[typeof(T)]}");
-            string directory = $"{Directories[typeof(T)]}/{fileName}";
+            // if (!Directory.Exists($"{Directories[typeof(T)]}")) Directory.CreateDirectory($"{Directories[typeof(T)]}");
+            // string directory = $"{Directories[typeof(T)]}/{fileName}";
+            var directory = fileName;
 
             // Required for storing references to 'parent classes' without causing a loop.
             JsonSerializerSettings settings = new() { PreserveReferencesHandling = PreserveReferencesHandling.Objects };
@@ -43,7 +44,8 @@ namespace Somniloquy {
         }
 
         public static T Deserialize<T>(string fileName) {
-            string directory = $"{Directories[typeof(T)]}/{fileName}";
+            //string directory = $"{Directories[typeof(T)]}/{fileName}";
+            var directory = fileName;
 
             try {
                 using FileStream compressedFileStream = File.OpenRead(directory);

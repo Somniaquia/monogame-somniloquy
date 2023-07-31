@@ -8,8 +8,8 @@ namespace Somniloquy {
     using System.Linq;
     
     public struct Animation {
-        public List<Point> FramePositions = new();
-        public List<Point> FrameOffsets = new();
+        public List<int> FrameIndices { get; set; } = new();
+        public List<Point> FrameOffsets { get; set; } = new();
 
         public Animation() { }
     }    
@@ -31,21 +31,21 @@ namespace Somniloquy {
             CurrentAnimation = animation;
         }
 
-        public void AddFrame(string animationName, Point framePosition, Point frameOffset) {
-            Animations[animationName].FramePositions.Add(framePosition);
+        public void AddFrame(string animationName, int frameIndex, Point frameOffset) {
+            Animations[animationName].FrameIndices.Add(frameIndex);
             Animations[animationName].FrameOffsets.Add(frameOffset);
         }
 
         public void PaintOnFrame(Color?[,] colors) {
-            SpriteSheet.PaintOnFrame(colors, CurrentAnimation.FramePositions[CurrentAnimationFrame]);
+            SpriteSheet.PaintOnFrame(colors, CurrentAnimation.FrameIndices[CurrentAnimationFrame]);
         }
 
         public Color?[,] GetFrameColors() {
-            return SpriteSheet.GetFrameColors(CurrentAnimation.FramePositions[CurrentAnimationFrame]);
+            return SpriteSheet.GetFrameColors(CurrentAnimation.FrameIndices[CurrentAnimationFrame]);
         }
 
         public void Draw(Rectangle destination, float opacity = 1f) {
-            GameManager.SpriteBatch.Draw(SpriteSheet.Texture, destination, new Rectangle(CurrentAnimation.FramePositions[CurrentAnimationFrame] * SpriteSheet.FrameSize, SpriteSheet.FrameSize), Color.White * opacity);
+            GameManager.SpriteBatch.Draw(SpriteSheet.RawSpriteSheet, destination, new Rectangle(new Point(0, CurrentAnimation.FrameIndices[CurrentAnimationFrame] * SpriteSheet.FrameSize.Y), SpriteSheet.FrameSize), Color.White * opacity);
         }
     }
 }

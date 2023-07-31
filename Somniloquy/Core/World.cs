@@ -25,8 +25,8 @@ namespace Somniloquy {
         public Tile DefaultTile { get; set; }
 
         public World() {
-            SpriteSheet = new(new Point(8, 8));
-            DefaultTile = NewTile(8);
+            SpriteSheet = new(new Point(Layer.TileLength, Layer.TileLength));
+            DefaultTile = NewTile(false);
         }
 
         public Layer NewLayer() {
@@ -35,8 +35,13 @@ namespace Somniloquy {
             return layer;
         }
 
-        public Tile NewTile(int tileLength) {
-            var tile = new Tile(SpriteSheet, tileLength);
+        public Tile NewTile(bool createNewFrame = true) {
+            Tile tile;
+            if (createNewFrame) {
+                tile = new Tile(SpriteSheet, SpriteSheet.NewFrame());
+            } else {
+                tile = new Tile(SpriteSheet, SpriteSheet.GetLatestFrame());
+            }
             Tiles.Add(tile);
             return tile;
         }

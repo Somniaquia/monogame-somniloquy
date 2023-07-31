@@ -20,8 +20,8 @@
         public Point Dimensions { get; set; }
         [JsonConverter(typeof(ChunksConverter))]
         public Dictionary<Point, Tile[,]> Chunks { get; set; } = new();
-        public int ChunkLength { get; } = 16;
-        public int TileLength { get; } = 8;
+        public static int ChunkLength { get; } = 16;
+        public static int TileLength { get; } = 16;
 
         public Layer(World parentWorld) {
             ParentWorld = parentWorld;
@@ -44,7 +44,7 @@
             if (sync) {
                 var previousTile = GetTile(tilePosition);
                 //SetTile(tilePosition, ParentWorld.NewTile(TileLength), command);
-                SetTile(tilePosition, ParentWorld.NewTile(TileLength));
+                SetTile(tilePosition, ParentWorld.NewTile());
                 PaintOnTile(GetTile(tilePosition), previousTile.Sprite.GetFrameColors(), command);
             }
 
@@ -117,9 +117,9 @@
                     }
 
                     Point position = new(tileX, tileY);
-                    var tile = GetTile(position);
+                    
                     if (GetTile(position) is null) {
-                        SetTile(position, ParentWorld.NewTile(8));
+                        SetTile(position, ParentWorld.NewTile());
                     }
 
                     PaintOnTile(position, colors, command, sync);

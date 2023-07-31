@@ -41,12 +41,12 @@ namespace Somniloquy {
     
         public static Rectangle ValidizeRectangle(Rectangle rectangle) {
             if (rectangle.Width < 0) {
-                rectangle.X = rectangle.X + rectangle.Width;
+                rectangle.X += rectangle.Width;
                 rectangle.Width = -rectangle.Width;
             }
 
             if (rectangle.Height < 0) {
-                rectangle.Y = rectangle.Y + rectangle.Height;
+                rectangle.Y += rectangle.Height;
                 rectangle.Height = -rectangle.Height;
             }
             return rectangle;
@@ -226,8 +226,20 @@ namespace Somniloquy {
                 return new Rectangle(target.X + (int)(target.Width * offset), target.Y, (int) (target.Width * ratio), target.Height);
             } else {
                 return new Rectangle(target.X, target.Y + (int)(target.Height * offset), target.Width, (int)(target.Height * ratio));
+            }  
+        }
+
+        public static void TransparentizeTexture(Texture2D target, Color? targetColor) {
+            Color[] colorData = new Color[target.Width * target.Height];
+            target.GetData(colorData);
+
+            for (int i = 0; i < colorData.Length; i++) {
+                if (colorData[i] == targetColor) {
+                    colorData[i] = Color.Transparent;
+                }
             }
-           
+
+            target.SetData(colorData);
         }
     }
 }

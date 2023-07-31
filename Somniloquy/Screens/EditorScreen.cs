@@ -3,6 +3,7 @@ namespace Somniloquy {
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Threading.Tasks;
 
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
@@ -10,6 +11,8 @@ namespace Somniloquy {
 
     using MonoGame.Extended;
     using MonoGame.Extended.BitmapFonts;
+
+    using NativeFileDialogSharp;
 
     public enum EditorState { PaintMode, TileMode, PropertiesMode }
     public enum EditorAction { PaintIdle, PaintRectangle, PaintLine, TileIdle, TileSelection, TileRectangle, TileLine, PropertiesIdle }
@@ -53,7 +56,10 @@ namespace Somniloquy {
     /// - Alt + Left Mouse Button: Select all connecting boundaries of same type
     /// </summary>
     public class EditorScreen : Screen {
+        public World LoadedWorld { get; set; } = new();
+
         public WorldScreen WorldScreen { get; set; }
+        public SpriteEditorScreen SpriteEditorScreen { get; set; }
         public ColorChart ColorChart { get; private set; } = null;
 
         public EditorState CurrentEditorState = EditorState.PaintMode;
@@ -66,20 +72,20 @@ namespace Somniloquy {
 
         public EditorScreen(Rectangle boundaries) : base(boundaries) {
             DividingDirection = Direction.Horizontal;
-            var worldScreen = new WorldScreen(Utils.ResizeRectangle(boundaries, DividingDirection, 0.8f, 0), this);
+            WorldScreen = new WorldScreen(Utils.ResizeRectangle(boundaries, DividingDirection, 0.8f, 0), this);
 
             var rightContainerRectangle = Utils.ResizeRectangle(boundaries, DividingDirection, 0.2f, 0.8f);
             var rightContainer = new Screen(rightContainerRectangle);
 
-            ChildScreens.Add(0, worldScreen);
+            ChildScreens.Add(0, WorldScreen);
             ChildScreens.Add(1, rightContainer);
 
-            var spriteSheetScreen = new SpriteSheetScreen(Utils.ResizeRectangle(boundaries, Direction.Vertical, 0f, 0.8f));
+            SpriteEditorScreen = new SpriteEditorScreen(Utils.ResizeRectangle(rightContainerRectangle, Direction.Vertical, 0.8f, 0f), this);
             ColorChart = new ColorChart(Utils.ResizeRectangle(rightContainerRectangle, Direction.Vertical, 0.2f, 0.8f), this);
             ColorChart.UpdateChart();
 
             rightContainer.DividingDirection = Direction.Vertical;
-            rightContainer.ChildScreens.Add(0, spriteSheetScreen);
+            rightContainer.ChildScreens.Add(0, SpriteEditorScreen);
             rightContainer.ChildScreens.Add(1, ColorChart);
         }
 
@@ -103,7 +109,55 @@ namespace Somniloquy {
                 ScreenManager.ToGameScreen(this);
             }
 
+            if (InputManager.IsKeyDown(Keys.LeftControl) && InputManager.IsKeyPressed(Keys.L)) {
+                if (InputManager.IsKeyDown(Keys.LeftShift)) {
+                    // LoadSpriteSheet();
+
+                    var path = Dialog.FileOpen("png", GameManager.ContentManager.RootDirectory).Path;
+
+                    if (File.Exists(path)) {
+                        SpriteEditorScreen.CreateTilesFromRawSpriteSheet(GameManager.LoadImage(path), LoadedWorld);
+                    }
+
+                    GameManager.FocusWindow();
+                }
+                else {
+                    Task.Run(() => {
+                        var path = Dialog.FileOpen("txt", GameManager.ContentManager.RootDirectory).Path;
+
+                        if (File.Exists(path)) {
+                            CommandManager.Clear();
+                            LoadedWorld.Layers.Clear();
+                            LoadedWorld = SerializationManager.Deserialize<World>(path);
+                            WorldScreen.SelectedLayer = LoadedWorld.Layers[0];
+                        }
+                    });
+
+                    GameManager.FocusWindow();
+                }
+            }
+
+            if (InputManager.IsKeyDown(Keys.LeftControl) && InputManager.IsKeyPressed(Keys.S)) {
+                Task.Run(() => {
+                    var path = Dialog.FileSave("txt", GameManager.ContentManager.RootDirectory).Path;
+
+                    SerializationManager.Serialize<World>(LoadedWorld, path);
+                });
+
+                GameManager.FocusWindow(); 
+            }
+
             base.Update();
+        }
+
+        private async void LoadSpriteSheet() {
+            var path = await Task.Run(() => Dialog.FileOpen("png", GameManager.ContentManager.RootDirectory).Path);
+            
+            if (File.Exists(path)) {
+                SpriteEditorScreen.CreateTilesFromRawSpriteSheet(GameManager.LoadImage(path), LoadedWorld);
+            }
+
+            GameManager.FocusWindow();
         }
     }
 }

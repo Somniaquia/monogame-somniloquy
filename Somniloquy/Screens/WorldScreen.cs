@@ -11,7 +11,6 @@ namespace Somniloquy {
     using MonoGame.Extended;
 
     public class WorldScreen : Screen {
-        public World LoadedWorld { get; set; } = new();
         public EditorScreen EditorScreen { get; set; } = null;
 
         public Layer SelectedLayer { get; set; } = null;
@@ -35,7 +34,7 @@ namespace Somniloquy {
 
         public override void Update() {
             Camera.UpdateTransformation();
-            LoadedWorld?.Update();
+            EditorScreen.LoadedWorld?.Update();
             base.Update();
         }
 
@@ -46,8 +45,8 @@ namespace Somniloquy {
         }
 
         private void EditModeFunctions() {
-            if (LoadedWorld.Layers.Count == 0) SelectedLayer = LoadedWorld.NewLayer();
-            SelectedLayer ??= LoadedWorld.Layers[^1];
+            if (EditorScreen.LoadedWorld.Layers.Count == 0) SelectedLayer = EditorScreen.LoadedWorld.NewLayer();
+            SelectedLayer ??= EditorScreen.LoadedWorld.Layers[^1];
 
             previousWorldPosition = mouseWorldPosition;
             mouseWorldPosition = Utils.ToPoint(Camera.ApplyInvertTransform(InputManager.GetMousePosition()));
@@ -65,21 +64,8 @@ namespace Somniloquy {
             if (InputManager.IsKeyDown(Keys.Q)) Camera.Zoom(-0.1f);
             if (InputManager.IsKeyDown(Keys.E)) Camera.Zoom(0.1f);
 
-            if (InputManager.GetNumberKeyPress() is not null) {
-                if (InputManager.IsKeyDown(Keys.LeftControl) && InputManager.IsKeyPressed(Keys.Enter)) {
-                    if (File.Exists($"Worlds/world{InputManager.GetNumberKeyPress()}.txt")) {
-                        CommandManager.Clear();
-                        LoadedWorld.Layers.Clear();
-                        LoadedWorld = SerializationManager.Deserialize<World>($"world{InputManager.GetNumberKeyPress()}.txt");
-                        SelectedLayer = LoadedWorld.Layers[0];
-                    }
-                } else if (InputManager.IsKeyPressed(Keys.Enter)) {
-                    SerializationManager.Serialize<World>(LoadedWorld, $"world{InputManager.GetNumberKeyPress()}.txt");
-                }
-            }
-
             if (InputManager.IsKeyDown(Keys.LeftControl) && InputManager.IsKeyPressed(Keys.N)) {
-                SelectedLayer = LoadedWorld.NewLayer();
+                SelectedLayer = EditorScreen.LoadedWorld.NewLayer();
             }
 
             if (InputManager.IsKeyDown(Keys.LeftAlt)) {
@@ -89,7 +75,8 @@ namespace Somniloquy {
             if (InputManager.IsKeyPressed(Keys.Delete)) {
                 // TODO: This is not a proper implementation - work multi-layer support!!
                 CommandManager.Clear();
-                LoadedWorld.Layers.Clear();
+                EditorScreen.LoadedWorld.Layers.Clear();
+                EditorScreen.LoadedWorld.Tiles.Clear();
                 TilePattern = new Tile[1, 1] { { null } };
             }
 
@@ -317,12 +304,12 @@ namespace Somniloquy {
         }
 
         private void GetTopmostLayerBeneathMouse() {
-            for (int i = LoadedWorld.Layers.Count - 1; i >= 0; i--) {
-                var layer = LoadedWorld.Layers[i];
+            for (int i = EditorScreen.LoadedWorld.Layers.Count - 1; i >= 0; i--) {
+                var layer = EditorScreen.LoadedWorld.Layers[i];
                 if (layer.GetTile(mouseTilePosition) is null || layer.GetTile(mouseTilePosition).GetColorAt(mousePositionInTile) == Color.Transparent) {
                     continue;
                 } else {
-                    SelectedLayer = LoadedWorld.Layers[i];
+                    SelectedLayer = EditorScreen.LoadedWorld.Layers[i];
                     break;
                 }
             }
@@ -365,31 +352,31 @@ namespace Somniloquy {
             GameManager.SpriteBatch.DrawRectangle(
                 Camera.ApplyTransform(
                     new Rectangle(
-                        chunkPosition.X * SelectedLayer.ChunkLength * SelectedLayer.TileLength,
-                        chunkPosition.Y * SelectedLayer.ChunkLength * SelectedLayer.TileLength,
-                        SelectedLayer.ChunkLength * SelectedLayer.TileLength, SelectedLayer.ChunkLength * SelectedLayer.TileLength
+                        chunkPosition.X * Layer.ChunkLength * Layer.TileLength,
+                        chunkPosition.Y * Layer.ChunkLength * Layer.TileLength,
+                        Layer.ChunkLength * Layer.TileLength, Layer.ChunkLength * Layer.TileLength
                     )
                 ), Color.White * 0.5f
             );
             
             if (EditorScreen.CurrentEditorAction == EditorAction.TileSelection) {
                 var rectangle = Utils.ValidizeRectangle(new Rectangle(
-                    tilePosition.X * SelectedLayer.TileLength,
-                    tilePosition.Y * SelectedLayer.TileLength,
-                    (firstPositionInWorld.Value.X - tilePosition.X) * SelectedLayer.TileLength,
-                    (firstPositionInWorld.Value.Y - tilePosition.Y) * SelectedLayer.TileLength
+                    tilePosition.X * Layer.TileLength,
+                    tilePosition.Y * Layer.TileLength,
+                    (firstPositionInWorld.Value.X - tilePosition.X) * Layer.TileLength,
+                    (firstPositionInWorld.Value.Y - tilePosition.Y) * Layer.TileLength
                 ));
 
-                rectangle.Width += SelectedLayer.TileLength; rectangle.Height += SelectedLayer.TileLength;
+                rectangle.Width += Layer.TileLength; rectangle.Height += Layer.TileLength;
 
                 GameManager.SpriteBatch.DrawRectangle(Camera.ApplyTransform(rectangle), Color.Red * 0.5f);
             } else {
                 GameManager.SpriteBatch.DrawRectangle(
                     Camera.ApplyTransform(
                         new Rectangle(
-                            tilePosition.X * SelectedLayer.TileLength,
-                            tilePosition.Y * SelectedLayer.TileLength,
-                            SelectedLayer.TileLength, SelectedLayer.TileLength
+                            tilePosition.X * Layer.TileLength,
+                            tilePosition.Y * Layer.TileLength,
+                            Layer.TileLength, Layer.TileLength
                         )
                     ), Color.Red * 0.5f
                 );
@@ -398,7 +385,7 @@ namespace Somniloquy {
 
         public override void Draw() {
             GameManager.SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, transformMatrix: Camera.Transform);
-            foreach (var layer in LoadedWorld.Layers) {
+            foreach (var layer in EditorScreen.LoadedWorld.Layers) {
                 float opacity = ReferenceEquals(layer, SelectedLayer) ? 1f : 0.5f;
                 bool drawCollisionBounds = EditorScreen.CurrentEditorState == EditorState.PropertiesMode;
                 
@@ -409,7 +396,6 @@ namespace Somniloquy {
             GameManager.SpriteBatch.End();
 
             GameManager.SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp);
-            // TODO: Move layer properties (tile size, chunk size) to static
             if (SelectedLayer is not null && InputManager.Focus == this) DrawGrids();
             base.Draw();
             GameManager.SpriteBatch.End();

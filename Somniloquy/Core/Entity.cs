@@ -52,8 +52,8 @@ namespace Somniloquy
                     if (vertices is null) continue;
 
                     for (var i = 0; i < vertices.Length; i++) {
-                        var v1 = vertices[i].ToVector2() + new Vector2(x, y) * CurrentLayer.TileLength;
-                        var v2 = vertices[(i + 1) % vertices.Length].ToVector2() + new Vector2(x, y) * CurrentLayer.TileLength;
+                        var v1 = vertices[i].ToVector2() + new Vector2(x, y) * Layer.TileLength;
+                        var v2 = vertices[(i + 1) % vertices.Length].ToVector2() + new Vector2(x, y) * Layer.TileLength;
                         if (!Utils.Intersects((v1, v2), CollisionBounds)) continue;
 
                         Vector2 closestPointOnEdge = Utils.GetClosestPointOnLine((v1, v2), potentialPosition);

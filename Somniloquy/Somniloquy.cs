@@ -12,7 +12,7 @@
     // dotnet publish -c Release -r win-x64 -p:PublishSingleFile=true --self-contained
 
     public class Somniloquy : Game {
-        private GraphicsDeviceManager graphicsDeviceManager;
+        private readonly GraphicsDeviceManager graphicsDeviceManager;
         private SpriteBatch spriteBatch;
 
         public Somniloquy() {
@@ -21,7 +21,7 @@
             IsMouseVisible = true;
 
             graphicsDeviceManager.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
-            graphicsDeviceManager.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
+            graphicsDeviceManager.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height - 1;
             graphicsDeviceManager.HardwareModeSwitch = false;
             graphicsDeviceManager.IsFullScreen = false;
             graphicsDeviceManager.ApplyChanges();
@@ -33,6 +33,7 @@
             GameManager.GraphicsDevice = graphicsDeviceManager.GraphicsDevice;
             GameManager.ContentManager = Content;
             GameManager.WindowSize = new Rectangle(0, 0, graphicsDeviceManager.PreferredBackBufferWidth, graphicsDeviceManager.PreferredBackBufferHeight);
+            GameManager.FocusWindow();
         }
 
         protected override void Initialize() {
