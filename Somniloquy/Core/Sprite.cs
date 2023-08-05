@@ -8,10 +8,13 @@ namespace Somniloquy {
     using System.Linq;
     
     public struct Animation {
+        public Sprite ParentSprite { get; set; }
         public List<int> FrameIndices { get; set; } = new();
         public List<Point> FrameOffsets { get; set; } = new();
 
-        public Animation() { }
+        public Animation(Sprite parent) {
+            ParentSprite = parent;
+        }
     }    
 
     public class Sprite {
@@ -26,7 +29,7 @@ namespace Somniloquy {
         }
 
         public void AddAnimation(string name) {
-            var animation = new Animation();
+            var animation = new Animation(this);
             Animations.Add(name, animation);
             CurrentAnimation = animation;
         }

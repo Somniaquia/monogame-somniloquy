@@ -21,7 +21,7 @@ namespace Somniloquy {
         public static Rectangle WindowSize { get; set; }
         public static Dictionary<string, Texture2D> Textures { get; set; }
         public static Texture2D Pixel { get; set; }
-        public static BitmapFont Misaki { get; set; }
+        public static SpriteFont Misaki { get; set; }
 
         [DllImport("user32.dll")]
         private static extern bool SetForegroundWindow(IntPtr hWnd);

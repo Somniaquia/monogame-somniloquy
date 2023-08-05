@@ -20,6 +20,7 @@ namespace Somniloquy {
             GameScreen gameScreen = new(GameManager.WindowSize) {
                 WorldScreen = editorScreen.WorldScreen
             };
+            gameScreen.LoadedWorlds.Add(editorScreen.LoadedWorld);
             gameScreen.AddPlayer();
 
             ActiveScreens.Remove(editorScreen);
@@ -28,7 +29,8 @@ namespace Somniloquy {
 
         public static void ToEditorScreen(GameScreen gameScreen) {            
             EditorScreen editorScreen = new(GameManager.WindowSize) {
-                WorldScreen = gameScreen.WorldScreen
+                WorldScreen = gameScreen.WorldScreen,
+                LoadedWorld = gameScreen.LoadedWorlds[0]
             };
 
             ActiveScreens.Remove(gameScreen);

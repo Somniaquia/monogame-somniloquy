@@ -28,7 +28,7 @@ namespace Somniloquy {
         public static void Serialize<T>(object instance, string fileName) {
             // if (!Directory.Exists($"{Directories[typeof(T)]}")) Directory.CreateDirectory($"{Directories[typeof(T)]}");
             // string directory = $"{Directories[typeof(T)]}/{fileName}";
-            var directory = fileName;
+            var directory = fileName[^4..].Equals(".txt") ? fileName : fileName + ".txt";
 
             // Required for storing references to 'parent classes' without causing a loop.
             JsonSerializerSettings settings = new() { PreserveReferencesHandling = PreserveReferencesHandling.Objects };

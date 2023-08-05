@@ -133,7 +133,7 @@ namespace Somniloquy {
         }
 
         public override void Draw() {
-            GameManager.SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp);
+            GameManager.SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
             if (EditorScreen.CurrentEditorState == EditorState.PaintMode) {
                 GameManager.DrawFilledRectangle(new Rectangle(Boundaries.X - 8, Boundaries.Y - 8, Boundaries.Width + 16, Boundaries.Height + 16), EditorScreen.SelectedColor);
                 GameManager.SpriteBatch.Draw(Chart, Boundaries, Color.White);

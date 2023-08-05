@@ -24,6 +24,7 @@
             graphicsDeviceManager.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height - 1;
             graphicsDeviceManager.HardwareModeSwitch = false;
             graphicsDeviceManager.IsFullScreen = false;
+            graphicsDeviceManager.SynchronizeWithVerticalRetrace = true;
             graphicsDeviceManager.ApplyChanges();
 
             Window.IsBorderless = true;
@@ -54,6 +55,7 @@
             pixel.SetData(new[] { Color.White });
             GameManager.Pixel = pixel;
 
+            GameManager.Misaki = Content.Load<SpriteFont>("Fonts/Misaki");
             //GameManager.Misaki = Content.Load<BitmapFont>("misaki");
         }
 

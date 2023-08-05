@@ -9,7 +9,7 @@ namespace Somniloquy {
 
     public class Tile {
         public Sprite Sprite { get; set; }
-        public Point[] CollisionVertices { get; set; } = new Point[4] { new Point(0, 0), new Point(7, 0), new Point(7, 7), new Point(0, 7) };
+        public Point[] CollisionVertices { get; set; } = new Point[4] { new Point(0, 0), new Point(15, 0), new Point(15, 15), new Point(0, 15) };
 
         public Tile(SpriteSheet spriteSheet, int frameIndexInSpriteSheet) {
             Sprite = new(spriteSheet);

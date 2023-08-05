@@ -140,7 +140,7 @@ namespace Somniloquy {
             float[] sampleWeights = new float[sampleCount];
 
             float totalWeights = 0.0f;
-            float sigma = sampleCount / 2.0f; // You might want to adjust this value
+            float sigma = sampleCount / 2.0f;
 
             for (int i = 0; i < sampleCount; i++) {
                 float x = i - sampleCount / 2;
@@ -148,7 +148,6 @@ namespace Somniloquy {
                 totalWeights += sampleWeights[i];
             }
 
-            // Normalize the weights
             for (int i = 0; i < sampleCount; i++) {
                 sampleWeights[i] /= totalWeights;
             }
@@ -156,14 +155,14 @@ namespace Somniloquy {
             return sampleWeights;
         }
 
-        public static float[] GetSampleOffsets(int direction = 0, int sampleCount = 11) {
-            float[] sampleOffsets = new float[sampleCount];
+        public static Vector2[] GetSampleOffsets(Direction direction, int sampleCount = 11) {
+            Vector2[] sampleOffsets = new Vector2[sampleCount];
 
-            var length = direction == 0 ? GameManager.WindowSize.X : GameManager.WindowSize.Y;
-            float delta = 1.0f / (float)length; // Assuming you're applying the blur horizontally first
+            var length = direction == Direction.Horizontal ? GameManager.WindowSize.X : GameManager.WindowSize.Y;
+            float delta = 1.0f / length;
 
             for (int i = 0; i < sampleCount; i++) {
-                sampleOffsets[i] = (i - sampleCount / 2) * delta;
+                sampleOffsets[i] = direction == Direction.Horizontal ? new Vector2((i - sampleCount / 2) * delta, 0) : new Vector2((i - sampleCount / 2) * delta, 0);
             }
 
             return sampleOffsets;

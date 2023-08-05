@@ -24,6 +24,7 @@ namespace Somniloquy {
         
         private void ExpandTexture(int additionalHeight) {
             Texture2D expandedTexture = new(GameManager.GraphicsDevice, RawSpriteSheet.Width, RawSpriteSheet.Height + additionalHeight);
+            // Max texture height : 16384
 
             Color[] originalColors = new Color[RawSpriteSheet.Width * RawSpriteSheet.Height];
             RawSpriteSheet.GetData(originalColors);
@@ -60,7 +61,6 @@ namespace Somniloquy {
 
             RawSpriteSheet.SetData(0, destination, colorsWithinMargin, 0, colorsWithinMargin.Length);
         }
-
 
         public void PaintOnFrame(Color?[,] colors, int frameIndex) {
             ModifyTexture(colors, new Rectangle(0, frameIndex * FrameSize.Y, FrameSize.X, FrameSize.Y));

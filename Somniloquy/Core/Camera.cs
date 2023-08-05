@@ -6,18 +6,17 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework.Graphics;
     using MonoGame.Extended;
 
-    public class Camera
-    {
+    public class Camera {
         public const float LerpModifier =  0.1f;
         public Vector2 Position = Vector2.Zero;
         private Vector2 visiblePosition = Vector2.Zero;
-        private float zoom;
+        public float zoom;
         private float visibleZoom;
         public float Rotation = 0.0f;
         private float visibleRotation = 0.0f;
         public Matrix Transform { get; private set; }
 
-        public Camera(float zoom=1.0f) {
+        public Camera(float zoom) {
             this.zoom = zoom;
             visibleZoom = zoom;
         }
@@ -28,13 +27,13 @@ namespace Somniloquy {
 
         public void Zoom(float delta) {
             zoom *= MathF.Pow(MathF.E, delta);
+            zoom = MathF.Min(MathF.Max(zoom, 1f), 64f);
         }
 
         public void UpdateTransformation() {
             visiblePosition.X = Utils.Lerp(visiblePosition.X, Position.X, LerpModifier);
             visiblePosition.Y = Utils.Lerp(visiblePosition.Y, Position.Y, LerpModifier);
 
-            zoom = zoom < 0.1f ? 0.1f : zoom;
             visibleZoom = Utils.Lerp(visibleZoom, zoom, LerpModifier);
 
             Rotation = Utils.ModuloF(Rotation, 2 * 3.141592653589793f);

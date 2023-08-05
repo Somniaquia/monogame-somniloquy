@@ -8,7 +8,6 @@ float SampleWeights[SAMPLE_COUNT];
 float4 PixelShaderFunction(float2 texCoord : TEXCOORD0) : COLOR0 {
     float4 color = float4(0.0f, 0.0f, 0.0f, 0.0f);
     
-    // Apply the Gaussian blur
     for (int i = 0; i < SAMPLE_COUNT; i++) {
         color += tex2D(TextureSampler, texCoord + SampleOffsets[i]) * SampleWeights[i];
     }

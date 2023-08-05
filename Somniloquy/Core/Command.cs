@@ -32,12 +32,6 @@ namespace Somniloquy {
         }
 
         public static void Clear() {
-            foreach (var command in UndoHistory) {
-                command.Clear();
-            } foreach (var command in RedoHistory) {
-                command.Clear();
-            }
-
             UndoHistory.Clear();
             RedoHistory.Clear();
         }
@@ -46,78 +40,52 @@ namespace Somniloquy {
     public interface ICommand {
         public abstract void Redo();
         public abstract void Undo();
-        public abstract void Clear();
     }
 
-    public class PaintCommand : ICommand {
-        private int animationFrame;
-        private List<(Tile, Color?[,], Color?[,])> affectedTiles = new();
-        // TODO: Add Undo/Redo for animations
-        public PaintCommand(int animationFrame) {
-            this.animationFrame = animationFrame;
-        }
+    public class WorldEditCommand : ICommand {
+        private List<(Animation, int, Color?[,], Color?[,])> textureChanges = new(); 
+        private List<(Layer, Point, Tile, Tile)> tileReferenceChanges = new();
 
-        public void Append(Tile tile, Color?[,] previousColors, Color?[,] subsequentColors) {
-            for (int i = 0; i < affectedTiles.Count; i++) {
-                if (ReferenceEquals(affectedTiles[i].Item1, tile)) {
-                    affectedTiles[i] = (tile, affectedTiles[i].Item2, subsequentColors);
+        public void AppendFrameTextureChanges(Animation animation, int frame, Color?[,] previousColors, Color?[,] subsequentColors) {
+            for (int i = 0; i < textureChanges.Count; i++) {
+                if (ReferenceEquals(textureChanges[i].Item1, animation) && textureChanges[i].Item2 == frame) {
+                    textureChanges[i] = (animation, frame, textureChanges[i].Item3, subsequentColors);
                     return;
                 }
             }
 
-            affectedTiles.Add((tile, previousColors, subsequentColors));
+            textureChanges.Add((animation, frame, previousColors, subsequentColors));
         }
 
-        public void Redo() {
-            foreach (var pair in affectedTiles) {
-                pair.Item1.Sprite.PaintOnFrame(pair.Item3);
-            }
-        }
-
-        public void Undo() {
-            for (int i = affectedTiles.Count - 1; i >= 0; i--) {
-                affectedTiles[i].Item1.Sprite.PaintOnFrame(affectedTiles[i].Item2);
-            }
-        }
-
-        public void Clear() {
-            affectedTiles.Clear();
-        }
-    }
-
-    public class SetCommand : ICommand {
-        private Layer layer;
-        private List<(Point, Tile, Tile)> affectedPositions = new();
-
-        public SetCommand(Layer layer) {
-            this.layer = layer;
-        }
-
-        public void Append(Point point, Tile previousTile, Tile subsequentTile) {
-            for (int i = 0; i < affectedPositions.Count; i++) {
-                if (affectedPositions[i].Item1.Equals(point)) {
-                    affectedPositions[i] = (point, affectedPositions[i].Item2, subsequentTile);
+        public void AppendTileReferenceChanges(Layer layer, Point position, Tile previousTile, Tile subsequentTile) {
+            for (int i = 0; i < tileReferenceChanges.Count; i++) {
+                if (tileReferenceChanges[i].Item1 == layer && tileReferenceChanges[i].Item2 == position) {
+                    tileReferenceChanges[i] = (layer, position, tileReferenceChanges[i].Item3, subsequentTile);
                     return;
                 }
             }
-
-            affectedPositions.Add((point, previousTile, subsequentTile));
-        }
-
-        public void Redo() {
-            foreach (var pair in affectedPositions) {
-                layer.SetTile(pair.Item1, pair.Item3);
-            }
+            
+            tileReferenceChanges.Add((layer, position, previousTile, subsequentTile));
         }
 
         public void Undo() {
-            for (int i = affectedPositions.Count - 1; i >= 0; i--) {
-                layer.SetTile(affectedPositions[i].Item1, affectedPositions[i].Item2);
+            for (int i = textureChanges.Count - 1; i >= 0; i--) {
+                textureChanges[i].Item1.ParentSprite.PaintOnFrame(textureChanges[i].Item3);
+            }
+
+            foreach (var pair in tileReferenceChanges) {
+                pair.Item1.SetTile(pair.Item2, pair.Item3);
             }
         }
 
-        public void Clear() {
-            affectedPositions.Clear();
+        public void Redo() {
+            foreach (var pair in textureChanges) {
+                pair.Item1.ParentSprite.PaintOnFrame(pair.Item3);
+            }
+
+            foreach (var pair in tileReferenceChanges) {
+                pair.Item1.SetTile(pair.Item2, pair.Item4);
+            }
         }
     }
 }

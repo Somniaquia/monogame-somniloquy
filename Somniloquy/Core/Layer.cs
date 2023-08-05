@@ -40,7 +40,7 @@
         }
 
         #region Paint Methods
-        public void PaintOnTile(Point tilePosition, Color?[,] colors, PaintCommand command = null, bool sync = false) {
+        public void PaintOnTile(Point tilePosition, Color?[,] colors, WorldEditCommand command = null, bool sync = false) {
             if (sync) {
                 var previousTile = GetTile(tilePosition);
                 //SetTile(tilePosition, ParentWorld.NewTile(TileLength), command);
@@ -52,13 +52,13 @@
             PaintOnTile(tile, colors, command);
         }
 
-        public void PaintOnTile(Tile tile, Color?[,] colors, PaintCommand command = null) {
+        public void PaintOnTile(Tile tile, Color?[,] colors, WorldEditCommand command = null) {
             var oldTexture = tile.Sprite.GetFrameColors();
             tile.Sprite.PaintOnFrame(colors);
-            command?.Append(tile, oldTexture, tile.Sprite.GetFrameColors());
+            command?.AppendFrameTextureChanges(tile.Sprite.CurrentAnimation, tile.Sprite.CurrentAnimationFrame, oldTexture, tile.Sprite.GetFrameColors());
         }
 
-        public void PaintLine(Point point1, Point point2, Color color, int width, PaintCommand command = null, bool sync = false) {
+        public void PaintLine(Point point1, Point point2, Color color, int width, WorldEditCommand command = null, bool sync = false) {
             int dx = Math.Abs(point2.X - point1.X);
             int dy = Math.Abs(point2.Y - point1.Y);
             int sx = (point1.X < point2.X) ? 1 : -1;
@@ -85,7 +85,7 @@
             }
         }
 
-        public void PaintCircle(Point point, Color color, int width, PaintCommand command = null, bool sync = false) {
+        public void PaintCircle(Point point, Color color, int width, WorldEditCommand command = null, bool sync = false) {
             // TODO: Add brush shape other than a square
             int left = point.X - (width - 1) / 2;
             int right = point.X + width / 2;
@@ -95,7 +95,7 @@
             PaintRectangle(new Rectangle(left, top, right - left, bottom - top), color, command, sync);
         }
 
-        public void PaintRectangle(Rectangle rectangle, Color color, PaintCommand command, bool sync = false) {
+        public void PaintRectangle(Rectangle rectangle, Color color, WorldEditCommand command, bool sync = false) {
             int startTileX = Utils.FloorDivide(rectangle.X, TileLength);
             int startTileY = Utils.FloorDivide(rectangle.Y, TileLength);
             int endTileX = Utils.FloorDivide(rectangle.Right, TileLength);
@@ -127,7 +127,7 @@
             }
         }
 
-        public void PaintFill(Point positionInWorld, Color color, PaintCommand command = null, bool sync = false) {
+        public void PaintFill(Point positionInWorld, Color color, WorldEditCommand command = null, bool sync = false) {
             var positionStack = new Stack<Point>();
             positionStack.Push(positionInWorld);
 
@@ -181,11 +181,11 @@
         #endregion
 
         #region Set Methods
-        public void SetTile(Point position, Tile tile, SetCommand command = null, bool preview = false) {
+        public void SetTile(Point position, Tile tile, WorldEditCommand command = null, bool preview = false) {
             if (preview) {
                 tile?.Draw(new Rectangle(position.X * TileLength, position.Y * TileLength, TileLength, TileLength), 0.5f);
             } else {
-                command?.Append(position, GetTile(position), tile);
+                command?.AppendTileReferenceChanges(this, position, GetTile(position), tile);
 
                 Point chunkPosition = GetChunkPositionOf(position);
 
@@ -213,7 +213,7 @@
             Chunks.Add(chunkPosition, chunk);
         }
 
-        public void SetLine(Point tilePos1, Point tilePos2, Tile[,] tilePattern, Point tilePatternOffset, int width, SetCommand command = null, bool preview = false) {
+        public void SetLine(Point tilePos1, Point tilePos2, Tile[,] tilePattern, Point tilePatternOffset, int width, WorldEditCommand command = null, bool preview = false) {
             Point originalTilePos = tilePos1;
 
             int dx = Math.Abs(tilePos2.X - tilePos1.X);
@@ -242,7 +242,7 @@
             }
         }
 
-        public void SetRectangle(Point tilePos1, Point tilePos2, Tile[,] tilePattern, Point tilePatternOffset, SetCommand command = null, bool preview = false) {
+        public void SetRectangle(Point tilePos1, Point tilePos2, Tile[,] tilePattern, Point tilePatternOffset, WorldEditCommand command = null, bool preview = false) {
             var pair = Utils.ValidizePoints(tilePos1, tilePos2);
             tilePos1 = pair.Item1;
             tilePos2 = pair.Item2;
@@ -260,7 +260,7 @@
             }
         }
 
-        public void SetCircle(Point centerPosition, Tile[,] tilePattern, int width, Point tilePatternOffset, SetCommand command = null, bool preview = false) {
+        public void SetCircle(Point centerPosition, Tile[,] tilePattern, int width, Point tilePatternOffset, WorldEditCommand command = null, bool preview = false) {
             for (int y = -(width - 1) / 2; y <= width / 2; y++) {
                 for (int x = -(width - 1) / 2; x <= width / 2; x++) {
                     Point position = new(centerPosition.X + x, centerPosition.Y + y);
@@ -277,7 +277,7 @@
             }   
         }
 
-        public void SetFill(Point tilePosition, Tile[,] tilePattern, SetCommand command = null) {
+        public void SetFill(Point tilePosition, Tile[,] tilePattern, WorldEditCommand command = null) {
             var positionStack = new Stack<Point>();
             positionStack.Push(tilePosition);
 
