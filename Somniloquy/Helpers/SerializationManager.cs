@@ -26,21 +26,23 @@ namespace Somniloquy {
         }
 
         public static void Serialize<T>(object instance, string fileName) {
-            // if (!Directory.Exists($"{Directories[typeof(T)]}")) Directory.CreateDirectory($"{Directories[typeof(T)]}");
-            // string directory = $"{Directories[typeof(T)]}/{fileName}";
-            var directory = fileName[^4..].Equals(".txt") ? fileName : fileName + ".txt";
+            try {
+                var directory = fileName[^4..].Equals(".txt") ? fileName : fileName + ".txt";
+                Console.WriteLine(directory);
+                // Required for storing references to 'parent classes' without causing a loop.
+                JsonSerializerSettings settings = new() { PreserveReferencesHandling = PreserveReferencesHandling.Objects };
 
-            // Required for storing references to 'parent classes' without causing a loop.
-            JsonSerializerSettings settings = new() { PreserveReferencesHandling = PreserveReferencesHandling.Objects };
+                string serialized = JsonConvert.SerializeObject(instance, settings);
 
-            string serialized = JsonConvert.SerializeObject(instance, settings);
-            
-            using FileStream compressedFileStream = File.Create(directory);
-            using GZipStream gzipStream = new(compressedFileStream, CompressionMode.Compress);
-            using StreamWriter writer = new(gzipStream);
-            writer.Write(serialized);
-
-            // Console.WriteLine(serialized);
+                using FileStream compressedFileStream = File.Create(directory);
+                using GZipStream gzipStream = new(compressedFileStream, CompressionMode.Compress);
+                using StreamWriter writer = new(gzipStream);
+                writer.Write(serialized);
+                writer.Flush();
+            }
+            catch (Exception ex) {
+                Console.WriteLine("An error occurred: " + ex.Message);
+            }
         }
 
         public static T Deserialize<T>(string fileName) {
@@ -54,8 +56,10 @@ namespace Somniloquy {
 
                 var settings = new JsonSerializerSettings();
                 settings.Converters.Add(new PointConverter());
-
-                return JsonConvert.DeserializeObject<T>(reader.ReadToEnd(), settings);
+                
+                var deserializedObject = JsonConvert.DeserializeObject<T>(reader.ReadToEnd(), settings);
+                reader.Close();
+                return deserializedObject;
             } catch (Exception e) {
                 Console.Out.WriteLine($"Failed to read file: {directory} \n {e.Message}");
                 return default;

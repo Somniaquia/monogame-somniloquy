@@ -16,6 +16,7 @@ namespace Somniloquy {
 
     public enum EditorState { PaintMode, TileMode, PropertiesMode }
     public enum EditorAction { PaintIdle, PaintRectangle, PaintLine, TileIdle, TileSelection, TileRectangle, TileLine, PropertiesIdle }
+    public enum TileAction { Repeat, Random, Wrap }
 
     /// <summary>
     /// EditorScreen is a screen for... well... editing the worlds you create!
@@ -68,6 +69,7 @@ namespace Somniloquy {
         public WorldEditCommand ActiveCommand { get; set; } = null;
         public int SelectedAnimationFrame { get; set; } = 0;
         public bool Sync = false;
+        public TileAction TileAction = TileAction.Repeat;
 
         public EditorScreen(Rectangle boundaries) : base(boundaries) {
             DividingDirection = Direction.Horizontal;
@@ -100,7 +102,11 @@ namespace Somniloquy {
             }
 
             if (InputManager.IsKeyPressed(Keys.Tab)) {
-                Sync = !Sync;
+                if (CurrentEditorState == EditorState.PaintMode) {
+                    Sync = !Sync;
+                } else if (CurrentEditorState == EditorState.TileMode) {
+                    TileAction = Utils.GetNextEnumValue(TileAction);
+                }
             }
 
             if (InputManager.IsKeyPressed(Keys.Enter)) {
@@ -118,27 +124,23 @@ namespace Somniloquy {
                     GameManager.FocusWindow();
                 }
                 else {
-                    Task.Run(() => {
-                        var path = Dialog.FileOpen("txt", GameManager.ContentManager.RootDirectory).Path;
+                    var path = Dialog.FileOpen("txt", GameManager.ContentManager.RootDirectory).Path;
 
-                        if (File.Exists(path)) {
-                            CommandManager.Clear();
-                            LoadedWorld.Layers.Clear();
-                            LoadedWorld = SerializationManager.Deserialize<World>(path);
-                            WorldScreen.SelectedLayer = LoadedWorld.Layers[0];
-                        }
-                    });
+                    if (File.Exists(path)) {
+                        CommandManager.Clear();
+                        LoadedWorld.Layers.Clear();
+                        LoadedWorld = SerializationManager.Deserialize<World>(path);
+                        WorldScreen.SelectedLayer = LoadedWorld.Layers[0];
+                    }
 
                     GameManager.FocusWindow();
                 }
             }
 
             if (InputManager.IsKeyDown(Keys.LeftControl) && InputManager.IsKeyPressed(Keys.S)) {
-                Task.Run(() => {
-                    var path = Dialog.FileSave("txt", GameManager.ContentManager.RootDirectory).Path;
-
-                    SerializationManager.Serialize<World>(LoadedWorld, path);
-                });
+                
+                var path = Dialog.FileSave("txt", GameManager.ContentManager.RootDirectory).Path;
+                SerializationManager.Serialize<World>(LoadedWorld, path);
 
                 GameManager.FocusWindow(); 
             }

@@ -9,7 +9,7 @@ namespace Somniloquy {
 
     public class Tile {
         public Sprite Sprite { get; set; }
-        public Point[] CollisionVertices { get; set; } = new Point[4] { new Point(0, 0), new Point(15, 0), new Point(15, 15), new Point(0, 15) };
+        public Point[] CollisionVertices { get; set; } = new Point[4] { new Point(0, 0), new Point(16, 0), new Point(16, 16), new Point(0, 16) };
 
         public Tile(SpriteSheet spriteSheet, int frameIndexInSpriteSheet) {
             Sprite = new(spriteSheet);
@@ -26,27 +26,27 @@ namespace Somniloquy {
             
         }
 
-        public void Draw(Rectangle destination, float opacity = 1f, bool drawCollisionBounds = false) {
+        public void Draw(Rectangle destination, float opacity = 1f) {
             if (Sprite is null || Sprite.Animations.Count == 0)
                 GameManager.DrawFilledRectangle(destination, Color.AliceBlue);
             else {
                 Sprite.Draw(destination, opacity);
             }
+        }
 
-            if (drawCollisionBounds) {
-                foreach (var vertex in CollisionVertices) {
-                    GameManager.SpriteBatch.DrawPoint(new Vector2(destination.X + vertex.X, destination.Y + vertex.Y), Color.Blue);
-                }
+        public void DrawCollisionBoundaries(Rectangle destination, float opacity = 1f) {
+            foreach (var vertex in CollisionVertices) {
+                GameManager.SpriteBatch.DrawPoint(new Vector2(destination.X + vertex.X, destination.Y + vertex.Y), Color.DarkBlue * opacity);
+            }
 
-                for (int i = 0; i < CollisionVertices.Length; i++) {
-                    var vertex1 = CollisionVertices[i];
-                    var vertex2 = CollisionVertices[(i + 1) % CollisionVertices.Length];
-                    GameManager.SpriteBatch.DrawLine(
-                        new Vector2(destination.X + vertex1.X, destination.Y + vertex1.Y),
-                        new Vector2(destination.X + vertex2.X, destination.Y + vertex2.Y),
-                        Color.Blue * 0.5f
-                    );
-                }
+            for (int i = 0; i < CollisionVertices.Length; i++) {
+                var vertex1 = CollisionVertices[i];
+                var vertex2 = CollisionVertices[(i + 1) % CollisionVertices.Length];
+                GameManager.SpriteBatch.DrawLine(
+                    new Vector2(destination.X + (float)vertex1.X / Layer.TileLength * destination.Width, destination.Y + (float)vertex1.Y / Layer.TileLength * destination.Height),
+                    new Vector2(destination.X + (float)vertex2.X / Layer.TileLength * destination.Width, destination.Y + (float)vertex2.Y / Layer.TileLength * destination.Height),
+                    Color.DarkBlue * opacity * 0.5f
+                );
             }
         }
     }

@@ -7,6 +7,8 @@ namespace Somniloquy {
     using MonoGame.Extended;
 
     public static class Utils {
+        private static Random random = new();
+
         public static float Lerp(float origin, float target, float lerpModifier) {
             return origin * (1 - lerpModifier) + target * lerpModifier;
         }
@@ -239,6 +241,16 @@ namespace Somniloquy {
             }
 
             target.SetData(colorData);
+        }
+
+        public static int RandomInteger(int min, int nonInclusiveMax) {
+            return random.Next(min, nonInclusiveMax);
+        }
+
+        public static T GetNextEnumValue<T>(T currentValue) where T : Enum {
+            T[] values = (T[])Enum.GetValues(typeof(T));
+            int j = Array.IndexOf(values, currentValue) + 1;
+            return (j == values.Length) ? values[0] : values[j];
         }
     }
 }
