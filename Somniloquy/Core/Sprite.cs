@@ -7,7 +7,7 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework.Graphics;
     using System.Linq;
     
-    public struct Animation {
+    public class Animation {
         public Sprite ParentSprite { get; set; }
         public List<int> FrameIndices { get; set; } = new();
         public List<Point> FrameOffsets { get; set; } = new();
@@ -21,8 +21,8 @@ namespace Somniloquy {
         public SpriteSheet SpriteSheet { get; set; }
         public Dictionary<string, Animation> Animations { get; set; } = new();
 
-        public Animation CurrentAnimation;
-        public int CurrentAnimationFrame;
+        public Animation CurrentAnimation { get; set; }
+        public int CurrentAnimationFrame { get; set; }
 
         public Sprite(SpriteSheet spriteSheet) {
             SpriteSheet = spriteSheet;

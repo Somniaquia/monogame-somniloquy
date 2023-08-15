@@ -30,6 +30,7 @@ namespace Somniloquy {
         public EffectParameter BloomSaturation;
         public EffectParameter BaseSaturation;
 
+        private Point windowSize = GameManager.WindowSize.Size;  // new(1280, 720);
 
         float pitch = 0.7f;
         static string music = "moseni_fog";
@@ -50,9 +51,6 @@ namespace Somniloquy {
             BloomExtractEffect = GameManager.ContentManager.Load<Effect>("Shaders/BloomExtract");
             GaussianBlurEffect = GameManager.ContentManager.Load<Effect>("Shaders/GaussianBlur");
             BloomCombineEffect = GameManager.ContentManager.Load<Effect>("Shaders/BloomCombine");
-
-            BrightnessThreshold = BloomExtractEffect.Parameters["BrightnessThreshold"];
-            BrightnessThreshold.SetValue(0.25f);
 
             SampleWeights = GaussianBlurEffect.Parameters["SampleWeights"];
             SampleOffsets = GaussianBlurEffect.Parameters["SampleOffsets"];
@@ -136,9 +134,9 @@ namespace Somniloquy {
             GameManager.GraphicsDevice.SetRenderTarget(null);
             BloomCombineEffect.CurrentTechnique.Passes[0].Apply();
             GameManager.GraphicsDevice.Clear(Color.Black);
-            //GameManager.SpriteBatch.Begin(0, BlendState.Additive, null, null, null, BloomCombineEffect);
-            GameManager.SpriteBatch.Begin(0, BlendState.Additive, null, null, null, null);
-            //GameManager.SpriteBatch.Draw(sceneRender, Vector2.Zero, Color.White);
+            GameManager.SpriteBatch.Begin(0, BlendState.Additive, null, null, null, BloomCombineEffect);
+            //GameManager.SpriteBatch.Begin(0, BlendState.Additive, null, null, null, null);
+            GameManager.SpriteBatch.Draw(sceneRender, Vector2.Zero, Color.White);
             GameManager.SpriteBatch.Draw(bloomBlurRender, Vector2.Zero, Color.White);
             GameManager.SpriteBatch.End();
 
@@ -148,24 +146,25 @@ namespace Somniloquy {
         }
 
         private RenderTarget2D BlurBloom(RenderTarget2D bloomExtractRender) {
-            RenderTarget2D gaussianBlurRenderHorizontal = new(GameManager.GraphicsDevice, GameManager.WindowSize.Width, GameManager.WindowSize.Height);
+            int sampleCount =11;
+            RenderTarget2D gaussianBlurRenderHorizontal = new(GameManager.GraphicsDevice, windowSize.X, windowSize.Y);
             GameManager.GraphicsDevice.SetRenderTarget(gaussianBlurRenderHorizontal);
             GameManager.GraphicsDevice.Clear(Color.Transparent);
 
-            SampleWeights.SetValue(Utils.GetSampleWeights());
-            SampleOffsets.SetValue(Utils.GetSampleOffsets(Direction.Horizontal));
+            SampleWeights.SetValue(Utils.GetSampleWeights(sampleCount));
+            SampleOffsets.SetValue(Utils.GetSampleOffsets(Direction.Horizontal, sampleCount));
             GaussianBlurEffect.CurrentTechnique.Passes[0].Apply();
 
             GameManager.SpriteBatch.Begin(0, BlendState.Opaque, null, null, null, GaussianBlurEffect);
             GameManager.SpriteBatch.Draw(bloomExtractRender, Vector2.Zero, Color.White);
             GameManager.SpriteBatch.End();
 
-            RenderTarget2D gaussianBlurRenderVertical = new(GameManager.GraphicsDevice, GameManager.WindowSize.Width, GameManager.WindowSize.Height);
+            RenderTarget2D gaussianBlurRenderVertical = new(GameManager.GraphicsDevice, windowSize.X, windowSize.Y);
             GameManager.GraphicsDevice.SetRenderTarget(gaussianBlurRenderVertical);
             GameManager.GraphicsDevice.Clear(Color.Transparent);
 
-            SampleWeights.SetValue(Utils.GetSampleWeights());
-            SampleOffsets.SetValue(Utils.GetSampleOffsets(Direction.Vertical));
+            SampleWeights.SetValue(Utils.GetSampleWeights(sampleCount));
+            SampleOffsets.SetValue(Utils.GetSampleOffsets(Direction.Vertical, sampleCount));
             GaussianBlurEffect.CurrentTechnique.Passes[0].Apply();
 
             GameManager.SpriteBatch.Begin(0, BlendState.Opaque, null, null, null, GaussianBlurEffect);
@@ -177,7 +176,7 @@ namespace Somniloquy {
         }
 
         private RenderTarget2D ExtractBloom(RenderTarget2D sceneRender) {
-            RenderTarget2D bloomExtractRender = new(GameManager.GraphicsDevice, GameManager.WindowSize.Width, GameManager.WindowSize.Height);
+            RenderTarget2D bloomExtractRender = new(GameManager.GraphicsDevice, windowSize.X, windowSize.Y);
             BloomExtractEffect.CurrentTechnique.Passes[0].Apply();
             
             GameManager.GraphicsDevice.SetRenderTarget(bloomExtractRender);
@@ -191,7 +190,7 @@ namespace Somniloquy {
         }
 
         private RenderTarget2D RenderScene() {
-            RenderTarget2D sceneRender = new(GameManager.GraphicsDevice, GameManager.WindowSize.Width, GameManager.WindowSize.Height);
+            RenderTarget2D sceneRender = new(GameManager.GraphicsDevice, windowSize.X, windowSize.Y);
             GameManager.GraphicsDevice.SetRenderTarget(sceneRender);
             GameManager.GraphicsDevice.Clear(Color.Transparent);
             GameManager.SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, transformMatrix: Camera.Transform);

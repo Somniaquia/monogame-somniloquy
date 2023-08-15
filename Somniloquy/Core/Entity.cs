@@ -65,8 +65,6 @@ namespace Somniloquy
                             potentialPosition += collisionDirection * overlap;
                         }
                     }
-
-                    Console.WriteLine();
                 }
             }
 
@@ -109,7 +107,7 @@ namespace Somniloquy
 
         public override void Update() {
             Velocity = Vector2.Zero;
-            float speed = 1f;
+            float speed = 2f;
 
             if (Controllability >= 0.5f) {
                 if (InputManager.IsKeyDown(Keys.W)) {

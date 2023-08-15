@@ -138,7 +138,7 @@ namespace Somniloquy {
             return (float)(1.0 / Math.Sqrt(2 * pi * sigma * sigma) * Math.Exp(-(x * x) / (2 * sigma * sigma)));
         }
 
-        public static float[] GetSampleWeights(int sampleCount = 11) {
+        public static float[] GetSampleWeights(int sampleCount) {
             float[] sampleWeights = new float[sampleCount];
 
             float totalWeights = 0.0f;
@@ -153,18 +153,18 @@ namespace Somniloquy {
             for (int i = 0; i < sampleCount; i++) {
                 sampleWeights[i] /= totalWeights;
             }
-
+            
             return sampleWeights;
         }
 
-        public static Vector2[] GetSampleOffsets(Direction direction, int sampleCount = 11) {
+        public static Vector2[] GetSampleOffsets(Direction direction, int sampleCount) {
             Vector2[] sampleOffsets = new Vector2[sampleCount];
 
-            var length = direction == Direction.Horizontal ? GameManager.WindowSize.X : GameManager.WindowSize.Y;
+            var length = direction == Direction.Horizontal ? GameManager.WindowSize.Width : GameManager.WindowSize.Height;
             float delta = 1.0f / length;
 
             for (int i = 0; i < sampleCount; i++) {
-                sampleOffsets[i] = direction == Direction.Horizontal ? new Vector2((i - sampleCount / 2) * delta, 0) : new Vector2((i - sampleCount / 2) * delta, 0);
+                sampleOffsets[i] = direction == Direction.Horizontal ? new Vector2((i - sampleCount / 2) * delta, 0) : new Vector2(0, (i - sampleCount / 2) * delta);
             }
 
             return sampleOffsets;

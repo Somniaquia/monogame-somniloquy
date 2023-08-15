@@ -406,29 +406,30 @@ namespace Somniloquy {
                 var yPos = Camera.ApplyTransform(new Vector2(0, y * Layer.TileLength)).Y;
                 GameManager.SpriteBatch.DrawLine(0, yPos, GameManager.WindowSize.Width, yPos, Color.Black * 0.5f);
             }
+            if (InputManager.Focus == this) {
+                if (EditorScreen.CurrentEditorAction == EditorAction.TileSelection) {
+                    var rectangle = Utils.ValidizeRectangle(new Rectangle(
+                        tilePosition.X * Layer.TileLength,
+                        tilePosition.Y * Layer.TileLength,
+                        (firstPositionInWorld.Value.X - tilePosition.X) * Layer.TileLength,
+                        (firstPositionInWorld.Value.Y - tilePosition.Y) * Layer.TileLength
+                    ));
 
-            if (EditorScreen.CurrentEditorAction == EditorAction.TileSelection) {
-                var rectangle = Utils.ValidizeRectangle(new Rectangle(
-                    tilePosition.X * Layer.TileLength,
-                    tilePosition.Y * Layer.TileLength,
-                    (firstPositionInWorld.Value.X - tilePosition.X) * Layer.TileLength,
-                    (firstPositionInWorld.Value.Y - tilePosition.Y) * Layer.TileLength
-                ));
+                    rectangle.Width += Layer.TileLength; rectangle.Height += Layer.TileLength;
 
-                rectangle.Width += Layer.TileLength; rectangle.Height += Layer.TileLength;
-
-                GameManager.SpriteBatch.DrawRectangle(Camera.ApplyTransform(rectangle), Color.Red * 0.5f);
-            } else {
-                GameManager.SpriteBatch.DrawRectangle(
-                    Camera.ApplyTransform(
-                        new Rectangle(
-                            tilePosition.X * Layer.TileLength,
-                            tilePosition.Y * Layer.TileLength,
-                            Layer.TileLength, Layer.TileLength
-                        )
-                    ), Color.Red * 0.5f
-                );
-            }
+                    GameManager.SpriteBatch.DrawRectangle(Camera.ApplyTransform(rectangle), Color.Red * 0.5f);
+                } else {
+                    GameManager.SpriteBatch.DrawRectangle(
+                        Camera.ApplyTransform(
+                            new Rectangle(
+                                tilePosition.X * Layer.TileLength,
+                                tilePosition.Y * Layer.TileLength,
+                                Layer.TileLength, Layer.TileLength
+                            )
+                        ), Color.Red * 0.5f
+                    );
+                }
+            } 
         }
 
         public override void Draw() {
@@ -443,7 +444,7 @@ namespace Somniloquy {
 
             GameManager.SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
 
-            if (SelectedLayer is not null && InputManager.Focus == this) DrawGrids();
+            if (SelectedLayer is not null) DrawGrids();
             
             if (EditorScreen.CurrentEditorState == EditorState.PropertiesMode) {
                 foreach (var layer in EditorScreen.LoadedWorld.Layers) {
