@@ -29,19 +29,22 @@
     <PackageReference Include="NativeFileDialogSharp" Version="0.5.0" />
   </ItemGroup>
   <ItemGroup>
+    <!-- <None Update="Assets\">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None> -->
     <None Update="Content\misaki_gothic_2nd.ttf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="FMod\fmod.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="FMod\fmodL.dll">
+    <None Update="ExternalAssemblies\FMod\fmod.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="FMod\fmodstudio.dll">
+    <None Update="ExternalAssemblies\FMod\fmodL.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="FMod\fmodstudioL.dll">
+    <None Update="ExternalAssemblies\FMod\fmodstudio.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="ExternalAssemblies\FMod\fmodstudioL.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

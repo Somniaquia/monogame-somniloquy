@@ -20,17 +20,17 @@ namespace Somniloquy {
         public string Name { get; set; }
         public SpriteSheet SpriteSheet { get; set; }
         public List<Tile> Tiles { get; set; } = new();
-        public List<Layer> Layers { get; set; } = new();
+        public List<TileLayer2D> Layers { get; set; } = new();
 
         public Tile DefaultTile { get; set; }
 
         public World() {
-            SpriteSheet = new(new Point(Layer.TileLength, Layer.TileLength));
+            SpriteSheet = new(new Point(TileLayer2D.TileLength, TileLayer2D.TileLength));
             DefaultTile = NewTile(false);
         }
 
-        public Layer NewLayer() {
-            var layer = new Layer(this);
+        public TileLayer2D NewLayer() {
+            var layer = new TileLayer2D(this);
             Layers.Add(layer);
             return layer;
         }

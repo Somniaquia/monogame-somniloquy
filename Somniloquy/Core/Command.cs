@@ -44,7 +44,7 @@ namespace Somniloquy {
 
     public class WorldEditCommand : ICommand {
         private List<(Animation, int, Color?[,], Color?[,])> textureChanges = new(); 
-        private List<(Layer, Point, Tile, Tile)> tileReferenceChanges = new();
+        private List<(TileLayer2D, Point, Tile, Tile)> tileReferenceChanges = new();
 
         public void AppendFrameTextureChanges(Animation animation, int frame, Color?[,] previousColors, Color?[,] subsequentColors) {
             for (int i = 0; i < textureChanges.Count; i++) {
@@ -57,7 +57,7 @@ namespace Somniloquy {
             textureChanges.Add((animation, frame, previousColors, subsequentColors));
         }
 
-        public void AppendTileReferenceChanges(Layer layer, Point position, Tile previousTile, Tile subsequentTile) {
+        public void AppendTileReferenceChanges(TileLayer2D layer, Point position, Tile previousTile, Tile subsequentTile) {
             for (int i = 0; i < tileReferenceChanges.Count; i++) {
                 if (tileReferenceChanges[i].Item1 == layer && tileReferenceChanges[i].Item2 == position) {
                     tileReferenceChanges[i] = (layer, position, tileReferenceChanges[i].Item3, subsequentTile);
