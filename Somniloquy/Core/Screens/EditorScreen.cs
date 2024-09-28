@@ -105,7 +105,7 @@ namespace Somniloquy {
                 if (CurrentEditorState == EditorState.PaintMode) {
                     Sync = !Sync;
                 } else if (CurrentEditorState == EditorState.TileMode) {
-                    TileAction = Utils.GetNextEnumValue(TileAction);
+                    TileAction = Util.GetNextEnumValue(TileAction);
                 }
             }
 

@@ -49,7 +49,7 @@ namespace Somniloquy {
             SelectedLayer ??= EditorScreen.LoadedWorld.Layers[^1];
 
             previousWorldPosition = mouseWorldPosition;
-            mouseWorldPosition = Utils.ToPoint(Camera.ApplyInvertTransform(InputManager.GetMousePosition()));
+            mouseWorldPosition = Util.ToPoint(Camera.ApplyInvertTransform(InputManager.GetMousePosition()));
 
             previousTilePosition = SelectedLayer.GetTilePositionOf(previousWorldPosition);
             mouseTilePosition = SelectedLayer.GetTilePositionOf(mouseWorldPosition);
@@ -173,11 +173,11 @@ namespace Somniloquy {
                     CommandManager.Push(EditorScreen.ActiveCommand);
                     if (InputManager.IsKeyDown(Keys.LeftShift)) {
                         SelectedLayer.SetLine(
-                            firstPositionInWorld.Value, Utils.AnchorPoint(mouseTilePosition, firstPositionInWorld.Value),
+                            firstPositionInWorld.Value, Util.AnchorPoint(mouseTilePosition, firstPositionInWorld.Value),
                             tilePattern, EditorScreen.TileAction, Point.Zero, 1, EditorScreen.ActiveCommand
                         );
-                        tilePatternOrigin = Utils.AnchorPoint(mouseTilePosition, firstPositionInWorld.Value) - firstPositionInWorld.Value;
-                        firstPositionInWorld = Utils.AnchorPoint(mouseWorldPosition, firstPositionInWorld.Value);
+                        tilePatternOrigin = Util.AnchorPoint(mouseTilePosition, firstPositionInWorld.Value) - firstPositionInWorld.Value;
+                        firstPositionInWorld = Util.AnchorPoint(mouseWorldPosition, firstPositionInWorld.Value);
                     }
                     else {
                         SelectedLayer.SetLine(
@@ -256,7 +256,7 @@ namespace Somniloquy {
                     CommandManager.Push(EditorScreen.ActiveCommand);
 
                     SelectedLayer.PaintRectangle(
-                        Utils.ValidizeRectangle(new Rectangle(firstPositionInWorld.Value, previousWorldPosition - firstPositionInWorld.Value)),
+                        Util.ValidizeRectangle(new Rectangle(firstPositionInWorld.Value, previousWorldPosition - firstPositionInWorld.Value)),
                         color, EditorScreen.ActiveCommand, EditorScreen.Sync
                     );
                     firstPositionInWorld = mouseWorldPosition;
@@ -272,10 +272,10 @@ namespace Somniloquy {
                     CommandManager.Push(EditorScreen.ActiveCommand);
                     if (InputManager.IsKeyDown(Keys.LeftShift)) {
                         SelectedLayer.PaintLine(
-                            firstPositionInWorld.Value, Utils.AnchorPoint(mouseWorldPosition, firstPositionInWorld.Value),
+                            firstPositionInWorld.Value, Util.AnchorPoint(mouseWorldPosition, firstPositionInWorld.Value),
                             color, 1, EditorScreen.ActiveCommand, EditorScreen.Sync
                         );
-                        firstPositionInWorld = Utils.AnchorPoint(mouseWorldPosition, firstPositionInWorld.Value);
+                        firstPositionInWorld = Util.AnchorPoint(mouseWorldPosition, firstPositionInWorld.Value);
                     } else {
                         SelectedLayer.PaintLine(
                             firstPositionInWorld.Value, mouseWorldPosition,
@@ -335,7 +335,7 @@ namespace Somniloquy {
                     Color[] retrievedColors = new Color[margin.Width * margin.Height];
                     image.GetData(0, margin, retrievedColors, 0, retrievedColors.Length);
 
-                    var colors = Utils.ToNullableColors(Utils.ConvertTo2D(retrievedColors, TileLayer2D.TileLength));
+                    var colors = Util.ToNullableColors(Util.ConvertTo2D(retrievedColors, TileLayer2D.TileLength));
 
                     int frame = EditorScreen.LoadedWorld.SpriteSheet.NewFrame();
                     EditorScreen.LoadedWorld.SpriteSheet.PaintOnFrame(colors, frame);
@@ -365,11 +365,11 @@ namespace Somniloquy {
                     SQ.SB.DrawPoint(mouseWorldPosition.ToVector2(), EditorScreen.SelectedColor * 0.5f);
                     break;
                 case EditorAction.PaintRectangle:
-                    SQ.SB.DrawFilledRectangle(Utils.ValidizeRectangle(new Rectangle(firstPositionInWorld.Value, mouseWorldPosition - firstPositionInWorld.Value + new Point(1, 1))), EditorScreen.SelectedColor * 0.5f);
+                    SQ.SB.DrawFilledRectangle(Util.ValidizeRectangle(new Rectangle(firstPositionInWorld.Value, mouseWorldPosition - firstPositionInWorld.Value + new Point(1, 1))), EditorScreen.SelectedColor * 0.5f);
                     break;
                 case EditorAction.PaintLine:
                     if (InputManager.IsKeyDown(Keys.LeftShift)) {
-                        SQ.SB.DrawPixelizedLine(firstPositionInWorld.Value, Utils.AnchorPoint(mouseWorldPosition, firstPositionInWorld.Value), EditorScreen.SelectedColor * 0.5f);
+                        SQ.SB.DrawPixelizedLine(firstPositionInWorld.Value, Util.AnchorPoint(mouseWorldPosition, firstPositionInWorld.Value), EditorScreen.SelectedColor * 0.5f);
                     } else {
                         SQ.SB.DrawPixelizedLine(firstPositionInWorld.Value, mouseWorldPosition, EditorScreen.SelectedColor * 0.5f);
                     }
@@ -394,8 +394,8 @@ namespace Somniloquy {
             Point tilePosition = mouseTilePosition;
 
             var viewportRect = Camera.GetViewport();
-            Point topLeft = SelectedLayer.GetTilePositionOf(Utils.ToPoint(viewportRect.TopLeft));
-            Point bottomRight = SelectedLayer.GetTilePositionOf(Utils.ToPoint(viewportRect.BottomRight));
+            Point topLeft = SelectedLayer.GetTilePositionOf(Util.ToPoint(viewportRect.TopLeft));
+            Point bottomRight = SelectedLayer.GetTilePositionOf(Util.ToPoint(viewportRect.BottomRight));
 
             for (int x = topLeft.X; x <= bottomRight.X; x++) {
                 var xPos = Camera.ApplyTransform(new Vector2(x * TileLayer2D.TileLength, 0)).X;
@@ -408,7 +408,7 @@ namespace Somniloquy {
             }
             if (InputManager.FocusedScreen == this) {
                 if (EditorScreen.CurrentEditorAction == EditorAction.TileSelection) {
-                    var rectangle = Utils.ValidizeRectangle(new Rectangle(
+                    var rectangle = Util.ValidizeRectangle(new Rectangle(
                         tilePosition.X * TileLayer2D.TileLength,
                         tilePosition.Y * TileLayer2D.TileLength,
                         (firstPositionInWorld.Value.X - tilePosition.X) * TileLayer2D.TileLength,

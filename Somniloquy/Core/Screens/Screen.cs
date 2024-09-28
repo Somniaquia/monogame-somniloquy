@@ -30,7 +30,7 @@ namespace Somniloquy {
 
         public virtual void Update() {
             if (Focusable) {
-                if (Utils.IsWithinBoundaries(Utils.ToPoint(InputManager.GetMousePosition()), Boundaries)) {
+                if (Util.IsWithinBoundaries(Util.ToPoint(InputManager.GetMousePosition()), Boundaries)) {
                     if (!InputManager.IsMouseButtonDown(MouseButtons.LeftButton)) {
                         InputManager.FocusedScreen = this;
                     }

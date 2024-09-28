@@ -6,7 +6,6 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework.Input;
     using WintabDN;
 
-    public delegate void Action(params object[] parameters);
     public enum MouseButtons { LeftButton, RightButton, MiddleButton, XButton1, XButton2 }
 
     public class Keybind {

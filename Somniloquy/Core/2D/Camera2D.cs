@@ -33,13 +33,13 @@ namespace Somniloquy {
         }
 
         public void UpdateTransformation() {
-            Position.X = Utils.Lerp(Position.X, TargetPosition.X, LerpModifier);
-            Position.Y = Utils.Lerp(Position.Y, TargetPosition.Y, LerpModifier);
+            Position.X = Util.Lerp(Position.X, TargetPosition.X, LerpModifier);
+            Position.Y = Util.Lerp(Position.Y, TargetPosition.Y, LerpModifier);
 
-            Zoom = Utils.Lerp(Zoom, TargetZoom, LerpModifier);
+            Zoom = Util.Lerp(Zoom, TargetZoom, LerpModifier);
 
-            TargetRotation = Utils.PosMod(TargetRotation, 2 * MathF.PI);
-            Rotation = Utils.Lerp(Rotation, TargetRotation, LerpModifier);
+            TargetRotation = Util.PosMod(TargetRotation, 2 * MathF.PI);
+            Rotation = Util.Lerp(Rotation, TargetRotation, LerpModifier);
 
             Viewport viewport = SQ.GD.Viewport;
 

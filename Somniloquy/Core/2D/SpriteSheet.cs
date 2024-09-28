@@ -71,7 +71,7 @@ namespace Somniloquy {
             Color[] retrievedColors = new Color[margin.Width * margin.Height];
             RawSpriteSheet.GetData(0, margin, retrievedColors, 0, retrievedColors.Length);
 
-            return Utils.ToNullableColors(Utils.ConvertTo2D(retrievedColors, FrameSize.X));
+            return Util.ToNullableColors(Util.ConvertTo2D(retrievedColors, FrameSize.X));
         }
 
         public Color GetPixelColor(Point position) {

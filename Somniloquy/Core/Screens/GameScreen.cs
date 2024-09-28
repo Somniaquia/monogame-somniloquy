@@ -152,8 +152,8 @@ namespace Somniloquy {
             SQ.GD.SetRenderTarget(gaussianBlurRenderHorizontal);
             SQ.GD.Clear(Color.Transparent);
 
-            SampleWeights.SetValue(Utils.GetSampleWeights(sampleCount));
-            SampleOffsets.SetValue(Utils.GetSampleOffsets(Direction.Horizontal, sampleCount));
+            SampleWeights.SetValue(Util.GetSampleWeights(sampleCount));
+            SampleOffsets.SetValue(Util.GetSampleOffsets(Direction.Horizontal, sampleCount));
             GaussianBlurEffect.CurrentTechnique.Passes[0].Apply();
 
             SQ.SB.Begin(0, BlendState.Opaque, null, null, null, GaussianBlurEffect);
@@ -164,8 +164,8 @@ namespace Somniloquy {
             SQ.GD.SetRenderTarget(gaussianBlurRenderVertical);
             SQ.GD.Clear(Color.Transparent);
 
-            SampleWeights.SetValue(Utils.GetSampleWeights(sampleCount));
-            SampleOffsets.SetValue(Utils.GetSampleOffsets(Direction.Vertical, sampleCount));
+            SampleWeights.SetValue(Util.GetSampleWeights(sampleCount));
+            SampleOffsets.SetValue(Util.GetSampleOffsets(Direction.Vertical, sampleCount));
             GaussianBlurEffect.CurrentTechnique.Passes[0].Apply();
 
             SQ.SB.Begin(0, BlendState.Opaque, null, null, null, GaussianBlurEffect);

@@ -28,15 +28,15 @@
         }
 
         public Point GetPositionInTile(Point worldPosition) {
-            return new Point(Utils.PosMod(worldPosition.X, TileLength), Utils.PosMod(worldPosition.Y, TileLength));
+            return new Point(Util.PosMod(worldPosition.X, TileLength), Util.PosMod(worldPosition.Y, TileLength));
         }
 
         public Point GetTilePositionOf(Point worldPosition) {
-            return new Point(Utils.FloorDivide(worldPosition.X, TileLength), Utils.FloorDivide(worldPosition.Y, TileLength));
+            return new Point(Util.FloorDivide(worldPosition.X, TileLength), Util.FloorDivide(worldPosition.Y, TileLength));
         }
 
         public Point GetChunkPositionOf(Point tilePosition) {
-            return new Point(Utils.FloorDivide(tilePosition.X, ChunkLength), Utils.FloorDivide(tilePosition.Y, ChunkLength));
+            return new Point(Util.FloorDivide(tilePosition.X, ChunkLength), Util.FloorDivide(tilePosition.Y, ChunkLength));
         }
 
         #region Paint Methods
@@ -96,10 +96,10 @@
         }
 
         public void PaintRectangle(Rectangle rectangle, Color color, WorldEditCommand command, bool sync = false) {
-            int startTileX = Utils.FloorDivide(rectangle.X, TileLength);
-            int startTileY = Utils.FloorDivide(rectangle.Y, TileLength);
-            int endTileX = Utils.FloorDivide(rectangle.Right, TileLength);
-            int endTileY = Utils.FloorDivide(rectangle.Bottom, TileLength);
+            int startTileX = Util.FloorDivide(rectangle.X, TileLength);
+            int startTileY = Util.FloorDivide(rectangle.Y, TileLength);
+            int endTileX = Util.FloorDivide(rectangle.Right, TileLength);
+            int endTileY = Util.FloorDivide(rectangle.Bottom, TileLength);
 
             for (int tileY = startTileY; tileY <= endTileY; tileY++) {
                 for (int tileX = startTileX; tileX <= endTileX; tileX++) {
@@ -145,7 +145,7 @@
             while (positionStack.Count != 0) {
                 var position = positionStack.Pop();
                 var tile = GetTile(GetTilePositionOf(position));
-                tileColors[tile][Utils.PosMod(position.X, TileLength), Utils.PosMod(position.Y, TileLength)] = color;
+                tileColors[tile][Util.PosMod(position.X, TileLength), Util.PosMod(position.Y, TileLength)] = color;
 
                 foreach (var positionOffset in new Point[] { new Point(-1, 0), new Point(1, 0), new Point(0, -1), new Point(0, 1) }) {
                     var checkingPosition = position + positionOffset;
@@ -160,7 +160,7 @@
                             //tileColors.Add(checkingTile, checkingTile.Sprite.GetCurrentAnimation().GetFrameColors(0));
                         }
 
-                        if (tileColors[checkingTile][Utils.PosMod(checkingPosition.X, TileLength), Utils.PosMod(checkingPosition.Y, TileLength)] == targetColor) {
+                        if (tileColors[checkingTile][Util.PosMod(checkingPosition.X, TileLength), Util.PosMod(checkingPosition.Y, TileLength)] == targetColor) {
                             positionStack.Push(checkingPosition);
                         }
                     }
@@ -243,7 +243,7 @@
         }
 
         public void SetRectangle(Point tilePos1, Point tilePos2, Tile[,] tilePattern, TileAction action, Point tilePatternOffset, WorldEditCommand command = null, bool preview = false) {
-            var pair = Utils.ValidizePoints(tilePos1, tilePos2);
+            var pair = Util.ValidizePoints(tilePos1, tilePos2);
             tilePos1 = pair.Item1;
             tilePos2 = pair.Item2;
 
@@ -253,31 +253,31 @@
                         SetTile(
                             new Point(x, y), 
                             tilePattern[
-                                Utils.PosMod(tilePatternOffset.X + x - tilePos1.X, tilePattern.GetLength(0)),
-                                Utils.PosMod(tilePatternOffset.Y + y - tilePos1.Y, tilePattern.GetLength(1))
+                                Util.PosMod(tilePatternOffset.X + x - tilePos1.X, tilePattern.GetLength(0)),
+                                Util.PosMod(tilePatternOffset.Y + y - tilePos1.Y, tilePattern.GetLength(1))
                             ], command, preview
                         );
                     } else if (action == TileAction.Random) {
                         SetTile(
                             new Point(x, y),
                             tilePattern[
-                                Utils.RandomInteger(0, tilePattern.GetLength(0)),
-                                Utils.RandomInteger(0, tilePattern.GetLength(1))
+                                Util.RandomInteger(0, tilePattern.GetLength(0)),
+                                Util.RandomInteger(0, tilePattern.GetLength(1))
                             ], command, preview
                         );
-                        Console.WriteLine(Utils.RandomInteger(0, tilePattern.GetLength(0)));
+                        Console.WriteLine(Util.RandomInteger(0, tilePattern.GetLength(0)));
                     } else if (action == TileAction.Wrap) {
                         int patternX, patternY;
 
-                        if (tilePattern.GetLength(0) <= 2) patternX = Utils.PosMod(tilePatternOffset.X + x - tilePos1.X, tilePattern.GetLength(0));
+                        if (tilePattern.GetLength(0) <= 2) patternX = Util.PosMod(tilePatternOffset.X + x - tilePos1.X, tilePattern.GetLength(0));
                         else if (x == tilePos1.X) patternX = 0;
                         else if (x == tilePos2.X) patternX = tilePattern.GetLength(0) - 1;
-                        else patternX = Utils.PosMod(tilePatternOffset.X + x - tilePos1.X - 1, tilePattern.GetLength(0) - 2) + 1;
+                        else patternX = Util.PosMod(tilePatternOffset.X + x - tilePos1.X - 1, tilePattern.GetLength(0) - 2) + 1;
 
-                        if (tilePattern.GetLength(1) <= 2) patternY = Utils.PosMod(tilePatternOffset.Y + y - tilePos1.Y, tilePattern.GetLength(1));
+                        if (tilePattern.GetLength(1) <= 2) patternY = Util.PosMod(tilePatternOffset.Y + y - tilePos1.Y, tilePattern.GetLength(1));
                         else if (y == tilePos1.Y) patternY = 0;
                         else if (y == tilePos2.Y) patternY = tilePattern.GetLength(0) - 1;
-                        else patternY = Utils.PosMod(tilePatternOffset.Y + y - tilePos1.Y - 1, tilePattern.GetLength(0) - 2) + 1;
+                        else patternY = Util.PosMod(tilePatternOffset.Y + y - tilePos1.Y - 1, tilePattern.GetLength(0) - 2) + 1;
 
                         SetTile(new Point(x, y), tilePattern[patternX, patternY], command, preview);
                     }
@@ -294,16 +294,16 @@
                             SetTile(
                                 new Point(centerPosition.X + x, centerPosition.Y + y),
                                 tilePattern[
-                                    Utils.PosMod(tilePatternOffset.X + x, tilePattern.GetLength(0)),
-                                    Utils.PosMod(tilePatternOffset.Y + y, tilePattern.GetLength(1))
+                                    Util.PosMod(tilePatternOffset.X + x, tilePattern.GetLength(0)),
+                                    Util.PosMod(tilePatternOffset.Y + y, tilePattern.GetLength(1))
                                 ], command, preview
                             );
                         } else if (action == TileAction.Random) {
                             SetTile(
                                 new Point(centerPosition.X + x, centerPosition.Y + y),
                                 tilePattern[
-                                    Utils.RandomInteger(0, tilePattern.GetLength(0)),
-                                    Utils.RandomInteger(0, tilePattern.GetLength(1))
+                                    Util.RandomInteger(0, tilePattern.GetLength(0)),
+                                    Util.RandomInteger(0, tilePattern.GetLength(1))
                                 ], command, preview
                             );
                         } else if (action == TileAction.Wrap) {
@@ -324,8 +324,8 @@
             while (positionStack.Count != 0) {
                 var position = positionStack.Pop();
                 SetTile(position, tilePattern[
-                        Utils.PosMod(position.X - tilePosition.X, tilePattern.GetLength(0)),
-                        Utils.PosMod(position.Y - tilePosition.Y, tilePattern.GetLength(1))
+                        Util.PosMod(position.X - tilePosition.X, tilePattern.GetLength(0)),
+                        Util.PosMod(position.Y - tilePosition.Y, tilePattern.GetLength(1))
                     ], command
                 );
 
@@ -354,8 +354,8 @@
         }
 
         public Tile[,] GetTiles(Point tilePosition1, Point tilePosition2) {
-            var point1 = Utils.ValidizePoints(tilePosition1, tilePosition2).Item1;
-            var point2 = Utils.ValidizePoints(tilePosition1, tilePosition2).Item2;
+            var point1 = Util.ValidizePoints(tilePosition1, tilePosition2).Item1;
+            var point2 = Util.ValidizePoints(tilePosition1, tilePosition2).Item2;
 
             int columns = point2.X - point1.X + 1; int rows = point2.Y - point1.Y + 1;
 
@@ -385,8 +385,8 @@
         public void Draw(Camera2D camera, float opacity = 1f) {
             var viewportRect = camera.GetViewport();
 
-            var startChunkPosition = GetChunkPositionOf(GetTilePositionOf(Utils.ToPoint(viewportRect.TopLeft)));
-            var endChunkPosition = GetChunkPositionOf(GetTilePositionOf(Utils.ToPoint(viewportRect.BottomRight)));
+            var startChunkPosition = GetChunkPositionOf(GetTilePositionOf(Util.ToPoint(viewportRect.TopLeft)));
+            var endChunkPosition = GetChunkPositionOf(GetTilePositionOf(Util.ToPoint(viewportRect.BottomRight)));
 
             for (int chunkY = startChunkPosition.Y; chunkY < endChunkPosition.Y; chunkY++) {
                 for (int chunkX = startChunkPosition.X; chunkX < endChunkPosition.X; chunkX++) {
@@ -412,8 +412,8 @@
         public void DrawCollisionBoundaries(Camera2D camera, float opacity = 1f) {
             var cameraBounds = camera.GetViewport();
 
-            var startChunkPosition = GetChunkPositionOf(GetTilePositionOf(Utils.ToPoint(cameraBounds.TopLeft)));
-            var endChunkPosition = GetChunkPositionOf(GetTilePositionOf(Utils.ToPoint(cameraBounds.BottomRight)));
+            var startChunkPosition = GetChunkPositionOf(GetTilePositionOf(Util.ToPoint(cameraBounds.TopLeft)));
+            var endChunkPosition = GetChunkPositionOf(GetTilePositionOf(Util.ToPoint(cameraBounds.BottomRight)));
 
             for (int chunkY = startChunkPosition.Y; chunkY < endChunkPosition.Y; chunkY++) {
                 for (int chunkX = startChunkPosition.X; chunkX < endChunkPosition.X; chunkX++) {

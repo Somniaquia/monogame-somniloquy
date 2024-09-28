@@ -78,7 +78,7 @@ namespace Somniloquy {
 
         public void UpdateChart() {
             PositionOnChart = new Vector2(MathF.Max(MathF.Min(1, PositionOnChart.X), 0), MathF.Max(MathF.Min(1, PositionOnChart.Y), 0));
-            Hue = Utils.PosMod(Hue, 360);
+            Hue = Util.PosMod(Hue, 360);
 
             Chart ??= new Texture2D(SQ.GD, Boundaries.Width, Boundaries.Height);
 
@@ -137,7 +137,7 @@ namespace Somniloquy {
             if (EditorScreen.CurrentEditorState == EditorState.PaintMode) {
                 SQ.SB.DrawFilledRectangle(new Rectangle(Boundaries.X - 8, Boundaries.Y - 8, Boundaries.Width + 16, Boundaries.Height + 16), EditorScreen.SelectedColor);
                 SQ.SB.Draw(Chart, Boundaries, Color.White);
-                SQ.SB.DrawPoint(new Vector2(Boundaries.X, Boundaries.Y) + new Vector2(PositionOnChart.X * Boundaries.Width, PositionOnChart.Y * Boundaries.Height), Utils.InvertColor(EditorScreen.SelectedColor), 8);
+                SQ.SB.DrawPoint(new Vector2(Boundaries.X, Boundaries.Y) + new Vector2(PositionOnChart.X * Boundaries.Width, PositionOnChart.Y * Boundaries.Height), Util.InvertColor(EditorScreen.SelectedColor), 8);
             }
             base.Draw();
             SQ.SB.End();

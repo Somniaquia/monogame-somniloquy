@@ -18,10 +18,10 @@ namespace Somniloquy {
         }
 
         public Vector2 ResolveCollisions(Vector2 potentialPosition) {
-            Point startTilePosition = CurrentLayer.GetTilePositionOf(Utils.ToPoint(CollisionBounds.Center));
+            Point startTilePosition = CurrentLayer.GetTilePositionOf(Util.ToPoint(CollisionBounds.Center));
             Point endTilePosition = CurrentLayer.GetTilePositionOf(potentialPosition.ToPoint());
 
-            var pair = Utils.ValidizePoints(startTilePosition, endTilePosition);
+            var pair = Util.ValidizePoints(startTilePosition, endTilePosition);
             startTilePosition = pair.Item1 - new Point(1, 1);
             endTilePosition = pair.Item2 + new Point(1, 1);
 
@@ -53,9 +53,9 @@ namespace Somniloquy {
                     for (var i = 0; i < vertices.Length; i++) {
                         var v1 = vertices[i].ToVector2() + new Vector2(x, y) * TileLayer2D.TileLength;
                         var v2 = vertices[(i + 1) % vertices.Length].ToVector2() + new Vector2(x, y) * TileLayer2D.TileLength;
-                        if (!Utils.Intersects((v1, v2), CollisionBounds)) continue;
+                        if (!Util.Intersects((v1, v2), CollisionBounds)) continue;
 
-                        Vector2 closestPointOnEdge = Utils.GetClosestPointOnLine((v1, v2), potentialPosition);
+                        Vector2 closestPointOnEdge = Util.GetClosestPointOnLine((v1, v2), potentialPosition);
                         float distanceToEdge = (closestPointOnEdge - potentialPosition).Length();
 
                         if (distanceToEdge < CollisionBounds.Radius && distanceToEdge > 0) {

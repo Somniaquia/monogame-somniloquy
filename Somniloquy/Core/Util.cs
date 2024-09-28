@@ -6,7 +6,7 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework.Graphics;
     using MonoGame.Extended;
 
-    public static class Utils {
+    public static class Util {
         private static Random random = new();
 
         public static float Lerp(float origin, float target, float lerpModifier) {
