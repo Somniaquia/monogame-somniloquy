@@ -37,10 +37,10 @@ namespace Somniloquy {
             float maxPressure = CWintabInfo.GetMaxPressure();
 
             uint count = 0; penPressure = 0;
-            WintabPacket[] results = wintabData.GetDataPackets(1, true, ref count);
-            for (int i = 0; i < count; i++) {
-                penPressure = results[i].pkNormalPressure / maxPressure;
-            }
+            // WintabPacket[] results = wintabData.GetDataPackets(1, true, ref count);
+            // for (int i = 0; i < count; i++) {
+            //     penPressure = results[i].pkNormalPressure / maxPressure;
+            // }
 
             // Keys[] pressedKeys = currentKeyboardState.GetPressedKeys();
             // if (pressedKeys.Length > 0)
