@@ -17,21 +17,38 @@ namespace Somniloquy {
             return new Point((int)MathF.Floor(vector.X), (int)Math.Floor(vector.Y));
         }
 
-        public static float FloorDivideF(float dividend, float divisor) {
-            return dividend >= 0 ? dividend / divisor : (dividend - divisor + 1) / divisor;
+        public static Point Floor(Vector2 v) {
+            return new Point((int)Math.Floor(v.X), (int)Math.Floor(v.Y));
         }
 
-        public static float ModuloF(float dividend, float divisor) {
+        public static Point Ceiling(Vector2 v) {
+            return new Point((int)Math.Ceiling(v.X), (int)Math.Ceiling(v.Y));
+        }
+
+        public static float PosMod(float dividend, float divisor) {
             return (dividend%divisor + divisor) % divisor;
+        }
+
+        public static Vector2 PosMod(Vector2 va, Vector2 vb) {
+            return new(PosMod(va.X, vb.X), PosMod(va.Y, vb.Y));
+        }
+        
+        public static Point PosMod(Point va, Point vb) {
+            return new(PosMod(va.X, vb.X), PosMod(va.Y, vb.Y));
+        }
+        
+        public static int PosMod(int dividend, int divisor) {
+            return (dividend%divisor + divisor) % divisor;
+        }
+
+        public static float FloorDivideF(float dividend, float divisor) {
+            return dividend >= 0 ? dividend / divisor : (dividend - divisor + 1) / divisor;
         }
         
         public static int FloorDivide(int dividend, int divisor) {
             return dividend >= 0 ? dividend / divisor : (dividend - divisor + 1) / divisor;
         }
 
-        public static int Modulo(int dividend, int divisor) {
-            return (dividend%divisor + divisor) % divisor;
-        }
 
         public static bool IsWithinBoundaries(Point point, Rectangle boundaries) {
             return (boundaries.Left <= point.X && point.X <= boundaries.Right & boundaries.Top < point.Y && point.Y < boundaries.Bottom);

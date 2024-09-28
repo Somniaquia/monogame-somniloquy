@@ -1,5 +1,4 @@
-namespace Somniloquy
-{
+namespace Somniloquy {
     using System;
     using System.Collections.Generic;
 

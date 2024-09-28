@@ -38,7 +38,7 @@ namespace Somniloquy {
 
             Zoom = Utils.Lerp(Zoom, TargetZoom, LerpModifier);
 
-            TargetRotation = Utils.ModuloF(TargetRotation, 2 * MathF.PI);
+            TargetRotation = Utils.PosMod(TargetRotation, 2 * MathF.PI);
             Rotation = Utils.Lerp(Rotation, TargetRotation, LerpModifier);
 
             Viewport viewport = SQ.GD.Viewport;
@@ -66,7 +66,7 @@ namespace Somniloquy {
             );
         }
 
-        public (Vector2, Vector2) GetCameraBounds() {
+        public RectangleF GetViewport() {
             Viewport viewport = SQ.GD.Viewport;
             Vector2 upperLeft = ApplyInvertTransform(Vector2.Zero);
             //upperLeft.X += viewport.Width * 0.5f;
@@ -75,7 +75,7 @@ namespace Somniloquy {
             Vector2 bottomRight = ApplyInvertTransform(new Vector2(viewport.Width, viewport.Height));
             bottomRight.X += viewport.Width * 0.5f;
             bottomRight.Y += viewport.Height * 0.5f;
-            return (upperLeft, bottomRight);
+            return new RectangleF(upperLeft, bottomRight - upperLeft);
         }
     }
 }

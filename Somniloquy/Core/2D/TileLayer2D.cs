@@ -14,7 +14,7 @@
     /// The dynamic modification of layers in a same world will help form the overall expected nature of the game, triggering
     /// different layouts or looks for the same world in every visit, sometimes connecting a different world or triggering events such as jumpscares
     /// </summary>
-    public class TileLayer2D {
+    public class TileLayer2D : Layer2D {
         public World ParentWorld { get; set; }
         public TileLayer2D ChildLayers { get; set; }
         public Point Dimensions { get; set; }
@@ -28,7 +28,7 @@
         }
 
         public Point GetPositionInTile(Point worldPosition) {
-            return new Point(Utils.Modulo(worldPosition.X, TileLength), Utils.Modulo(worldPosition.Y, TileLength));
+            return new Point(Utils.PosMod(worldPosition.X, TileLength), Utils.PosMod(worldPosition.Y, TileLength));
         }
 
         public Point GetTilePositionOf(Point worldPosition) {
@@ -145,7 +145,7 @@
             while (positionStack.Count != 0) {
                 var position = positionStack.Pop();
                 var tile = GetTile(GetTilePositionOf(position));
-                tileColors[tile][Utils.Modulo(position.X, TileLength), Utils.Modulo(position.Y, TileLength)] = color;
+                tileColors[tile][Utils.PosMod(position.X, TileLength), Utils.PosMod(position.Y, TileLength)] = color;
 
                 foreach (var positionOffset in new Point[] { new Point(-1, 0), new Point(1, 0), new Point(0, -1), new Point(0, 1) }) {
                     var checkingPosition = position + positionOffset;
@@ -160,7 +160,7 @@
                             //tileColors.Add(checkingTile, checkingTile.Sprite.GetCurrentAnimation().GetFrameColors(0));
                         }
 
-                        if (tileColors[checkingTile][Utils.Modulo(checkingPosition.X, TileLength), Utils.Modulo(checkingPosition.Y, TileLength)] == targetColor) {
+                        if (tileColors[checkingTile][Utils.PosMod(checkingPosition.X, TileLength), Utils.PosMod(checkingPosition.Y, TileLength)] == targetColor) {
                             positionStack.Push(checkingPosition);
                         }
                     }
@@ -253,8 +253,8 @@
                         SetTile(
                             new Point(x, y), 
                             tilePattern[
-                                Utils.Modulo(tilePatternOffset.X + x - tilePos1.X, tilePattern.GetLength(0)),
-                                Utils.Modulo(tilePatternOffset.Y + y - tilePos1.Y, tilePattern.GetLength(1))
+                                Utils.PosMod(tilePatternOffset.X + x - tilePos1.X, tilePattern.GetLength(0)),
+                                Utils.PosMod(tilePatternOffset.Y + y - tilePos1.Y, tilePattern.GetLength(1))
                             ], command, preview
                         );
                     } else if (action == TileAction.Random) {
@@ -269,15 +269,15 @@
                     } else if (action == TileAction.Wrap) {
                         int patternX, patternY;
 
-                        if (tilePattern.GetLength(0) <= 2) patternX = Utils.Modulo(tilePatternOffset.X + x - tilePos1.X, tilePattern.GetLength(0));
+                        if (tilePattern.GetLength(0) <= 2) patternX = Utils.PosMod(tilePatternOffset.X + x - tilePos1.X, tilePattern.GetLength(0));
                         else if (x == tilePos1.X) patternX = 0;
                         else if (x == tilePos2.X) patternX = tilePattern.GetLength(0) - 1;
-                        else patternX = Utils.Modulo(tilePatternOffset.X + x - tilePos1.X - 1, tilePattern.GetLength(0) - 2) + 1;
+                        else patternX = Utils.PosMod(tilePatternOffset.X + x - tilePos1.X - 1, tilePattern.GetLength(0) - 2) + 1;
 
-                        if (tilePattern.GetLength(1) <= 2) patternY = Utils.Modulo(tilePatternOffset.Y + y - tilePos1.Y, tilePattern.GetLength(1));
+                        if (tilePattern.GetLength(1) <= 2) patternY = Utils.PosMod(tilePatternOffset.Y + y - tilePos1.Y, tilePattern.GetLength(1));
                         else if (y == tilePos1.Y) patternY = 0;
                         else if (y == tilePos2.Y) patternY = tilePattern.GetLength(0) - 1;
-                        else patternY = Utils.Modulo(tilePatternOffset.Y + y - tilePos1.Y - 1, tilePattern.GetLength(0) - 2) + 1;
+                        else patternY = Utils.PosMod(tilePatternOffset.Y + y - tilePos1.Y - 1, tilePattern.GetLength(0) - 2) + 1;
 
                         SetTile(new Point(x, y), tilePattern[patternX, patternY], command, preview);
                     }
@@ -294,8 +294,8 @@
                             SetTile(
                                 new Point(centerPosition.X + x, centerPosition.Y + y),
                                 tilePattern[
-                                    Utils.Modulo(tilePatternOffset.X + x, tilePattern.GetLength(0)),
-                                    Utils.Modulo(tilePatternOffset.Y + y, tilePattern.GetLength(1))
+                                    Utils.PosMod(tilePatternOffset.X + x, tilePattern.GetLength(0)),
+                                    Utils.PosMod(tilePatternOffset.Y + y, tilePattern.GetLength(1))
                                 ], command, preview
                             );
                         } else if (action == TileAction.Random) {
@@ -324,8 +324,8 @@
             while (positionStack.Count != 0) {
                 var position = positionStack.Pop();
                 SetTile(position, tilePattern[
-                        Utils.Modulo(position.X - tilePosition.X, tilePattern.GetLength(0)),
-                        Utils.Modulo(position.Y - tilePosition.Y, tilePattern.GetLength(1))
+                        Utils.PosMod(position.X - tilePosition.X, tilePattern.GetLength(0)),
+                        Utils.PosMod(position.Y - tilePosition.Y, tilePattern.GetLength(1))
                     ], command
                 );
 
@@ -383,10 +383,10 @@
         }
 
         public void Draw(Camera2D camera, float opacity = 1f) {
-            var cameraBounds = camera.GetCameraBounds();
+            var viewportRect = camera.GetViewport();
 
-            var startChunkPosition = GetChunkPositionOf(GetTilePositionOf(Utils.ToPoint(cameraBounds.Item1)));
-            var endChunkPosition = GetChunkPositionOf(GetTilePositionOf(Utils.ToPoint(cameraBounds.Item2)));
+            var startChunkPosition = GetChunkPositionOf(GetTilePositionOf(Utils.ToPoint(viewportRect.TopLeft)));
+            var endChunkPosition = GetChunkPositionOf(GetTilePositionOf(Utils.ToPoint(viewportRect.BottomRight)));
 
             for (int chunkY = startChunkPosition.Y; chunkY < endChunkPosition.Y; chunkY++) {
                 for (int chunkX = startChunkPosition.X; chunkX < endChunkPosition.X; chunkX++) {
@@ -410,10 +410,10 @@
         }
         
         public void DrawCollisionBoundaries(Camera2D camera, float opacity = 1f) {
-            var cameraBounds = camera.GetCameraBounds();
+            var cameraBounds = camera.GetViewport();
 
-            var startChunkPosition = GetChunkPositionOf(GetTilePositionOf(Utils.ToPoint(cameraBounds.Item1)));
-            var endChunkPosition = GetChunkPositionOf(GetTilePositionOf(Utils.ToPoint(cameraBounds.Item2)));
+            var startChunkPosition = GetChunkPositionOf(GetTilePositionOf(Utils.ToPoint(cameraBounds.TopLeft)));
+            var endChunkPosition = GetChunkPositionOf(GetTilePositionOf(Utils.ToPoint(cameraBounds.BottomRight)));
 
             for (int chunkY = startChunkPosition.Y; chunkY < endChunkPosition.Y; chunkY++) {
                 for (int chunkX = startChunkPosition.X; chunkX < endChunkPosition.X; chunkX++) {

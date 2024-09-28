@@ -393,9 +393,9 @@ namespace Somniloquy {
         public void DrawGrids() {
             Point tilePosition = mouseTilePosition;
 
-            var pair = Camera.GetCameraBounds();
-            Point topLeft = SelectedLayer.GetTilePositionOf(Utils.ToPoint(pair.Item1));
-            Point bottomRight = SelectedLayer.GetTilePositionOf(Utils.ToPoint(pair.Item2));
+            var viewportRect = Camera.GetViewport();
+            Point topLeft = SelectedLayer.GetTilePositionOf(Utils.ToPoint(viewportRect.TopLeft));
+            Point bottomRight = SelectedLayer.GetTilePositionOf(Utils.ToPoint(viewportRect.BottomRight));
 
             for (int x = topLeft.X; x <= bottomRight.X; x++) {
                 var xPos = Camera.ApplyTransform(new Vector2(x * TileLayer2D.TileLength, 0)).X;

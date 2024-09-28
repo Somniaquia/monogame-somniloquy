@@ -78,7 +78,7 @@ namespace Somniloquy {
 
         public void UpdateChart() {
             PositionOnChart = new Vector2(MathF.Max(MathF.Min(1, PositionOnChart.X), 0), MathF.Max(MathF.Min(1, PositionOnChart.Y), 0));
-            Hue = Utils.Modulo(Hue, 360);
+            Hue = Utils.PosMod(Hue, 360);
 
             Chart ??= new Texture2D(SQ.GD, Boundaries.Width, Boundaries.Height);
 
