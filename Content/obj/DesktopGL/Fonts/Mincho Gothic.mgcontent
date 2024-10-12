@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PipelineBuildEvent xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <SourceFile>C:/Somnia/Projects/Somniloquy/Somniloquy/Content/Fonts/Mincho Gothic.fnt</SourceFile>
+  <SourceTime>2023-12-08T18:14:02.235166+09:00</SourceTime>
+  <DestFile>C:/Somnia/Projects/Somniloquy/Somniloquy/Content/bin/DesktopGL/Fonts/Mincho Gothic.xnb</DestFile>
+  <DestTime>2023-12-08T18:14:13.8905475+09:00</DestTime>
+  <Importer>BitmapFontImporter</Importer>
+  <ImporterTime>2020-08-30T02:17:30+09:00</ImporterTime>
+  <Processor>BitmapFontProcessor</Processor>
+  <ProcessorTime>2020-08-30T02:17:30+09:00</ProcessorTime>
+  <Dependencies />
+  <BuildAsset />
+  <BuildOutput />
+</PipelineBuildEvent>
