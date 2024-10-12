@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PipelineBuildEvent xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <SourceFile>C:/Somnia/Projects/Somniloquy/Somniloquy/Content/Fonts/MisakiMincho.spritefont</SourceFile>
+  <SourceTime>2023-11-18T23:43:21.5134972+09:00</SourceTime>
+  <DestFile>C:/Somnia/Projects/Somniloquy/Somniloquy/Content/bin/DesktopGL/Fonts/MisakiMincho.xnb</DestFile>
+  <DestTime>2023-11-21T23:16:22.1656537+09:00</DestTime>
+  <Importer>FontDescriptionImporter</Importer>
+  <ImporterTime>2022-07-26T20:44:56+09:00</ImporterTime>
+  <Processor>FontDescriptionProcessor</Processor>
+  <ProcessorTime>2022-07-26T20:44:56+09:00</ProcessorTime>
+  <Parameters>
+    <Key>PremultiplyAlpha</Key>
+    <Value>True</Value>
+  </Parameters>
+  <Parameters>
+    <Key>TextureFormat</Key>
+    <Value>Compressed</Value>
+  </Parameters>
+  <Dependencies />
+  <BuildAsset />
+  <BuildOutput />
+</PipelineBuildEvent>

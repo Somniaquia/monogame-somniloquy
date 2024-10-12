@@ -1,0 +1,3 @@
+Source File,Dest File,Processor Type,Content Type,Source File Size,Dest File Size,Build Seconds
+"C:/Somnia/Projects/Somniloquy/Somniloquy/Content/Fonts/Mincho Gothic 0.png","C:/Somnia/Projects/Somniloquy/Somniloquy/Content/bin/DesktopGL/Fonts/Mincho Gothic 0.xnb","TextureProcessor","Texture2DContent",149996,4194389,0.2844797
+"C:/Somnia/Projects/Somniloquy/Somniloquy/Content/Fonts/Mincho Gothic.fnt","C:/Somnia/Projects/Somniloquy/Somniloquy/Content/bin/DesktopGL/Fonts/Mincho Gothic.xnb","BitmapFontProcessor","BitmapFontProcessorResult",861638,257335,0.046232
