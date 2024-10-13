@@ -1,7 +1,6 @@
 namespace Somniloquy {
     using System;
     using System.Collections.Generic;
-    using Newtonsoft.Json;
 
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;

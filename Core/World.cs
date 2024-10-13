@@ -4,7 +4,6 @@ namespace Somniloquy {
     using System.Linq;
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
-    using Newtonsoft.Json;
 
     /// <summary>
     /// A World stores multiple Sections, where a Section corresponds to a continuous area that can be traveled without screen transitions,

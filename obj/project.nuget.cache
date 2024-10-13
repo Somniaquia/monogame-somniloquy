@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "tnd9Y6XrM8Y=",
+  "dgSpecHash": "dBg3pG2fF5c=",
   "success": true,
   "projectFilePath": "C:\\Somnia\\Projects\\monogame-somniloquy\\Somniloquy.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Somni\\.nuget\\packages\\fmodforfoxes\\3.1.0\\fmodforfoxes.3.1.0.nupkg.sha512",
-    "C:\\Users\\Somni\\.nuget\\packages\\monogame.content.builder.task\\3.8.2.1105\\monogame.content.builder.task.3.8.2.1105.nupkg.sha512",
-    "C:\\Users\\Somni\\.nuget\\packages\\monogame.framework.desktopgl\\3.8.2.1105\\monogame.framework.desktopgl.3.8.2.1105.nupkg.sha512",
+    "C:\\Users\\Somni\\.nuget\\packages\\monogame.content.builder.task\\3.8.1.303\\monogame.content.builder.task.3.8.1.303.nupkg.sha512",
+    "C:\\Users\\Somni\\.nuget\\packages\\monogame.framework.desktopgl\\3.8.1.303\\monogame.framework.desktopgl.3.8.1.303.nupkg.sha512",
     "C:\\Users\\Somni\\.nuget\\packages\\system.runtime.compilerservices.unsafe\\6.0.0\\system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512",
     "C:\\Users\\Somni\\.nuget\\packages\\system.text.encodings.web\\8.0.0\\system.text.encodings.web.8.0.0.nupkg.sha512",
     "C:\\Users\\Somni\\.nuget\\packages\\system.text.json\\8.0.5\\system.text.json.8.0.5.nupkg.sha512",

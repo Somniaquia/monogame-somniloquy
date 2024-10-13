@@ -22,24 +22,20 @@
         public Vector2I GetChunkPosition(Vector2I tilePosition) => Util.Floor(tilePosition / ChunkLength);
         public Vector2I GetTilePositionInChunk(Vector2I tilePosition) => Util.PosMod(tilePosition, new Vector2I(ChunkLength));
 
-        public void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain = null, bool preview = false) {
-            if (preview) {
-                SQ.SB.Draw(SQ.SB.Pixel, position, color);
-            } else {
-                // if (sync) {
-                //     var previousTile = GetTile(tilePosition);
-                //     // SetTile(tilePosition, ParentWorld.NewTile(TileLength), command);
-                //     SetTile(tilePosition, ParentWorld.NewTile());
-                //     PaintPixel(GetTile(tilePosition), previousTile.Sprite.GetFrameColors(), command);
-                // }
-                
-                var tilePosition = GetTilePosition(position);
-                var tile = GetTile(tilePosition);
+        public void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain = null) {
+            // if (sync) {
+            //     var previousTile = GetTile(tilePosition);
+            //     // SetTile(tilePosition, ParentWorld.NewTile(TileLength), command);
+            //     SetTile(tilePosition, ParentWorld.NewTile());
+            //     PaintPixel(GetTile(tilePosition), previousTile.Sprite.GetFrameColors(), command);
+            // }
+            
+            var tilePosition = GetTilePosition(position);
+            var tile = GetTile(tilePosition);
 
-                // TODO: CHUNK CHECK!!!
+            // TODO: CHUNK CHECK!!!
 
-                tile.PaintPixel(GetPositionInTile(position), color, opacity, chain);
-            }
+            tile.PaintPixel(GetPositionInTile(position), color, opacity, chain);
         }
 
         #region Tile Methods
@@ -123,7 +119,7 @@
         }
 
         public void Draw(Camera2D camera, float opacity = 1f) {
-            var viewportRect = camera.GetViewportInWorld();
+            var viewportRect = camera.ViewportInWorld;
 
             var startChunkPosition = GetChunkPosition(GetTilePosition((Vector2I)viewportRect.TopLeft()));
             var endChunkPosition = GetChunkPosition(GetTilePosition((Vector2I)viewportRect.BottomRight()));

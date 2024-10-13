@@ -27,5 +27,13 @@ namespace Somniloquy {
         public static Vector2 BottomRight(this RectangleF rectangle) {
             return new(rectangle.Right, rectangle.Bottom);
         }
+
+        public static Rectangle ExpandSouthEast(this Rectangle rectangle, int amount) {
+            return new(rectangle.X, rectangle.Y, rectangle.Width + amount, rectangle.Height + amount);
+        }
+
+        public static RectangleF ExpandSouthEast(this RectangleF rectangle, float amount) {
+            return new(rectangle.X, rectangle.Y, rectangle.Width + amount, rectangle.Height + amount);
+        }
     }
 }

@@ -55,8 +55,8 @@ namespace Somniloquy
             System.setReverbProperties(0, ref reverbProperties);
 
             MusicName = "My Song 3";
-            StartLoop(MusicName, 5);
-            SetPitch(MusicName, Pitch);
+            // StartLoop(MusicName, 5);
+            // SetPitch(MusicName, Pitch);
         }
 
         public static void StartLoop(string name, float fade_seconds = 0f) {

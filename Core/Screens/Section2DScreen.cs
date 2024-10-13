@@ -6,7 +6,7 @@ namespace Somniloquy {
 
     public class Section2DScreen : Screen {
         public Section2D Section;
-        public Camera2D Camera { get; set; } = new Camera2D(8.0f);
+        public Camera2D Camera = new();
         public Section2DEditor Editor;
 
         public Section2DScreen(Rectangle boundaries, Section2D section = null) : base(boundaries) {
@@ -56,8 +56,8 @@ namespace Somniloquy {
 			GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.S, (parameters) => MoveScreen(new Vector2(0, 1)), false));
             GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.D, (parameters) => MoveScreen(new Vector2(1, 0)), false));
 
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.Q, (parameters) => ZoomScreen(1 / 1.05f), false));
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.E, (parameters) => ZoomScreen(1.05f), false));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.Q, (parameters) => ZoomScreen(-0.05f), false));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.E, (parameters) => ZoomScreen(0.05f), false));
             // GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.U, (parameters) => ShiftHue(-0.005f), false));
             // GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.O, (parameters) => ShiftHue(0.005f), false));
 
@@ -83,13 +83,13 @@ namespace Somniloquy {
 
         public void MoveScreen(params object[] parameters) {
             if (parameters.Length == 1 && parameters[0] is Vector2 direction) {
-                Screen.Camera.MoveCamera(direction * 500 * (float)SQ.GameTime.ElapsedGameTime.TotalSeconds);
+                Screen.Camera.MoveCamera(direction);
             }
         }
 
         public void ZoomScreen(params object[] parameters) {
             if (parameters.Length == 1 && parameters[0] is float ratio) {
-                Screen.Camera.ZoomCamera(MathF.Pow(ratio, 100 * (float)SQ.GameTime.ElapsedGameTime.TotalSeconds));
+                Screen.Camera.ZoomCamera(ratio);
             }
         }
 
@@ -118,6 +118,7 @@ namespace Somniloquy {
         }
 
         public override void Draw() {
+            Screen.Camera.DrawPoint((Vector2I)Screen.Camera.GlobalMousePos, Color.White * 0.5f);
             SelectedLayer?.Draw(Screen.Camera);
         }
     }

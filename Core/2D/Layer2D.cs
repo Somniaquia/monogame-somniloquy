@@ -30,26 +30,26 @@ namespace Somniloquy {
     }
 
     public interface IPaintableLayer2D {
-        public void PaintRectangle(Vector2I startPosition, Vector2I endPosition, Color color, float opacity, bool filled, CommandChain chain = null, bool preview = false) {
+        public void PaintRectangle(Vector2I startPosition, Vector2I endPosition, Color color, float opacity, bool filled, CommandChain chain = null) {
             PixelActions.ApplyRectangleAction(startPosition, endPosition, filled, (Vector2I position) => {
-                PaintPixel(position, color, opacity, chain, preview);
+                PaintPixel(position, color, opacity, chain);
             });
         }
 
-        public void PaintLine(Vector2I start, Vector2I end, Color color, float opacity, int width = 0, CommandChain chain = null, bool preview = false) {
+        public void PaintLine(Vector2I start, Vector2I end, Color color, float opacity, int width = 0, CommandChain chain = null) {
             PixelActions.ApplyLineAction(start, end, width, (Vector2I position) => {
-                PaintPixel(position, color, opacity, chain, preview);
+                PaintPixel(position, color, opacity, chain);
             });
         }
 
-        public void PaintCircle(Vector2I center, int radius, Color color, float opacity, bool filled = true, CommandChain chain = null, bool preview = false) {
+        public void PaintCircle(Vector2I center, int radius, Color color, float opacity, bool filled = true, CommandChain chain = null) {
             PixelActions.ApplyCircleAction(center, radius, filled, (Vector2I position) => {
-                PaintPixel(position, color, opacity, chain, preview);
+                PaintPixel(position, color, opacity, chain);
             });
         }
 
         // TODO: Paint Fill
 
-        public abstract void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain = null, bool preview = false);
+        public abstract void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain = null);
     }
 }

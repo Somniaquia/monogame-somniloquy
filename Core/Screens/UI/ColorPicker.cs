@@ -137,7 +137,7 @@ namespace Somniloquy {
             if (Screen.EditorState == EditorState.PaintMode) {
                 SQ.SB.DrawFilledRectangle(new Rectangle(Boundaries.X - 8, Boundaries.Y - 8, Boundaries.Width + 16, Boundaries.Height + 16), Screen.SelectedColor);
                 SQ.SB.Draw(Chart, Boundaries, Color.White);
-                SQ.SB.DrawPoint(new Vector2(Boundaries.X, Boundaries.Y) + new Vector2(PositionOnChart.X * Boundaries.Width, PositionOnChart.Y * Boundaries.Height), Util.InvertColor(Screen.SelectedColor), 8);
+                SQ.SB.DrawCircle((Vector2I)(new Vector2(Boundaries.X, Boundaries.Y) + new Vector2(PositionOnChart.X * Boundaries.Width, PositionOnChart.Y * Boundaries.Height)), 8, Util.InvertColor(Screen.SelectedColor), true);
             }
             base.Draw();
             SQ.SB.End();

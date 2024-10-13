@@ -11,30 +11,52 @@
           "lib/net6.0/FmodForFoxes.dll": {}
         }
       },
-      "MonoGame.Content.Builder.Task/3.8.2.1105": {
+      "MonoGame.Content.Builder.Task/3.8.1.303": {
         "type": "package",
         "build": {
           "build/MonoGame.Content.Builder.Task.props": {},
           "build/MonoGame.Content.Builder.Task.targets": {}
         }
       },
-      "MonoGame.Framework.DesktopGL/3.8.2.1105": {
+      "MonoGame.Framework.DesktopGL/3.8.1.303": {
         "type": "package",
+        "compile": {
+          "lib/net6.0/MonoGame.Framework.dll": {}
+        },
+        "runtime": {
+          "lib/net6.0/MonoGame.Framework.dll": {}
+        },
         "build": {
           "build/MonoGame.Framework.DesktopGL.targets": {}
         },
         "runtimeTargets": {
+          "runtimes/linux-x64/native/libSDL2-2.0.so.0": {
+            "assetType": "native",
+            "rid": "linux-x64"
+          },
           "runtimes/linux-x64/native/libopenal.so.1": {
             "assetType": "native",
             "rid": "linux-x64"
+          },
+          "runtimes/osx/native/libSDL2.dylib": {
+            "assetType": "native",
+            "rid": "osx"
           },
           "runtimes/osx/native/libopenal.1.dylib": {
             "assetType": "native",
             "rid": "osx"
           },
+          "runtimes/win-x64/native/SDL2.dll": {
+            "assetType": "native",
+            "rid": "win-x64"
+          },
           "runtimes/win-x64/native/soft_oal.dll": {
             "assetType": "native",
             "rid": "win-x64"
+          },
+          "runtimes/win-x86/native/SDL2.dll": {
+            "assetType": "native",
+            "rid": "win-x86"
           },
           "runtimes/win-x86/native/soft_oal.dll": {
             "assetType": "native",
@@ -121,36 +143,39 @@
         "readme.txt"
       ]
     },
-    "MonoGame.Content.Builder.Task/3.8.2.1105": {
-      "sha512": "wNlkLaITOqMs9MmCYLp3Qc7QfFng3FhIq/b+njdYV3cTVpLYgs/i56FYtJjm8jLoUA/2sJ36Qo/uqWpgW+jBuQ==",
+    "MonoGame.Content.Builder.Task/3.8.1.303": {
+      "sha512": "9Ilzzje62LhWElbPNEl7vh7XsRSbze+lvCJdZtTZUGu48FRgvYN6THURwIB9PN98EI33/Wnf6iuShNUtD7hL4Q==",
       "type": "package",
-      "path": "monogame.content.builder.task/3.8.2.1105",
+      "path": "monogame.content.builder.task/3.8.1.303",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "Icon.png",
         "build/MonoGame.Content.Builder.Task.props",
         "build/MonoGame.Content.Builder.Task.targets",
-        "monogame.content.builder.task.3.8.2.1105.nupkg.sha512",
+        "monogame.content.builder.task.3.8.1.303.nupkg.sha512",
         "monogame.content.builder.task.nuspec"
       ]
     },
-    "MonoGame.Framework.DesktopGL/3.8.2.1105": {
-      "sha512": "QwjhmpyMZ9js4zqoYN/0cz//nYZ1u5yB8KWJ1P7nbViqfUyzuFDvGqgUEXFLp+n0Rx4z9PuKfwL5nQpp9LrXhg==",
+    "MonoGame.Framework.DesktopGL/3.8.1.303": {
+      "sha512": "eGYhqn0n1olk8MNYeE9EuBmoNNECN1T18rPMaQpkzsEQ0H3nVyFPXC+uCo78v5pi5juQpJ3PSFnSkjzZJ1U58A==",
       "type": "package",
-      "path": "monogame.framework.desktopgl/3.8.2.1105",
+      "path": "monogame.framework.desktopgl/3.8.1.303",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "Icon.png",
         "build/MonoGame.Framework.DesktopGL.targets",
-        "lib/net8.0/MonoGame.Framework.dll",
-        "lib/net8.0/MonoGame.Framework.xml",
-        "monogame.framework.desktopgl.3.8.2.1105.nupkg.sha512",
+        "lib/net6.0/MonoGame.Framework.dll",
+        "monogame.framework.desktopgl.3.8.1.303.nupkg.sha512",
         "monogame.framework.desktopgl.nuspec",
+        "runtimes/linux-x64/native/libSDL2-2.0.so.0",
         "runtimes/linux-x64/native/libopenal.so.1",
+        "runtimes/osx/native/libSDL2.dylib",
         "runtimes/osx/native/libopenal.1.dylib",
+        "runtimes/win-x64/native/SDL2.dll",
         "runtimes/win-x64/native/soft_oal.dll",
+        "runtimes/win-x86/native/SDL2.dll",
         "runtimes/win-x86/native/soft_oal.dll"
       ]
     },
@@ -291,8 +316,8 @@
   "projectFileDependencyGroups": {
     "net6.0": [
       "FmodForFoxes >= 3.1.0",
-      "MonoGame.Content.Builder.Task >= 3.8.2.1105",
-      "MonoGame.Framework.DesktopGL >= 3.8.2.1105",
+      "MonoGame.Content.Builder.Task >= 3.8.1.303",
+      "MonoGame.Framework.DesktopGL >= 3.8.1.303",
       "System.Text.Json >= 8.0.5"
     ]
   },
@@ -352,11 +377,11 @@
           },
           "MonoGame.Content.Builder.Task": {
             "target": "Package",
-            "version": "[3.8.2.1105, )"
+            "version": "[3.8.1.303, )"
           },
           "MonoGame.Framework.DesktopGL": {
             "target": "Package",
-            "version": "[3.8.2.1105, )"
+            "version": "[3.8.1.303, )"
           },
           "System.Text.Json": {
             "target": "Package",

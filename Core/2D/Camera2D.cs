@@ -4,7 +4,6 @@ namespace Somniloquy {
 
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
-    
 
     public class Camera2D {
         public const float LerpModifier =  0.1f;
@@ -21,11 +20,6 @@ namespace Somniloquy {
 
         public Vector2? GlobalMousePos;
         public Vector2? PreviousGlobalMousePos;
-
-        public Camera2D(float zoom) {
-            TargetZoom = zoom;
-            Zoom = zoom;
-        }
 
         public void MoveCamera(Vector2 displacement) {
             TargetCenterPosInWorld += displacement * 10 / MathF.Sqrt(TargetZoom);
@@ -66,8 +60,8 @@ namespace Somniloquy {
 
         public RectangleF ToWorldPos(RectangleF screenRectangle) {
             return new RectangleF(
-                ToScreenPos(screenRectangle.Location),
-                ToScreenPos(screenRectangle.Location + screenRectangle.Size) - ToScreenPos(screenRectangle.Location)
+                ToWorldPos(screenRectangle.Location),
+                ToWorldPos(screenRectangle.Location + screenRectangle.Size) - ToWorldPos(screenRectangle.Location)
             );
         }
 
@@ -83,15 +77,39 @@ namespace Somniloquy {
         }
 
         public void Draw(Texture2D texture, Rectangle worldRectangle, Rectangle source, Color color) {
-            SQ.SB.Draw(texture, (Rectangle)ToScreenPos(worldRectangle), source, color);
+            SQ.SB.Draw(texture, (Rectangle)ToScreenPos(worldRectangle).ExpandSouthEast(1), source, color);
+        }
+
+        public void Draw(Texture2D texture, Rectangle worldRectangle, Color color) {
+            SQ.SB.Draw(texture, (Rectangle)ToScreenPos(worldRectangle).ExpandSouthEast(1), color);
         }
 
         public void Draw(Texture2D texture, Vector2 worldPos, Rectangle source, Color color) {
-            SQ.SB.Draw(texture, (Rectangle)ToScreenPos(new RectangleF(worldPos, source.Size.ToVector2())), source, color);
+            SQ.SB.Draw(texture, (Rectangle)ToScreenPos(new RectangleF(worldPos, source.Size.ToVector2())).ExpandSouthEast(1), source, color);
         }
 
-        public void DrawPixel(Vector2I worldPos, Color color) {
-            SQ.SB.Draw(SQ.SB.Pixel, (Rectangle)ToScreenPos(new Rectangle(worldPos, new(1, 1))), color);
+        public void DrawPoint(Vector2I worldPos, Color color) {
+            SQ.SB.Draw(SQ.SB.Pixel, (Rectangle)ToScreenPos(new Rectangle(worldPos, new(1, 1))).ExpandSouthEast(1), color);
+        }
+
+        public void DrawFilledRectangle(Rectangle destination, Color color) {
+            SQ.SB.Draw(SQ.SB.Pixel, (Rectangle)ToScreenPos(destination).ExpandSouthEast(1), null, color, 0f, Vector2.Zero, SpriteEffects.None, 0f);
+        }
+ 
+        public void DrawLine(Vector2I start, Vector2I end, Color color, int width = 0, bool scale = false) {
+            if (scale) {
+                PixelActions.ApplyLineAction(start, end, width, (Vector2I position) => {
+                    DrawPoint(position, color);
+                });
+            } else {
+                SQ.SB.DrawLine((Vector2I)ToScreenPos(start), (Vector2I)ToScreenPos(end), color);
+            }
+        }
+
+        public void DrawCircle(Vector2I center, int radius, Color color, bool filled) {
+            PixelActions.ApplyCircleAction(center, radius, filled, (Vector2I position) => {
+                DrawPoint(position, color);
+            });
         }
     }
 }

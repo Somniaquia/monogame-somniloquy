@@ -46,8 +46,8 @@ namespace Somniloquy {
 
         protected override void Initialize() {
             base.Initialize();
-            SerializationManager.InitializeDirectories((typeof(World), "Worlds"), (typeof(Texture2D), "Textures"));
-            SoundManager.Initialize("C:\\Somnia\\Projects\\monogame-somniloquy\\Somniloquy\\Assets\\Loops");
+            // SerializationManager.InitializeDirectories((typeof(World), "Worlds"), (typeof(Texture2D), "Textures"));
+            SoundManager.Initialize("C:\\Somnia\\Projects\\monogame-somniloquy\\Assets\\Loops");
             InputManager.Initialize(Window);
 
             ScreenManager.AddScreen(new Section2DScreen(new Rectangle(new(), WindowSize)));

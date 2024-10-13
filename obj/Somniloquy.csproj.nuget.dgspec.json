@@ -56,11 +56,11 @@
             },
             "MonoGame.Content.Builder.Task": {
               "target": "Package",
-              "version": "[3.8.2.1105, )"
+              "version": "[3.8.1.303, )"
             },
             "MonoGame.Framework.DesktopGL": {
               "target": "Package",
-              "version": "[3.8.2.1105, )"
+              "version": "[3.8.1.303, )"
             },
             "System.Text.Json": {
               "target": "Package",

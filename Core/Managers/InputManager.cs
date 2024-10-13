@@ -44,12 +44,12 @@ namespace Somniloquy {
         public static Vector2 PenTilt = Vector2.Zero;
 
         private class KeyState {
-            public bool IsPressed;
+            public bool IsDown;
             public int ElapsedTicks; // int can sufficiently handle roughly 165 hours of 60 frames per second before overflowing
             public double ElapsedSeconds; // These record elapsed time since STATE CHANGE, including time since key released. 
 
             public KeyState() {
-                IsPressed = false;
+                IsDown = false;
                 ElapsedTicks = 0;
                 ElapsedSeconds = 0;
             }
@@ -95,12 +95,12 @@ namespace Somniloquy {
         private static void UpdateKeyboardState() {
             var currentKeyboardState = Keyboard.GetState();
             foreach (Keys key in Enum.GetValues(typeof(Keys))) {
-                bool isKeyPressed = currentKeyboardState.IsKeyDown(key);
+                bool previouslyDown = currentKeyboardState.IsKeyDown(key);
                 var keyState = KeyStates[key];
 
-                if (isKeyPressed) {
-                    if (!keyState.IsPressed) {
-                        keyState.IsPressed = true;
+                if (previouslyDown) {
+                    if (!keyState.IsDown) {
+                        keyState.IsDown = true;
                         keyState.ElapsedTicks = 0;
                         keyState.ElapsedSeconds = 0;
                     } else {
@@ -109,8 +109,8 @@ namespace Somniloquy {
                     }
                 }
                 else {
-                    if (keyState.IsPressed) {
-                        keyState.IsPressed = false;
+                    if (keyState.IsDown) {
+                        keyState.IsDown = false;
                         keyState.ElapsedTicks = 0;
                         keyState.ElapsedSeconds = 0;
                     } else {
@@ -127,8 +127,8 @@ namespace Somniloquy {
                 var mouseState = MouseButtonStates[button];
 
                 if (isButtonPressed) {
-                    if (!mouseState.IsPressed) {
-                        mouseState.IsPressed = true;
+                    if (!mouseState.IsDown) {
+                        mouseState.IsDown = true;
                         mouseState.ElapsedTicks = 0;
                         mouseState.ElapsedSeconds = 0;
                     } else {
@@ -136,8 +136,8 @@ namespace Somniloquy {
                         mouseState.ElapsedSeconds += SQ.GameTime.ElapsedGameTime.TotalSeconds;
                     }
                 } else {
-                    if (mouseState.IsPressed) {
-                        mouseState.IsPressed = false;
+                    if (mouseState.IsDown) {
+                        mouseState.IsDown = false;
                         mouseState.ElapsedTicks = 0;
                         mouseState.ElapsedSeconds = 0;
                     } else {
@@ -180,16 +180,16 @@ namespace Somniloquy {
         public static void RegisterPostKeyAction(Action action) => PostKeyActions.Add(action);
         public static void UnregisterPostKeyAction(Action action) => PostKeyActions.Remove(action);
 
-        public static bool IsKeyDown(Keys key) => KeyStates[key].IsPressed;
-        public static bool IsKeyPressed(Keys key) => KeyStates[key].IsPressed && KeyStates[key].ElapsedTicks == 0;
-        public static bool IsKeyReleased(Keys key) => !KeyStates[key].IsPressed && KeyStates[key].ElapsedTicks == 0;
+        public static bool IsKeyDown(Keys key) => KeyStates[key].IsDown;
+        public static bool IsKeyPressed(Keys key) => KeyStates[key].IsDown && KeyStates[key].ElapsedTicks == 0;
+        public static bool IsKeyReleased(Keys key) => !KeyStates[key].IsDown && KeyStates[key].ElapsedTicks == 0;
 
-        public static int ElapsedTicksSinceKeyPressed(Keys key) => KeyStates[key].IsPressed ? KeyStates[key].ElapsedTicks : -1;
-        public static int ElapsedTicksSinceKeyReleased(Keys key) => !KeyStates[key].IsPressed ? KeyStates[key].ElapsedTicks : -1;
-        public static double ElapsedSecondsSinceKeyPressed(Keys key) => KeyStates[key].IsPressed ? KeyStates[key].ElapsedSeconds : -1;
-        public static double ElapsedSecondsSinceKeyReleased(Keys key) => !KeyStates[key].IsPressed ? KeyStates[key].ElapsedSeconds : -1;
+        public static int ElapsedTicksSinceKeyPressed(Keys key) => KeyStates[key].IsDown ? KeyStates[key].ElapsedTicks : -1;
+        public static int ElapsedTicksSinceKeyReleased(Keys key) => !KeyStates[key].IsDown ? KeyStates[key].ElapsedTicks : -1;
+        public static double ElapsedSecondsSinceKeyPressed(Keys key) => KeyStates[key].IsDown ? KeyStates[key].ElapsedSeconds : -1;
+        public static double ElapsedSecondsSinceKeyReleased(Keys key) => !KeyStates[key].IsDown ? KeyStates[key].ElapsedSeconds : -1;
 
-        public static Vector2 GetMousePosition() => CurrentMouseState.Position;
+        public static Vector2 GetMousePosition() => CurrentMouseState.Position.ToVector2();
         public static bool IsMouseButtonDown(MouseButtons button) {
             return button switch {
                 MouseButtons.LeftButton => CurrentMouseState.LeftButton == ButtonState.Pressed,
@@ -201,15 +201,15 @@ namespace Somniloquy {
             };
         }
         public static bool IsMouseButtonPressed(MouseButtons mouseButton) {
-            bool result = MouseButtonStates[mouseButton].IsPressed && MouseButtonStates[mouseButton].ElapsedTicks == 1; // Fix initiation order bug; 
+            bool result = MouseButtonStates[mouseButton].IsDown && MouseButtonStates[mouseButton].ElapsedTicks == 1; // Fix initiation order bug; 
             return result; // The fudge is an initiation order bug; I do not remember what it means
         }
-        public static bool IsMouseButtonReleased(MouseButtons mouseButton) => !MouseButtonStates[mouseButton].IsPressed && MouseButtonStates[mouseButton].ElapsedTicks == 0;
+        public static bool IsMouseButtonReleased(MouseButtons mouseButton) => !MouseButtonStates[mouseButton].IsDown && MouseButtonStates[mouseButton].ElapsedTicks == 0;
 
-        public static int ElapsedTicksSinceMouseButtonPressed(MouseButtons mouseButton) => MouseButtonStates[mouseButton].IsPressed ? MouseButtonStates[mouseButton].ElapsedTicks : -1;
-        public static int ElapsedTicksSinceKeyReleased(MouseButtons mouseButton) => !MouseButtonStates[mouseButton].IsPressed ? MouseButtonStates[mouseButton].ElapsedTicks : -1;
-        public static double ElapsedSecondsSinceMouseButtonPressed(MouseButtons mouseButton) => MouseButtonStates[mouseButton].IsPressed ? MouseButtonStates[mouseButton].ElapsedSeconds : -1;
-        public static double ElapsedSecondsSinceKeyReleased(MouseButtons mouseButton) => !MouseButtonStates[mouseButton].IsPressed ? MouseButtonStates[mouseButton].ElapsedSeconds : -1;
+        public static int ElapsedTicksSinceMouseButtonPressed(MouseButtons mouseButton) => MouseButtonStates[mouseButton].IsDown ? MouseButtonStates[mouseButton].ElapsedTicks : -1;
+        public static int ElapsedTicksSinceKeyReleased(MouseButtons mouseButton) => !MouseButtonStates[mouseButton].IsDown ? MouseButtonStates[mouseButton].ElapsedTicks : -1;
+        public static double ElapsedSecondsSinceMouseButtonPressed(MouseButtons mouseButton) => MouseButtonStates[mouseButton].IsDown ? MouseButtonStates[mouseButton].ElapsedSeconds : -1;
+        public static double ElapsedSecondsSinceKeyReleased(MouseButtons mouseButton) => !MouseButtonStates[mouseButton].IsDown ? MouseButtonStates[mouseButton].ElapsedSeconds : -1;
 
         public static float GetPenPressure() => PenPressure;
         public static Vector2 GetPenTilt() => PenTilt;
@@ -233,9 +233,9 @@ namespace Somniloquy {
 
             foreach (object keyOrMouseButton in keysOrMouseButtons) {
                 if (keyOrMouseButton is Keys key) {
-                    if (!IsKeyPressed(key)) return false; // One of the keys isn't pressed
+                    if (!IsKeyDown(key)) return false; // One of the keys isn't pressed
                 } else if (keyOrMouseButton is MouseButtons mouseButton) {
-                    if (!IsMouseButtonPressed(mouseButton)) return false;
+                    if (!IsMouseButtonDown(mouseButton)) return false;
                 } else {
                     throw new Exception("Non-Key or MouseButton type passed to Key Combinations");
                 }

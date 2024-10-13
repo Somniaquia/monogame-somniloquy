@@ -6,9 +6,6 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework.Graphics;
     using Microsoft.Xna.Framework.Input;
 
-    
-    using MonoGame.Extended.BitmapFonts;
-
     public static class ScreenManager {
         public static List<Screen> ActiveScreens { get; set; } = new();
         public static Screen FocusedScreen;
