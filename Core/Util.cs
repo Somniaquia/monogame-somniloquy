@@ -13,10 +13,6 @@ namespace Somniloquy {
             return origin * (1 - lerpModifier) + target * lerpModifier;
         }
 
-        public static Vector2I Floor(Vector2 v) {
-            return new Vector2I((int)Math.Floor(v.X), (int)Math.Floor(v.Y));
-        }
-
         public static Vector2I Ceiling(Vector2 v) {
             return new Vector2I((int)Math.Ceiling(v.X), (int)Math.Ceiling(v.Y));
         }
@@ -45,7 +41,7 @@ namespace Somniloquy {
             return new Color(255 - color.R, 255 - color.G, 255 - color.B);
         }
     
-        public static Rectangle ValidizeRectangle(Rectangle rectangle) {
+        public static RectangleF ValidizeRectangle(RectangleF rectangle) {
             if (rectangle.Width < 0) {
                 rectangle.X += rectangle.Width;
                 rectangle.Width = -rectangle.Width;
@@ -57,6 +53,7 @@ namespace Somniloquy {
             }
             return rectangle;
         }
+
 
         public static (Vector2I, Vector2I) SortVector2Is(Vector2I Vector2I1, Vector2I Vector2I2) {
             if (Vector2I1.X > Vector2I2.X) (Vector2I2.X, Vector2I1.X) = (Vector2I1.X, Vector2I2.X);
@@ -246,6 +243,22 @@ namespace Somniloquy {
             T[] values = (T[])Enum.GetValues(typeof(T));
             int j = Array.IndexOf(values, currentValue) + 1;
             return (j == values.Length) ? values[0] : values[j];
+        }
+
+        public static float Max(params float[] numbers) {
+            float max = float.NegativeInfinity;
+            for (int i = 0; i < numbers.Length; i++) {
+                if (numbers[i] > max) max = numbers[i];
+            }
+            return max;
+        }
+
+        public static float Min(params float[] numbers) {
+            float min = float.PositiveInfinity;
+            for (int i = 0; i < numbers.Length; i++) {
+                if (numbers[i] < min) min = numbers[i];
+            }
+            return min;
         }
     }
 }

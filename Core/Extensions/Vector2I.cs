@@ -209,8 +209,8 @@ namespace Somniloquy {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2I operator /(Vector2I value1, Vector2I value2)
         {
-            value1.X /= value2.X;
-            value1.Y /= value2.Y;
+            value1.X = (int)MathF.Floor(value1.X / (float)value2.X);
+            value1.Y = (int)MathF.Floor(value1.Y / (float)value2.Y);
             return value1;
         }
 
@@ -223,9 +223,8 @@ namespace Somniloquy {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2I operator /(Vector2I value1, int divider)
         {
-            int factor = 1 / divider;
-            value1.X *= factor;
-            value1.Y *= factor;
+            value1.X = (int)MathF.Floor(value1.X / (float)divider);
+            value1.Y = (int)MathF.Floor(value1.Y / (float)divider);
             return value1;
         }
 
@@ -1169,7 +1168,7 @@ namespace Somniloquy {
 
         public static explicit operator Vector2I(Vector2 vec)
         {
-            return new Vector2I((int)vec.X, (int)vec.Y);
+            return new Vector2I((int)MathF.Floor(vec.X), (int)MathF.Floor(vec.Y));
         }
 
         #endregion

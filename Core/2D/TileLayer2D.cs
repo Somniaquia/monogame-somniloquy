@@ -17,9 +17,9 @@
         public static int TileLength { get; } = 16;
         public Dictionary<Vector2I, Tile2D[,]> Chunks { get; set; } = new();
 
-        public Vector2I GetTilePosition(Vector2I worldPosition) => Util.Floor(worldPosition / TileLength);
+        public Vector2I GetTilePosition(Vector2I worldPosition) => worldPosition / TileLength;
         public Vector2I GetPositionInTile(Vector2I worldPosition) => Util.PosMod(worldPosition, new Vector2I(TileLength));
-        public Vector2I GetChunkPosition(Vector2I tilePosition) => Util.Floor(tilePosition / ChunkLength);
+        public Vector2I GetChunkPosition(Vector2I tilePosition) => tilePosition / ChunkLength;
         public Vector2I GetTilePositionInChunk(Vector2I tilePosition) => Util.PosMod(tilePosition, new Vector2I(ChunkLength));
 
         public void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain = null) {
@@ -119,7 +119,7 @@
         }
 
         public void Draw(Camera2D camera, float opacity = 1f) {
-            var viewportRect = camera.ViewportInWorld;
+            var viewportRect = camera.VisibleRectangleInWorld;
 
             var startChunkPosition = GetChunkPosition(GetTilePosition((Vector2I)viewportRect.TopLeft()));
             var endChunkPosition = GetChunkPosition(GetTilePosition((Vector2I)viewportRect.BottomRight()));
@@ -144,8 +144,8 @@
         }
 
         public void DrawTileBounds(Camera2D camera, float opacity = 1f) {
-            var startPos = camera.ViewportInWorld.TopLeft();
-            var endChunkPosition = camera.ViewportInWorld.BottomRight();
+            var startPos = camera.VisibleRectangleInWorld.TopLeft();
+            var endChunkPosition = camera.VisibleRectangleInWorld.BottomRight();
 
             
         }

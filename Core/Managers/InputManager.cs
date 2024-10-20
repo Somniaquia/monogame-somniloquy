@@ -34,6 +34,7 @@ namespace Somniloquy {
         private static CWintabData wintabData;
 
         private static MouseState CurrentMouseState;
+        public static int ScrollWheelDelta;
         private static Dictionary<Keys, KeyState> KeyStates = new();
         private static Dictionary<MouseButtons, KeyState> MouseButtonStates = new();
         public static List<Keybind> Keybinds = new();
@@ -74,11 +75,8 @@ namespace Somniloquy {
         }
 
         public static void Update() {
-            CurrentMouseState = Mouse.GetState();
-
             UpdateKeyboardState();
             UpdateMouseState();
-
             UpdateTabletState();
 
             foreach (var keybind in Keybinds) {
@@ -94,6 +92,7 @@ namespace Somniloquy {
 
         private static void UpdateKeyboardState() {
             var currentKeyboardState = Keyboard.GetState();
+
             foreach (Keys key in Enum.GetValues(typeof(Keys))) {
                 bool previouslyDown = currentKeyboardState.IsKeyDown(key);
                 var keyState = KeyStates[key];
@@ -122,6 +121,10 @@ namespace Somniloquy {
         }
 
         private static void UpdateMouseState() {
+            var previousScrollWheelValue = CurrentMouseState.ScrollWheelValue;
+            CurrentMouseState = Mouse.GetState();
+            ScrollWheelDelta = CurrentMouseState.ScrollWheelValue - previousScrollWheelValue;
+
             foreach (MouseButtons button in Enum.GetValues(typeof(MouseButtons))) {
                 bool isButtonPressed = IsMouseButtonDown(button);
                 var mouseState = MouseButtonStates[button];
@@ -151,7 +154,7 @@ namespace Somniloquy {
         private static void UpdateTabletState() {
             float maxPressure = CWintabInfo.GetMaxPressure();
 
-            uint count = 0; PenPressure = 0;
+            uint count = 0; PenPressure = 1;
             WintabPacket[] packets = wintabData.GetDataPackets(1, true, ref count);
             for (int i = 0; i < count; i++) {
                 PenPressure = packets[i].pkNormalPressure / maxPressure;

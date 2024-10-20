@@ -56,8 +56,10 @@ namespace Somniloquy {
 			GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.S, (parameters) => MoveScreen(new Vector2(0, 1)), false));
             GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.D, (parameters) => MoveScreen(new Vector2(1, 0)), false));
 
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.Q, (parameters) => ZoomScreen(-0.05f), false));
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.E, (parameters) => ZoomScreen(0.05f), false));
+            // GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.Q, (parameters) => ZoomScreen(-0.05f), false));
+            // GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.E, (parameters) => ZoomScreen(0.05f), false));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.Q, (parameters) => RotateScreen(-0.05f), false));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.E, (parameters) => RotateScreen(0.05f), false));
             // GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.U, (parameters) => ShiftHue(-0.005f), false));
             // GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.O, (parameters) => ShiftHue(0.005f), false));
 
@@ -73,6 +75,8 @@ namespace Somniloquy {
 
         public override void Update() {
             base.Update();
+
+            ZoomScreen(InputManager.ScrollWheelDelta * 0.001f);
         }
 
         public void UnregisterEditorGlobalKeybinds() {
@@ -93,14 +97,20 @@ namespace Somniloquy {
             }
         }
 
+        public void RotateScreen(params object[] parameters) {
+            if (parameters.Length == 1 && parameters[0] is float ratio) {
+                Screen.Camera.RotateCamera(ratio);
+            }
+        }
+
         public void HandleLeftClick() { // This is a total placeholder, implement proper seperate functions for each action and implement keybind exclusive priorities
             if (!Focused) return;
 
             if (SelectedLayer is IPaintableLayer2D paintableLayer) {
                 if (InputManager.IsMouseButtonPressed(MouseButtons.LeftButton)) {
-                    paintableLayer.PaintCircle(Util.Floor(Screen.Camera.GlobalMousePos.Value), (int)(InputManager.GetPenTilt().Length() * 5), SelectedColor, InputManager.GetPenPressure());
+                    paintableLayer.PaintCircle((Vector2I)Screen.Camera.GlobalMousePos.Value, (int)(InputManager.GetPenTilt().Length() * 5), SelectedColor, InputManager.GetPenPressure());
                 } else {
-                    paintableLayer.PaintLine(Util.Floor(Screen.Camera.PreviousGlobalMousePos.Value), Util.Floor(Screen.Camera.GlobalMousePos.Value), SelectedColor, InputManager.GetPenPressure(), (int)(InputManager.GetPenTilt().Length() * 5));
+                    paintableLayer.PaintLine((Vector2I)Screen.Camera.PreviousGlobalMousePos.Value, (Vector2I)Screen.Camera.GlobalMousePos.Value, SelectedColor, InputManager.GetPenPressure(), (int)(InputManager.GetPenTilt().Length() * 5));
                 }
             }
         }

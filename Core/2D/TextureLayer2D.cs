@@ -10,7 +10,7 @@ namespace Somniloquy {
         public int ChunkLength = 256;
         public Dictionary<Vector2I, TextureChunk2D> Chunks = new();
 
-        public Vector2I GetChunkPosition(Vector2I canvasPosition) => Util.Floor(canvasPosition / ChunkLength);
+        public Vector2I GetChunkPosition(Vector2I canvasPosition) => canvasPosition / ChunkLength;
         public Vector2I GetPositionInChunk(Vector2I canvasPosition) => Util.PosMod(canvasPosition, new Vector2I(ChunkLength, ChunkLength));
 
         public void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain = null) {
@@ -26,8 +26,8 @@ namespace Somniloquy {
         }
 
         public override void Draw(Camera2D camera) {
-            Vector2 topLeft = camera.ViewportInWorld.TopLeft();
-            Vector2 bottomRight = camera.ViewportInWorld.BottomRight();
+            Vector2 topLeft = camera.VisibleRectangleInWorld.TopLeft() - new Vector2(1);
+            Vector2 bottomRight = camera.VisibleRectangleInWorld.BottomRight() + new Vector2(1);
             Vector2I topLeftChunk = new((int)(topLeft.X / ChunkLength) - 1, (int)(topLeft.Y / ChunkLength) - 1);
             Vector2I bottomRightChunk = new((int)(bottomRight.X / ChunkLength) + 1, (int)(bottomRight.Y / ChunkLength) + 1);
 
@@ -35,18 +35,20 @@ namespace Somniloquy {
 
             for (int y = topLeftChunk.Y; y < bottomRightChunk.Y; y++) {
                 for (int x = topLeftChunk.X; x < bottomRightChunk.X; x++) {
-                    var chunkPosition = new Vector2I(x, y);
-                    camera.DrawLine(chunkPosition * ChunkLength, (chunkPosition + new Vector2I(1, 0)) * ChunkLength, Color.White, scale: false);
-                    camera.DrawLine(chunkPosition * ChunkLength, (chunkPosition + new Vector2I(0, 1)) * ChunkLength, Color.White, scale: false);
+                    var chunkIndex = new Vector2I(x, y);
+                    var chunkPos = chunkIndex * ChunkLength;
+                    var nextChunkPos = (chunkIndex + new Vector2I(1, 1)) * ChunkLength;
+                    camera.DrawLine(chunkPos, (chunkIndex + new Vector2I(1, 0)) * ChunkLength, Color.Gray * 0.5f, scale: false);
+                    camera.DrawLine(chunkPos, (chunkIndex + new Vector2I(0, 1)) * ChunkLength, Color.Gray * 0.5f, scale: false);
                     
-                    if (!Chunks.ContainsKey(chunkPosition)) continue;
+                    if (!Chunks.ContainsKey(chunkIndex)) continue;
 
-                    var xLeft = MathF.Min(MathF.Max(topLeft.X, x * ChunkLength), bottomRight.X);
-                    var xRight = MathF.Max(MathF.Min(bottomRight.X, (x + 1) * ChunkLength), topLeft.X);
-                    var yTop = MathF.Min(MathF.Max(topLeft.Y, y * ChunkLength), bottomRight.Y);
-                    var yBottom = MathF.Max(MathF.Min(bottomRight.Y, (y + 1) * ChunkLength), topLeft.Y); 
+                    var xLeft = MathF.Min(MathF.Max(topLeft.X, chunkPos.X), bottomRight.X);
+                    var xRight = MathF.Max(MathF.Min(bottomRight.X, nextChunkPos.X), topLeft.X);
+                    var yTop = MathF.Min(MathF.Max(topLeft.Y, chunkPos.Y), bottomRight.Y);
+                    var yBottom = MathF.Max(MathF.Min(bottomRight.Y, nextChunkPos.Y), topLeft.Y); 
 
-                    camera.Draw(Chunks[chunkPosition].Texture, (Rectangle)new RectangleF(xLeft, yTop, xRight - xLeft, yBottom - yTop), Color.White);
+                    camera.Draw(Chunks[chunkIndex].Texture, (Rectangle)new RectangleF(xLeft, yTop, xRight - xLeft, yBottom - yTop), (Rectangle)new RectangleF(xLeft - chunkPos.X, yTop - chunkPos.Y , xRight - xLeft, yBottom - yTop), Color.White);
                 }
             }
         }

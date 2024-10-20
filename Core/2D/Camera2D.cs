@@ -1,7 +1,7 @@
 namespace Somniloquy {
     using System;
     using System.Collections.Generic;
-
+    using System.Diagnostics;
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
 
@@ -16,12 +16,14 @@ namespace Somniloquy {
         public float Zoom = 1f;
         public float Rotation = 0.0f;
         public Matrix Transform;
-        public RectangleF ViewportInWorld = RectangleF.Empty;
+        public RectangleF VisibleRectangleInWorld = RectangleF.Empty;
 
         public Vector2? GlobalMousePos;
         public Vector2? PreviousGlobalMousePos;
 
         public void MoveCamera(Vector2 displacement) {
+            float theta = MathF.Atan2(displacement.Y, displacement.X) - Rotation;
+            displacement = new(displacement.Length() * MathF.Cos(theta), displacement.Length() * MathF.Sin(theta));
             TargetCenterPosInWorld += displacement * 10 / MathF.Sqrt(TargetZoom);
         }
 
@@ -30,25 +32,39 @@ namespace Somniloquy {
             TargetZoom = MathF.Min(MathF.Max(TargetZoom, 1f), 64f);
         }
 
+        public void RotateCamera(float delta) {
+            TargetRotation += delta;
+        }
+
         public void Update() {
             CenterPosInWorld.X = Util.Lerp(CenterPosInWorld.X, TargetCenterPosInWorld.X, LerpModifier);
             CenterPosInWorld.Y = Util.Lerp(CenterPosInWorld.Y, TargetCenterPosInWorld.Y, LerpModifier);
 
             Zoom = Util.Lerp(Zoom, TargetZoom, LerpModifier);
 
-            TargetRotation = Util.PosMod(TargetRotation, 2 * MathF.PI);
+            // TargetRotation = Util.PosMod(TargetRotation, 2 * MathF.PI);
             Rotation = Util.Lerp(Rotation, TargetRotation, LerpModifier);
 
-            Viewport viewport = SQ.GD.Viewport;
+            Rectangle bounds = SQ.GD.Viewport.Bounds;
 
             Transform =
                 Matrix.CreateTranslation(new Vector3(-CenterPosInWorld.X, -CenterPosInWorld.Y, 0)) *
                 Matrix.CreateRotationZ(Rotation) *
                 Matrix.CreateScale(new Vector3(Zoom, Zoom, 1)) *
-                Matrix.CreateTranslation(new Vector3(viewport.Width * 0.5f, viewport.Height * 0.5f, 0)
+                Matrix.CreateTranslation(new Vector3(bounds.Width * 0.5f, bounds.Height * 0.5f, 0)
             );
             
-            ViewportInWorld = ToWorldPos(viewport.Bounds);
+            var topLeft = ToWorldPos(bounds.TopLeft());
+            var topRight = ToWorldPos(bounds.TopRight());
+            var bottomLeft = ToWorldPos(bounds.BottomLeft());
+            var bottomRight = ToWorldPos(bounds.BottomRight());
+            
+            var left = Util.Min(topLeft.X, topRight.X, bottomLeft.X, bottomRight.X);
+            var right = Util.Max(topLeft.X, topRight.X, bottomLeft.X, bottomRight.X);
+            var up = Util.Min(topLeft.Y, topRight.Y, bottomLeft.Y, bottomRight.Y);
+            var down = Util.Max(topLeft.Y, topRight.Y, bottomLeft.Y, bottomRight.Y);
+            
+            VisibleRectangleInWorld = new RectangleF(left, up, right - left, down - up);
 
             PreviousGlobalMousePos = GlobalMousePos == null ? ToWorldPos(InputManager.GetMousePosition()) : GlobalMousePos;
             GlobalMousePos = ToWorldPos(InputManager.GetMousePosition());
@@ -76,6 +92,7 @@ namespace Somniloquy {
             );
         }
 
+        // TODO: Make drawing work with rotation with a RenderTarget
         public void Draw(Texture2D texture, Rectangle worldRectangle, Rectangle source, Color color) {
             SQ.SB.Draw(texture, (Rectangle)ToScreenPos(worldRectangle).ExpandSouthEast(1), source, color);
         }
