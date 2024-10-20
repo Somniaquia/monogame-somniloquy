@@ -133,7 +133,7 @@ namespace Somniloquy {
         }
 
         public override void Draw() {
-            SQ.SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
+            SQ.SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.AnisotropicClamp);
             if (Screen.EditorState == EditorState.PaintMode) {
                 SQ.SB.DrawFilledRectangle(new Rectangle(Boundaries.X - 8, Boundaries.Y - 8, Boundaries.Width + 16, Boundaries.Height + 16), Screen.SelectedColor);
                 SQ.SB.Draw(Chart, Boundaries, Color.White);

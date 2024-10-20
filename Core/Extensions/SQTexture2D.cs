@@ -5,7 +5,7 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework.Graphics;
 
     public class SQTexture2D : Texture2D {
-        public static List<SQTexture2D> ChangedTextures = new();
+        public static HashSet<SQTexture2D> ChangedTextures = new();
 
         public Color[] TextureData;
 
@@ -16,9 +16,9 @@ namespace Somniloquy {
         }
 
         public void SetPixel(Vector2I position, Color color, CommandChain chain = null) {
+            chain?.AddCommand(new TextureEditCommand(this, position, TextureData[position.Unwrap(Width)], color));
             TextureData[position.Unwrap(Width)] = color;
             ChangedTextures.Add(this);
-            chain?.AddCommand(new TextureEditCommand(this, position, TextureData[position.Unwrap(Width)], color));
         }
 
         public void PaintPixel(Vector2I position, Color color, float opacity = 1f, CommandChain chain = null) {
@@ -55,7 +55,9 @@ namespace Somniloquy {
         }
 
         public static void ApplyTextureChanges() {
-            ChangedTextures.ForEach(texture => texture.SetData(texture.TextureData));
+            foreach (var texture in ChangedTextures) {
+                texture.SetData(texture.TextureData);
+            }
             ChangedTextures.Clear();
         }
     }

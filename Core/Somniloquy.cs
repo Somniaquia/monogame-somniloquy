@@ -5,6 +5,7 @@ namespace Somniloquy {
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Runtime.InteropServices;
 
     using Microsoft.Xna.Framework;
@@ -19,6 +20,9 @@ namespace Somniloquy {
         public static ContentManager CM;
         public static SQSpriteBatch SB;
         public static GameTime GameTime;
+        public int TargetFPS = 60;
+        public float FPS;
+        private Queue<float> timeSamples;
 
         public static Vector2I WindowSize;
         public static bool IsWindowActive;
@@ -32,10 +36,14 @@ namespace Somniloquy {
 
             GDM.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
             GDM.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height - 48;
+
             GDM.HardwareModeSwitch = false;
             GDM.IsFullScreen = false;
             GDM.SynchronizeWithVerticalRetrace = true;
             GDM.ApplyChanges();
+
+            TargetElapsedTime = TimeSpan.FromSeconds(1d / TargetFPS);
+            timeSamples = new(10);
 
             Window.IsBorderless = true;
             Window.Position = new Vector2I(0, 0);
@@ -47,8 +55,8 @@ namespace Somniloquy {
         protected override void Initialize() {
             base.Initialize();
             // SerializationManager.InitializeDirectories((typeof(World), "Worlds"), (typeof(Texture2D), "Textures"));
-            SoundManager.Initialize("C:\\Somnia\\Projects\\monogame-somniloquy\\Assets\\Loops");
             InputManager.Initialize(Window);
+            SoundManager.Initialize("C:\\Somnia\\Projects\\monogame-somniloquy\\Assets\\Loops");
 
             ScreenManager.AddScreen(new Section2DScreen(new Rectangle(new(), WindowSize)));
         }
@@ -102,11 +110,27 @@ namespace Somniloquy {
 
         protected override void Draw(GameTime gameTime) {
             if (IsActive) {
+                UpdateFPS(gameTime);
+
                 GD.Clear(Color.Black);
                 SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
                 ScreenManager.Draw();
+                SB.DrawString(Misaki, $"FPS: {FPS:n1}", new Vector2(1, 1), Color.White);
+                CommandManager.DrawHistoryInfo();
                 SB.End();
                 base.Draw(gameTime);
+            }
+        }
+
+        private void UpdateFPS(GameTime gameTime) {
+            float CurrentFramesPerSecond = (float)(1.0d / gameTime.ElapsedGameTime.TotalSeconds);
+            timeSamples.Enqueue(CurrentFramesPerSecond);
+
+            if (timeSamples.Count > 10) {
+                timeSamples.Dequeue();
+                FPS = timeSamples.Average(i => i);
+            } else {
+                FPS = CurrentFramesPerSecond;
             }
         }
     }

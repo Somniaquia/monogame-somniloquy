@@ -1,7 +1,7 @@
 namespace Somniloquy {
     using System;
     using System.Collections.Generic;
-
+    using System.Linq;
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Input;
     using WintabDN;
@@ -12,18 +12,20 @@ namespace Somniloquy {
     public class Keybind {
         public bool TriggerOnce;
         public bool OrderSensitive;
-        public object[] KeysOrMouseButtons;
+        public object[] Buttons;
+        public object[] ExclusiveButtons;
         public Action Action;
 
-        public Keybind(object[] keysOrMouseButtons, Action action, bool triggerOnce, bool orderSensitive) {
-            foreach (var keyOrMouseButton in keysOrMouseButtons) {
+        public Keybind(object[] buttons, object[] exclusiveButtons, Action action, bool triggerOnce, bool orderSensitive) {
+            foreach (var button in buttons.Concat(exclusiveButtons)) {
                 // Check that it's either a key or a valid mouse button input (Keys or MouseButton).
-                if (keyOrMouseButton is not Keys && keyOrMouseButton is not MouseButtons) {
+                if (button is not Keys && button is not MouseButtons) {
                     throw new Exception("Non-Key or MouseButton type passed to Key Combinations");
                 }
             }
 
-            KeysOrMouseButtons = keysOrMouseButtons;
+            Buttons = buttons;
+            ExclusiveButtons = exclusiveButtons;
             Action = action;
             TriggerOnce = triggerOnce;
             OrderSensitive = orderSensitive;
@@ -80,7 +82,7 @@ namespace Somniloquy {
             UpdateTabletState();
 
             foreach (var keybind in Keybinds) {
-                if (IsKeyCombinationPressed(keybind.TriggerOnce, keybind.OrderSensitive, keybind.KeysOrMouseButtons)) {
+                if (IsKeyCombinationPressed(keybind.TriggerOnce, keybind.OrderSensitive, keybind.Buttons, keybind.ExclusiveButtons)) {
                     keybind.Action.Invoke();
                 }
             }
@@ -94,10 +96,10 @@ namespace Somniloquy {
             var currentKeyboardState = Keyboard.GetState();
 
             foreach (Keys key in Enum.GetValues(typeof(Keys))) {
-                bool previouslyDown = currentKeyboardState.IsKeyDown(key);
+                bool isDown = currentKeyboardState.IsKeyDown(key);
                 var keyState = KeyStates[key];
 
-                if (previouslyDown) {
+                if (isDown) {
                     if (!keyState.IsDown) {
                         keyState.IsDown = true;
                         keyState.ElapsedTicks = 0;
@@ -126,10 +128,10 @@ namespace Somniloquy {
             ScrollWheelDelta = CurrentMouseState.ScrollWheelValue - previousScrollWheelValue;
 
             foreach (MouseButtons button in Enum.GetValues(typeof(MouseButtons))) {
-                bool isButtonPressed = IsMouseButtonDown(button);
+                bool isDown = IsMouseButtonDown(button);
                 var mouseState = MouseButtonStates[button];
 
-                if (isButtonPressed) {
+                if (isDown) {
                     if (!mouseState.IsDown) {
                         mouseState.IsDown = true;
                         mouseState.ElapsedTicks = 0;
@@ -161,19 +163,23 @@ namespace Somniloquy {
             }
         }
 
-        public static Keybind RegisterKeybind(object keysOrMouseButtons, Action action, bool triggerOnce = true) {
-            return RegisterKeybind(new object[] {keysOrMouseButtons}, action, triggerOnce);
+        public static Keybind RegisterKeybind(object button, Action action, bool triggerOnce = true) {
+            return RegisterKeybind(new object[] {button}, action, triggerOnce);
         }
 
-        public static Keybind RegisterKeybind(object[] keysOrMouseButtons, Action action, bool triggerOnce = true, bool orderSensitive = false) {
-            foreach (var keyOrMouseButton in keysOrMouseButtons) {
-                if (keyOrMouseButton is Keys key) {
+        public static Keybind RegisterKeybind(object[] buttons, Action action, bool triggerOnce = true, bool orderSensitive = false) {
+            return RegisterKeybind(buttons, new object[] {}, action, triggerOnce);
+        }
+
+        public static Keybind RegisterKeybind(object[] buttons, object[] exclusiveButtons, Action action, bool triggerOnce = true, bool orderSensitive = false) {
+            foreach (var button in buttons.Concat(exclusiveButtons)) {
+                if (button is Keys key) {
                     if (!KeyStates.ContainsKey(key))
                         KeyStates[key] = new KeyState();
                 }
             }
 
-            var keybind = new Keybind(keysOrMouseButtons, action, triggerOnce, orderSensitive);
+            var keybind = new Keybind(buttons, exclusiveButtons, action, triggerOnce, orderSensitive);
             Keybinds.Add(keybind);
             return keybind;
         }
@@ -204,8 +210,8 @@ namespace Somniloquy {
             };
         }
         public static bool IsMouseButtonPressed(MouseButtons mouseButton) {
-            bool result = MouseButtonStates[mouseButton].IsDown && MouseButtonStates[mouseButton].ElapsedTicks == 1; // Fix initiation order bug; 
-            return result; // The fudge is an initiation order bug; I do not remember what it means
+            bool result = MouseButtonStates[mouseButton].IsDown && MouseButtonStates[mouseButton].ElapsedTicks == 0;
+            return result;
         }
         public static bool IsMouseButtonReleased(MouseButtons mouseButton) => !MouseButtonStates[mouseButton].IsDown && MouseButtonStates[mouseButton].ElapsedTicks == 0;
 
@@ -223,21 +229,31 @@ namespace Somniloquy {
             return PenButtons[buttonIndex - 1];
         }
 
-        public static bool IsKeyCombinationPressed(bool triggerOnce, bool orderSensitive, params object[] keysOrMouseButtons) {
+        public static bool IsKeyCombinationPressed(bool triggerOnce, bool orderSensitive, object[] buttons, object[] exclusiveButtons) {
+            foreach (var button in exclusiveButtons) {
+                if (button is Keys key) {
+                    if (IsKeyDown(key)) return false;
+                } else if (button is MouseButtons mouseButton) {
+                    if (IsMouseButtonDown(mouseButton)) return false;
+                } else {
+                    throw new Exception("Non-Key or MouseButton type passed to Key Combinations");
+                }
+            }
+            
             if (triggerOnce) {
-                if (keysOrMouseButtons[^1] is Keys key) {
+                if (buttons[^1] is Keys key) {
                     if (!IsKeyPressed(key)) return false;
-                } else if (keysOrMouseButtons[^1] is MouseButtons mouseButton) {
+                } else if (buttons[^1] is MouseButtons mouseButton) {
                     if (!IsMouseButtonPressed(mouseButton)) return false; 
                 } else {
                     throw new Exception("Non-Key or MouseButton type passed to Key Combinations");
                 }
             }
 
-            foreach (object keyOrMouseButton in keysOrMouseButtons) {
-                if (keyOrMouseButton is Keys key) {
+            foreach (object button in buttons) {
+                if (button is Keys key) {
                     if (!IsKeyDown(key)) return false; // One of the keys isn't pressed
-                } else if (keyOrMouseButton is MouseButtons mouseButton) {
+                } else if (button is MouseButtons mouseButton) {
                     if (!IsMouseButtonDown(mouseButton)) return false;
                 } else {
                     throw new Exception("Non-Key or MouseButton type passed to Key Combinations");
@@ -245,10 +261,10 @@ namespace Somniloquy {
             }
 
             if (orderSensitive) {
-                for (int i = 0; i < keysOrMouseButtons.Length - 1; i++) {
+                for (int i = 0; i < buttons.Length - 1; i++) {
                     // Every instance of keyOrMouseButtons are proved to be either Key or MouseButton thus usage of ternary will be ok
-                    var currentKeyElapsedTicks = keysOrMouseButtons[i] is Keys key1 ? KeyStates[key1].ElapsedTicks : MouseButtonStates[(MouseButtons)keysOrMouseButtons[i]].ElapsedTicks;
-                    var anteriorKeyElapsedTicks = keysOrMouseButtons[i] is Keys key ? KeyStates[key].ElapsedTicks : MouseButtonStates[(MouseButtons)keysOrMouseButtons[i]].ElapsedTicks;
+                    var currentKeyElapsedTicks = buttons[i] is Keys key1 ? KeyStates[key1].ElapsedTicks : MouseButtonStates[(MouseButtons)buttons[i]].ElapsedTicks;
+                    var anteriorKeyElapsedTicks = buttons[i] is Keys key ? KeyStates[key].ElapsedTicks : MouseButtonStates[(MouseButtons)buttons[i]].ElapsedTicks;
                     if (currentKeyElapsedTicks < anteriorKeyElapsedTicks) return false; // Wrong order
                 }
             }

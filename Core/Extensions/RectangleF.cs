@@ -513,7 +513,7 @@ namespace Somniloquy
 
         public static explicit operator Rectangle(RectangleF rectangleF)
         {
-            return new Rectangle((int)rectangleF.X, (int)rectangleF.Y, (int)rectangleF.Width, (int)rectangleF.Height);
+            return new Rectangle((int)MathF.Round(rectangleF.X), (int)MathF.Round(rectangleF.Y), (int)MathF.Round(rectangleF.Width), (int)MathF.Round(rectangleF.Height));
         }
 
         #endregion

@@ -45,7 +45,9 @@ namespace Somniloquy {
         }
 
         public static void ApplyCircleAction(Vector2I center, int radius, bool filled, PixelAction action) {
-            if (filled) {
+            if (radius == 0) {
+                action(center);
+            } else if (filled) {
                 int x = 0;
                 int y = radius;
                 int d = 3 - 2 * radius;

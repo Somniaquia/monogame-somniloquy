@@ -63,7 +63,7 @@ namespace Somniloquy {
             var right = Util.Max(topLeft.X, topRight.X, bottomLeft.X, bottomRight.X);
             var up = Util.Min(topLeft.Y, topRight.Y, bottomLeft.Y, bottomRight.Y);
             var down = Util.Max(topLeft.Y, topRight.Y, bottomLeft.Y, bottomRight.Y);
-            
+
             VisibleRectangleInWorld = new RectangleF(left, up, right - left, down - up);
 
             PreviousGlobalMousePos = GlobalMousePos == null ? ToWorldPos(InputManager.GetMousePosition()) : GlobalMousePos;
@@ -93,24 +93,24 @@ namespace Somniloquy {
         }
 
         // TODO: Make drawing work with rotation with a RenderTarget
-        public void Draw(Texture2D texture, Rectangle worldRectangle, Rectangle source, Color color) {
-            SQ.SB.Draw(texture, (Rectangle)ToScreenPos(worldRectangle).ExpandSouthEast(1), source, color);
+        public void Draw(Texture2D texture, RectangleF worldRectangle, Rectangle source, Color color) {
+            SQ.SB.Draw(texture, (Rectangle)ToScreenPos(worldRectangle), source, color);
         }
 
-        public void Draw(Texture2D texture, Rectangle worldRectangle, Color color) {
-            SQ.SB.Draw(texture, (Rectangle)ToScreenPos(worldRectangle).ExpandSouthEast(1), color);
+        public void Draw(Texture2D texture, RectangleF worldRectangle, Color color) {
+            SQ.SB.Draw(texture, (Rectangle)ToScreenPos(worldRectangle), color);
         }
 
         public void Draw(Texture2D texture, Vector2 worldPos, Rectangle source, Color color) {
-            SQ.SB.Draw(texture, (Rectangle)ToScreenPos(new RectangleF(worldPos, source.Size.ToVector2())).ExpandSouthEast(1), source, color);
+            SQ.SB.Draw(texture, (Rectangle)ToScreenPos(new RectangleF(worldPos, source.Size.ToVector2())), source, color);
         }
 
         public void DrawPoint(Vector2I worldPos, Color color) {
-            SQ.SB.Draw(SQ.SB.Pixel, (Rectangle)ToScreenPos(new Rectangle(worldPos, new(1, 1))).ExpandSouthEast(1), color);
+            SQ.SB.Draw(SQ.SB.Pixel, (Rectangle)ToScreenPos(new Rectangle(worldPos, new(1, 1))), color);
         }
 
         public void DrawFilledRectangle(Rectangle destination, Color color) {
-            SQ.SB.Draw(SQ.SB.Pixel, (Rectangle)ToScreenPos(destination).ExpandSouthEast(1), null, color, 0f, Vector2.Zero, SpriteEffects.None, 0f);
+            SQ.SB.Draw(SQ.SB.Pixel, (Rectangle)ToScreenPos(destination), null, color, 0f, Vector2.Zero, SpriteEffects.None, 0f);
         }
  
         public void DrawLine(Vector2I start, Vector2I end, Color color, int width = 0, bool scale = false) {

@@ -48,6 +48,8 @@ namespace Somniloquy {
 
         public List<Keybind> GlobalKeybinds = new();
 
+        public CommandChain CurrentCommandChain;
+
         public Section2DEditor(Rectangle boundaries, Section2DScreen screen) : base(boundaries) {
             Screen = screen;
 
@@ -56,10 +58,10 @@ namespace Somniloquy {
 			GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.S, (parameters) => MoveScreen(new Vector2(0, 1)), false));
             GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.D, (parameters) => MoveScreen(new Vector2(1, 0)), false));
 
-            // GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.Q, (parameters) => ZoomScreen(-0.05f), false));
-            // GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.E, (parameters) => ZoomScreen(0.05f), false));
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.Q, (parameters) => RotateScreen(-0.05f), false));
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.E, (parameters) => RotateScreen(0.05f), false));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.Q, (parameters) => ZoomScreen(-0.05f), false));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.E, (parameters) => ZoomScreen(0.05f), false));
+            // GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.Q, (parameters) => RotateScreen(-0.05f), false));
+            // GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.E, (parameters) => RotateScreen(0.05f), false));
             // GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.U, (parameters) => ShiftHue(-0.005f), false));
             // GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.O, (parameters) => ShiftHue(0.005f), false));
 
@@ -67,6 +69,9 @@ namespace Somniloquy {
 
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { MouseButtons.LeftButton }, (parameters) => HandleLeftClick(), false));
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { MouseButtons.RightButton }, (parameters) => HandleRightClick(), false));
+
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.Z}, new object[] {Keys.LeftShift}, (parameters) => CommandManager.Undo(), true, true));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.LeftShift, Keys.Z}, (parameters) => CommandManager.Redo(), true, true));
 
             SelectedLayer = new TextureLayer2D();
             Screen.Section.LayerGroups["group1"].AddLayer(SelectedLayer);
@@ -108,9 +113,10 @@ namespace Somniloquy {
 
             if (SelectedLayer is IPaintableLayer2D paintableLayer) {
                 if (InputManager.IsMouseButtonPressed(MouseButtons.LeftButton)) {
-                    paintableLayer.PaintCircle((Vector2I)Screen.Camera.GlobalMousePos.Value, (int)(InputManager.GetPenTilt().Length() * 5), SelectedColor, InputManager.GetPenPressure());
+                    CurrentCommandChain = CommandManager.AddCommandChain(new CommandChain());
+                    paintableLayer.PaintCircle((Vector2I)Screen.Camera.GlobalMousePos.Value, (int)(InputManager.GetPenTilt().Length() * 5), SelectedColor, InputManager.GetPenPressure(), true, CurrentCommandChain);
                 } else {
-                    paintableLayer.PaintLine((Vector2I)Screen.Camera.PreviousGlobalMousePos.Value, (Vector2I)Screen.Camera.GlobalMousePos.Value, SelectedColor, InputManager.GetPenPressure(), (int)(InputManager.GetPenTilt().Length() * 5));
+                    paintableLayer.PaintLine((Vector2I)Screen.Camera.PreviousGlobalMousePos.Value, (Vector2I)Screen.Camera.GlobalMousePos.Value, SelectedColor, InputManager.GetPenPressure(), (int)(InputManager.GetPenTilt().Length() * 5), CurrentCommandChain);
                 }
             }
         }

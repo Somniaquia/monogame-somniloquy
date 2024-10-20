@@ -9,9 +9,10 @@ namespace Somniloquy {
         public static Stack<ICommand> UndoHistory = new();
         public static Stack<ICommand> RedoHistory = new();
 
-        public static void Push(ICommand command) {
+        public static CommandChain AddCommandChain(CommandChain command) {
             UndoHistory.Push(command);
             RedoHistory.Clear();
+            return command;
         }
 
         public static void Undo() {
@@ -33,6 +34,11 @@ namespace Somniloquy {
         public static void Clear() {
             UndoHistory.Clear();
             RedoHistory.Clear();
+        }
+
+        public static void DrawHistoryInfo() {
+            SQ.SB.DrawString(SQ.Misaki, $"Undo History: {UndoHistory.Count}", new(1, SQ.WindowSize.Y - 33), Color.White);
+            SQ.SB.DrawString(SQ.Misaki, $"Redo History: {RedoHistory.Count}", new(1, SQ.WindowSize.Y - 17), Color.White);
         }
     }
 
@@ -58,14 +64,14 @@ namespace Somniloquy {
         private Color colorBefore, colorAfter;
 
         public TextureEditCommand(SQTexture2D target, Vector2I position, Color colorBefore, Color colorAfter) {
-            this.target = target; 
+            this.target = target;
             this.position = position;
             this.colorBefore = colorBefore;
             this.colorAfter = colorAfter;
         }
 
-        public void Undo() => target.PaintPixel(position, colorBefore);
-        public void Redo() => target.PaintPixel(position, colorAfter);
+        public void Undo() => target.SetPixel(position, colorBefore);
+        public void Redo() => target.SetPixel(position, colorAfter);
     }
 
     public class TextureChunkSetCommand : ICommand {
