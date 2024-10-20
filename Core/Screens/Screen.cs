@@ -9,22 +9,21 @@ namespace Somniloquy {
     public enum Direction { Horizontal, Vertical }
 
     public class Screen {
-        public Rectangle Boundaries { get; set; }
-        public Matrix TransformMatrix { get; protected set; }
+        public Rectangle Boundaries;
+        public Matrix Transform;
 
         public Direction DividingDirection = Direction.Horizontal;
-        public Dictionary<int, Screen> ChildScreens { get; set; } = new();
-        public bool Focusable { get; protected set; } = true;
-        public bool Focused;
+        public Dictionary<int, Screen> ChildScreens = new();
+        public bool Focusable = true;
 
         public Screen(Rectangle boundaries) {
             Boundaries = boundaries;
-            TransformMatrix = 
+            Transform = 
                 Matrix.CreateTranslation(-boundaries.X, -boundaries.Y, 0f) * 
                 Matrix.CreateScale(1f / boundaries.Width, 1f / boundaries.Height, 1f);
         }
 
-        public virtual void OnFocus() {}
+        public virtual void LoadContent() { }
 
         /// <summary>
         /// Base updates if the screen is focused. Call base.Update() at top!
@@ -34,7 +33,6 @@ namespace Somniloquy {
                 if (Util.IsWithinBoundaries((Vector2I)InputManager.GetMousePosition(), Boundaries)) {
                     if (!InputManager.IsMouseButtonDown(MouseButtons.LeftButton)) {
                         ScreenManager.FocusedScreen = this;
-                        Focused = true;
                     }
                 }
             }

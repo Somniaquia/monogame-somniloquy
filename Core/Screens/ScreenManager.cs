@@ -14,6 +14,12 @@ namespace Somniloquy {
             ActiveScreens.Add(screen);
         }
 
+        public static void LoadContent() {
+            foreach (var screen in ActiveScreens) {
+                screen.LoadContent();
+            }
+        }
+
         public static void Update() {
             foreach (var screen in ActiveScreens) {
                 screen.Update();

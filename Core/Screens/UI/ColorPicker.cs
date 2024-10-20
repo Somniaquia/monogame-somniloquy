@@ -5,83 +5,24 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
     using Microsoft.Xna.Framework.Input;
-    
 
     public class ColorPicker : Screen {
-        public Section2DEditor Screen { get; set; }
+        public Section2DEditor Screen;
         
-        public Texture2D Chart { get; set; }
-        public int Hue { get; set; } = 0;
-        public Vector2 PositionOnChart { get; set; } = Vector2.Zero;
-        private bool updatedChart = false;
+        public Texture2D Chart;
+        public Vector2 PositionOnChart = Vector2.Zero;
+        public int Hue = 0;
 
-        public ColorPicker(Rectangle boundaries, Section2DEditor screen) : base(boundaries) {
-            Screen = screen;
+        public ColorPicker(Rectangle boundaries, Section2DEditor screen) : base(boundaries) { 
+            Screen = screen; 
         }
 
-        public static Color ColorFromHSV(float hue, float saturation, float value) {
-            int hi = Convert.ToInt32(Math.Floor(hue / 60)) % 6;
-            hue = hue / 60 - (float)Math.Floor(hue / 60);
-
-            value *= 255;
-            int v = Convert.ToInt32(value);
-            int p = Convert.ToInt32(value * (1 - saturation));
-            int q = Convert.ToInt32(value * (1 - hue * saturation));
-            int t = Convert.ToInt32(value * (1 - (1 - hue) * saturation));
-
-            if (hi == 0)
-                return new Color(v, t, p);
-            else if (hi == 1)
-                return new Color(q, v, p);
-            else if (hi == 2)
-                return new Color(p, v, t);
-            else if (hi == 3)
-                return new Color(p, q, v);
-            else if (hi == 4)
-                return new Color(t, p, v);
-            else
-                return new Color(v, p, q);
+        public override void LoadContent() {
+            Chart = new Texture2D(SQ.GD, Boundaries.Width, Boundaries.Height); 
+            CreateChartTexture();
         }
 
-        public static (float hue, float saturation, float value) HSVFromColor(Color color) {
-            float r = color.R / 255f;
-            float g = color.G / 255f;
-            float b = color.B / 255f;
-
-            float max = Math.Max(r, Math.Max(g, b));
-            float min = Math.Min(r, Math.Min(g, b));
-            float delta = max - min;
-
-            float hue = 0f;
-            float saturation = 0f;
-            float value = max;
-
-            if (max > 0f) {
-                saturation = delta / max;
-
-                if (r >= max) {
-                    hue = (g - b) / delta;
-                } else if (g >= max) {
-                    hue = 2f + (b - r) / delta;
-                } else {
-                    hue = 4f + (r - g) / delta;
-                }
-
-                hue *= 60f;
-                if (hue < 0f) {
-                    hue += 360f;
-                }
-            }
-
-            return (hue, saturation, value);
-        }
-
-        public void UpdateChart() {
-            PositionOnChart = new Vector2(MathF.Max(MathF.Min(1, PositionOnChart.X), 0), MathF.Max(MathF.Min(1, PositionOnChart.Y), 0));
-            Hue = Util.PosMod(Hue, 360);
-
-            Chart ??= new Texture2D(SQ.GD, Boundaries.Width, Boundaries.Height);
-
+        public void CreateChartTexture() {
             Color[] chartData = new Color[Boundaries.Width * Boundaries.Height];
 
             for (int y = 0; y < Boundaries.Height; y++) {
@@ -89,58 +30,55 @@ namespace Somniloquy {
                     chartData[y * Boundaries.Width + x] = FetchColor(new Vector2((float)x/Boundaries.Width, (float)y/Boundaries.Height));
                 }
             }
-
             Chart.SetData(chartData);
-            Screen.SelectedColor = FetchColor(PositionOnChart);
-        }
-
-        public override void OnFocus() {
-            if (InputManager.IsMouseButtonDown(MouseButtons.LeftButton)) {
-                PositionOnChart = Vector2.Transform(InputManager.GetMousePosition(), TransformMatrix);
-                Screen.SelectedColor = FetchColor(PositionOnChart);
-                UpdateChart();
-            }
-
-            base.OnFocus();
         }
 
         private Color FetchColor(Vector2 positionOnChart) {
-            return ColorFromHSV(Hue, (float)positionOnChart.X, 1f - (float)positionOnChart.Y);
+            return new ColorOkHSL((byte)Hue, (byte)(positionOnChart.X * 255), (byte)(255 - positionOnChart.Y * 255)).ToRGB();
         }
 
         public void FetchPositionAndHueFromColor(Color desiredColor) {
-            var (hue, saturation, value) = HSVFromColor(desiredColor);
-            PositionOnChart = new Vector2(saturation, 1 - value);
-            Hue = (int) hue;
-            UpdateChart();
+            var hsl = desiredColor.ToOkHSL();
+            PositionOnChart = new Vector2(hsl.S, 1 - hsl.L);
+            Hue = hsl.H;
+            CreateChartTexture();
         }
 
         public override void Update() {
             base.Update();
 
-            updatedChart = false;
-            if (InputManager.IsKeyDown(Keys.U)) { Hue--; updatedChart = true; }
-            if (InputManager.IsKeyDown(Keys.O)) { Hue++; updatedChart = true; }
+            bool updateChart = false;
+            if (InputManager.IsKeyDown(Keys.U)) { Hue--; updateChart = true; }
+            if (InputManager.IsKeyDown(Keys.O)) { Hue++; updateChart = true; }
 
             float updateSpeed = InputManager.IsMouseButtonDown(MouseButtons.LeftButton) ? 0.001f : 0.01f;
 
-            if (InputManager.IsKeyDown(Keys.I)) { PositionOnChart += new Vector2(0, -updateSpeed); updatedChart = true; }
-            if (InputManager.IsKeyDown(Keys.K)) { PositionOnChart += new Vector2(0, updateSpeed); updatedChart = true; }
-            if (InputManager.IsKeyDown(Keys.J)) { PositionOnChart += new Vector2(-updateSpeed, 0); updatedChart = true; }
-            if (InputManager.IsKeyDown(Keys.L)) { PositionOnChart += new Vector2(updateSpeed, 0); updatedChart = true; }
+            if (InputManager.IsKeyDown(Keys.I)) { PositionOnChart += new Vector2(0, -updateSpeed); }
+            if (InputManager.IsKeyDown(Keys.K)) { PositionOnChart += new Vector2(0, updateSpeed); }
+            if (InputManager.IsKeyDown(Keys.J)) { PositionOnChart += new Vector2(-updateSpeed, 0); }
+            if (InputManager.IsKeyDown(Keys.L)) { PositionOnChart += new Vector2(updateSpeed, 0); }
 
-            if (updatedChart) UpdateChart();
+            if (updateChart) CreateChartTexture();
+
+            if (ScreenManager.FocusedScreen == this) {
+                if (InputManager.IsMouseButtonDown(MouseButtons.LeftButton)) {
+                    PositionOnChart = Vector2.Transform(InputManager.GetMousePosition(), Transform);
+                    Screen.SelectedColor = FetchColor(PositionOnChart);
+                    CreateChartTexture();
+                }
+            }
+
+            PositionOnChart = new Vector2(MathF.Max(MathF.Min(1, PositionOnChart.X), 0), MathF.Max(MathF.Min(1, PositionOnChart.Y), 0));
+            Hue = Util.PosMod(Hue, 255);
+            Screen.SelectedColor = FetchColor(PositionOnChart);
         }
 
         public override void Draw() {
-            SQ.SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.AnisotropicClamp);
             if (Screen.EditorState == EditorState.PaintMode) {
                 SQ.SB.DrawFilledRectangle(new Rectangle(Boundaries.X - 8, Boundaries.Y - 8, Boundaries.Width + 16, Boundaries.Height + 16), Screen.SelectedColor);
                 SQ.SB.Draw(Chart, Boundaries, Color.White);
                 SQ.SB.DrawCircle((Vector2I)(new Vector2(Boundaries.X, Boundaries.Y) + new Vector2(PositionOnChart.X * Boundaries.Width, PositionOnChart.Y * Boundaries.Height)), 8, Util.InvertColor(Screen.SelectedColor), true);
             }
-            base.Draw();
-            SQ.SB.End();
         }
     }
 }

@@ -260,5 +260,21 @@ namespace Somniloquy {
             }
             return min;
         }
+
+        public static int Max(params int[] numbers) {
+            int max = int.MinValue;
+            for (int i = 0; i < numbers.Length; i++) {
+                if (numbers[i] > max) max = numbers[i];
+            }
+            return max;
+        }
+
+        public static int Min(params int[] numbers) {
+            int min = int.MaxValue;
+            for (int i = 0; i < numbers.Length; i++) {
+                if (numbers[i] < min) min = numbers[i];
+            }
+            return min;
+        }
     }
 }

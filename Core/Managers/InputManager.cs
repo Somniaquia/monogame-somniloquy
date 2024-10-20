@@ -155,9 +155,8 @@ namespace Somniloquy {
 
         private static void UpdateTabletState() {
             float maxPressure = CWintabInfo.GetMaxPressure();
-
             uint count = 0; PenPressure = 1;
-            WintabPacket[] packets = wintabData.GetDataPackets(1, true, ref count);
+            WintabPacket[] packets = wintabData.GetDataPackets(10, true, ref count);
             for (int i = 0; i < count; i++) {
                 PenPressure = packets[i].pkNormalPressure / maxPressure;
             }

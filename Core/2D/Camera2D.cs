@@ -6,6 +6,7 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework.Graphics;
 
     public class Camera2D {
+        public SQSpriteBatch SB;
         public const float LerpModifier =  0.1f;
 
         public Vector2 TargetCenterPosInWorld = Vector2.Zero;
@@ -34,6 +35,10 @@ namespace Somniloquy {
 
         public void RotateCamera(float delta) {
             TargetRotation += delta;
+        }
+
+        public void LoadContent() {
+            SB = new(SQ.GD);
         }
 
         public void Update() {
@@ -94,23 +99,23 @@ namespace Somniloquy {
 
         // TODO: Make drawing work with rotation with a RenderTarget
         public void Draw(Texture2D texture, RectangleF worldRectangle, Rectangle source, Color color) {
-            SQ.SB.Draw(texture, (Rectangle)ToScreenPos(worldRectangle), source, color);
+            SB.Draw(texture, (Rectangle)worldRectangle, source, color);
         }
 
         public void Draw(Texture2D texture, RectangleF worldRectangle, Color color) {
-            SQ.SB.Draw(texture, (Rectangle)ToScreenPos(worldRectangle), color);
+            SB.Draw(texture, (Rectangle)worldRectangle, color);
         }
 
         public void Draw(Texture2D texture, Vector2 worldPos, Rectangle source, Color color) {
-            SQ.SB.Draw(texture, (Rectangle)ToScreenPos(new RectangleF(worldPos, source.Size.ToVector2())), source, color);
+            SB.Draw(texture, (Rectangle)new RectangleF(worldPos, source.Size.ToVector2()), source, color);
         }
 
         public void DrawPoint(Vector2I worldPos, Color color) {
-            SQ.SB.Draw(SQ.SB.Pixel, (Rectangle)ToScreenPos(new Rectangle(worldPos, new(1, 1))), color);
+            SB.Draw(SB.Pixel, new Rectangle(worldPos, new(1, 1)), color);
         }
 
         public void DrawFilledRectangle(Rectangle destination, Color color) {
-            SQ.SB.Draw(SQ.SB.Pixel, (Rectangle)ToScreenPos(destination), null, color, 0f, Vector2.Zero, SpriteEffects.None, 0f);
+            SB.Draw(SB.Pixel, destination, null, color, 0f, Vector2.Zero, SpriteEffects.None, 0f);
         }
  
         public void DrawLine(Vector2I start, Vector2I end, Color color, int width = 0, bool scale = false) {

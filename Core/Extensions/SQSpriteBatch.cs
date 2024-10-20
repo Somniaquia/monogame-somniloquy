@@ -4,9 +4,12 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework.Graphics;
 
     public class SQSpriteBatch : SpriteBatch {
-        public SQSpriteBatch(GraphicsDevice graphicsDevice) : base(graphicsDevice) { }
-
         public Texture2D Pixel;
+        
+        public SQSpriteBatch(GraphicsDevice graphicsDevice) : base(graphicsDevice) {
+            Pixel = new(SQ.GD, 1, 1);
+            Pixel.SetData(new[] { Color.White });
+        }
 
         public void Draw(Texture2D texture, Rectangle destination, Rectangle source, Color color, SpriteEffects effects) {
             Draw(texture, destination, source, color, 0f, Vector2.Zero, effects, 0f);

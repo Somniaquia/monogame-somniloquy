@@ -34,19 +34,37 @@ namespace Somniloquy {
             return TextureData[position.Unwrap(Width)];
         }
 
+        // Caused funny patterns - leaving it here
+        // private Color BlendColor(Vector2I position, Color paintingColor, float opacity) { 
+        //     if (opacity == 1f) return paintingColor;
+
+        //     Color canvasColor = TextureData[position.Unwrap(Width)];
+        //     paintingColor.A = (byte)(255 * opacity);
+            
+        //     Color blendedColor = new(
+        //         paintingColor.R * paintingColor.A + canvasColor.R * (1 - paintingColor.A),
+        //         paintingColor.G * paintingColor.A + canvasColor.G * (1 - paintingColor.A),
+        //         paintingColor.B * paintingColor.A + canvasColor.B * (1 - paintingColor.A),
+        //         paintingColor.A + canvasColor.A * (1 - paintingColor.A)
+        //     );
+
+        //     return blendedColor;
+        // }
+
         private Color BlendColor(Vector2I position, Color paintingColor, float opacity) {
             if (opacity == 1f) return paintingColor;
 
             Color canvasColor = TextureData[position.Unwrap(Width)];
-            paintingColor.A = (byte)(255 * opacity);
             
             Color blendedColor = new(
-                paintingColor.R * paintingColor.A + canvasColor.R * (1 - paintingColor.A),
-                paintingColor.G * paintingColor.A + canvasColor.G * (1 - paintingColor.A),
-                paintingColor.B * paintingColor.A + canvasColor.B * (1 - paintingColor.A),
-                paintingColor.A + canvasColor.A * (1 - paintingColor.A)
+                (int)(paintingColor.R * opacity + canvasColor.R * (1 - opacity)),
+                (int)(paintingColor.G * opacity + canvasColor.G * (1 - opacity)),
+                (int)(paintingColor.B * opacity + canvasColor.B * (1 - opacity)),
+                (int)(paintingColor.A * opacity + canvasColor.A * (1 - opacity))
             );
 
+            // DebugInfo.AddTempLine(() => $"PaintingColor: {paintingColor} * Opacity: {opacity} + CanvasColor {canvasColor} => BlendedColor {blendedColor}");
+            
             return blendedColor;
         }
 

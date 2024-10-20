@@ -3,6 +3,7 @@ namespace Somniloquy {
     using System.Collections.Generic;
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Input;
+    using Microsoft.Xna.Framework.Graphics;
 
     public class Section2DScreen : Screen {
         public Section2D Section;
@@ -23,7 +24,12 @@ namespace Somniloquy {
         public Section2D LoadSection() {
             return null;
         }
-    
+
+        public override void LoadContent() {
+            Camera.LoadContent();
+            Editor.LoadContent();
+        }
+
         public override void Update() {
             base.Update();
             Camera.Update();
@@ -32,7 +38,9 @@ namespace Somniloquy {
         }
 
         public override void Draw() {
-            Editor.Draw();
+            Camera.SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, transformMatrix: Camera.Transform);
+            Editor?.Draw();
+            Camera.SB.End();
         }
     }
     
@@ -70,17 +78,24 @@ namespace Somniloquy {
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { MouseButtons.LeftButton }, (parameters) => HandleLeftClick(), false));
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { MouseButtons.RightButton }, (parameters) => HandleRightClick(), false));
 
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.Z}, new object[] {Keys.LeftShift}, (parameters) => CommandManager.Undo(), true, true));
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.LeftShift, Keys.Z}, (parameters) => CommandManager.Redo(), true, true));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.Z}, new object[] {Keys.LeftShift, MouseButtons.LeftButton}, (parameters) => CommandManager.Undo(), true, true));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.LeftShift, Keys.Z}, new object[] {MouseButtons.LeftButton}, (parameters) => CommandManager.Redo(), true, true));
 
             SelectedLayer = new TextureLayer2D();
             Screen.Section.LayerGroups["group1"].AddLayer(SelectedLayer);
-            ColorPicker = new ColorPicker(boundaries, this);
+            ColorPicker = new ColorPicker(new Rectangle(SQ.WindowSize.X - 264, SQ.WindowSize.Y - 264, 256, 256), this);
+
+            DebugInfo.Subscribe(() => $"Selected Color: {SelectedColor}");
+        }
+
+        public override void LoadContent() {
+            ColorPicker.LoadContent();
         }
 
         public override void Update() {
             base.Update();
 
+            ColorPicker.Update();
             ZoomScreen(InputManager.ScrollWheelDelta * 0.001f);
         }
 
@@ -109,14 +124,16 @@ namespace Somniloquy {
         }
 
         public void HandleLeftClick() { // This is a total placeholder, implement proper seperate functions for each action and implement keybind exclusive priorities
-            if (!Focused) return;
+            if (ScreenManager.FocusedScreen != this) return;
 
             if (SelectedLayer is IPaintableLayer2D paintableLayer) {
+                // bool undoRedoCommandPressed = InputManager.IsKeyCombinationPressed(true, true, new object[] {Keys.LeftControl, Keys.Z}, new object[] {});
                 if (InputManager.IsMouseButtonPressed(MouseButtons.LeftButton)) {
                     CurrentCommandChain = CommandManager.AddCommandChain(new CommandChain());
-                    paintableLayer.PaintCircle((Vector2I)Screen.Camera.GlobalMousePos.Value, (int)(InputManager.GetPenTilt().Length() * 5), SelectedColor, InputManager.GetPenPressure(), true, CurrentCommandChain);
+                    // (int)(InputManager.GetPenTilt().Length() * 5)
+                    paintableLayer.PaintCircle((Vector2I)Screen.Camera.GlobalMousePos.Value, (int)(InputManager.GetPenPressure() * 5), SelectedColor, InputManager.GetPenPressure(), true, CurrentCommandChain);
                 } else {
-                    paintableLayer.PaintLine((Vector2I)Screen.Camera.PreviousGlobalMousePos.Value, (Vector2I)Screen.Camera.GlobalMousePos.Value, SelectedColor, InputManager.GetPenPressure(), (int)(InputManager.GetPenTilt().Length() * 5), CurrentCommandChain);
+                    paintableLayer.PaintLine((Vector2I)Screen.Camera.PreviousGlobalMousePos.Value, (Vector2I)Screen.Camera.GlobalMousePos.Value, SelectedColor, InputManager.GetPenPressure(), (int)(InputManager.GetPenPressure() * 5), CurrentCommandChain);
                 }
             }
         }
@@ -136,6 +153,7 @@ namespace Somniloquy {
         public override void Draw() {
             Screen.Camera.DrawPoint((Vector2I)Screen.Camera.GlobalMousePos, Color.White * 0.5f);
             SelectedLayer?.Draw(Screen.Camera);
+            ColorPicker.Draw();
         }
     }
 }

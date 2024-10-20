@@ -35,11 +35,6 @@ namespace Somniloquy {
             UndoHistory.Clear();
             RedoHistory.Clear();
         }
-
-        public static void DrawHistoryInfo() {
-            SQ.SB.DrawString(SQ.Misaki, $"Undo History: {UndoHistory.Count}", new(1, SQ.WindowSize.Y - 33), Color.White);
-            SQ.SB.DrawString(SQ.Misaki, $"Redo History: {RedoHistory.Count}", new(1, SQ.WindowSize.Y - 17), Color.White);
-        }
     }
 
     public interface ICommand {

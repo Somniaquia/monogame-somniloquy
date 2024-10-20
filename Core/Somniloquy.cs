@@ -20,7 +20,7 @@ namespace Somniloquy {
         public static ContentManager CM;
         public static SQSpriteBatch SB;
         public static GameTime GameTime;
-        public int TargetFPS = 60;
+        public int TargetFPS = 120;
         public float FPS;
         private Queue<float> timeSamples;
 
@@ -58,7 +58,6 @@ namespace Somniloquy {
             InputManager.Initialize(Window);
             SoundManager.Initialize("C:\\Somnia\\Projects\\monogame-somniloquy\\Assets\\Loops");
 
-            ScreenManager.AddScreen(new Section2DScreen(new Rectangle(new(), WindowSize)));
         }
 
         protected override void LoadContent() {
@@ -67,11 +66,18 @@ namespace Somniloquy {
             SB = new SQSpriteBatch(GD);
             CM = Content;
 
-            SB.Pixel = new(GD, 1, 1);
-            SB.Pixel.SetData(new[] { Color.White });
-
             Misaki = Content.Load<SpriteFont>("Fonts/Misaki");
-            //Somniloquy.Misaki = Content.Load<BitmapFont>("misaki");
+
+            ScreenManager.AddScreen(new Section2DScreen(new Rectangle(new(), WindowSize)));
+            ScreenManager.LoadContent();
+
+            DebugInfo.Subscribe(() => $"FPS: {FPS:n1}");
+            DebugInfo.Subscribe(() => $"Pen Pressure: {InputManager.PenPressure}");
+            DebugInfo.Subscribe(() => $"Pen Tilt: {InputManager.PenTilt}");
+            DebugInfo.Subscribe(() => $"Focused Screen: {ScreenManager.FocusedScreen}");
+            
+            DebugInfo.Subscribe(() => $"Undo History: {CommandManager.UndoHistory.Count}");
+            DebugInfo.Subscribe(() => $"Redo History: {CommandManager.RedoHistory.Count}");
         }
 
         [DllImport("user32.dll")]
@@ -114,9 +120,8 @@ namespace Somniloquy {
 
                 GD.Clear(Color.Black);
                 SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
-                ScreenManager.Draw();
-                SB.DrawString(Misaki, $"FPS: {FPS:n1}", new Vector2(1, 1), Color.White);
-                CommandManager.DrawHistoryInfo();
+                    ScreenManager.Draw();
+                    DebugInfo.Draw(Misaki);
                 SB.End();
                 base.Draw(gameTime);
             }
