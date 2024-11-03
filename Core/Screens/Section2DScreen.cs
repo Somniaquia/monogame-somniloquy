@@ -68,8 +68,9 @@ namespace Somniloquy {
 
             GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.Q, (parameters) => ZoomScreen(-0.05f), false));
             GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.E, (parameters) => ZoomScreen(0.05f), false));
-            // GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.Q, (parameters) => RotateScreen(-0.05f), false));
-            // GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.E, (parameters) => RotateScreen(0.05f), false));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.OemPipe, (parameters) => Screen.Camera.TargetRotation = 0, true));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.OemOpenBrackets, (parameters) => RotateScreen(-0.05f), false));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.OemCloseBrackets, (parameters) => RotateScreen(0.05f), false));
             // GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.U, (parameters) => ShiftHue(-0.005f), false));
             // GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.O, (parameters) => ShiftHue(0.005f), false));
 
@@ -81,7 +82,7 @@ namespace Somniloquy {
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.Z}, new object[] {Keys.LeftShift, MouseButtons.LeftButton}, (parameters) => CommandManager.Undo(), true, true));
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.LeftShift, Keys.Z}, new object[] {MouseButtons.LeftButton}, (parameters) => CommandManager.Redo(), true, true));
 
-            SelectedLayer = new TextureLayer2D();
+            SelectedLayer = new TileLayer2D();
             Screen.Section.LayerGroups["group1"].AddLayer(SelectedLayer);
             ColorPicker = new ColorPicker(new Rectangle(SQ.WindowSize.X - 264, SQ.WindowSize.Y - 264, 256, 256), this);
 
@@ -107,13 +108,13 @@ namespace Somniloquy {
 
         public void MoveScreen(params object[] parameters) {
             if (parameters.Length == 1 && parameters[0] is Vector2 direction) {
-                Screen.Camera.MoveCamera(direction);
+                Screen.Camera.MoveCamera(direction * 0.75f);
             }
         }
 
         public void ZoomScreen(params object[] parameters) {
             if (parameters.Length == 1 && parameters[0] is float ratio) {
-                Screen.Camera.ZoomCamera(ratio);
+                Screen.Camera.ZoomCamera(ratio * 0.75f);
             }
         }
 
@@ -123,25 +124,38 @@ namespace Somniloquy {
             }
         }
 
-        public void HandleLeftClick() { // This is a total placeholder, implement proper seperate functions for each action and implement keybind exclusive priorities
-            if (ScreenManager.FocusedScreen != this) return;
-
-            if (SelectedLayer is IPaintableLayer2D paintableLayer) {
-                // bool undoRedoCommandPressed = InputManager.IsKeyCombinationPressed(true, true, new object[] {Keys.LeftControl, Keys.Z}, new object[] {});
-                if (InputManager.IsMouseButtonPressed(MouseButtons.LeftButton)) {
-                    CurrentCommandChain = CommandManager.AddCommandChain(new CommandChain());
-                    // (int)(InputManager.GetPenTilt().Length() * 5)
-                    paintableLayer.PaintCircle((Vector2I)Screen.Camera.GlobalMousePos.Value, (int)(InputManager.GetPenPressure() * 5), SelectedColor, InputManager.GetPenPressure(), true, CurrentCommandChain);
-                } else {
-                    paintableLayer.PaintLine((Vector2I)Screen.Camera.PreviousGlobalMousePos.Value, (Vector2I)Screen.Camera.GlobalMousePos.Value, SelectedColor, InputManager.GetPenPressure(), (int)(InputManager.GetPenPressure() * 5), CurrentCommandChain);
+        public void HandleLeftClick() {
+            if (InputManager.IsKeyDown(Keys.LeftAlt)) {
+                if (SelectedLayer is IPaintableLayer2D paintableLayer) {
+                    var color = paintableLayer.GetColor((Vector2I)Screen.Camera.GlobalMousePos.Value);
+                    if (color != null) SelectedColor = color.Value;
+                    ColorPicker.Hue = SelectedColor.ToOkHSL().H;
+                    ColorPicker.CreateChartTexture();
                 }
+            } else {
+                Paint(InputManager.IsMouseButtonPressed(MouseButtons.LeftButton), SelectedColor);
             }
         }
 
         public void HandleRightClick() {
-            // Erasing = true;
-            // HandleLeftClick();
-            // Erasing = false;
+            Paint(InputManager.IsMouseButtonPressed(MouseButtons.RightButton), Color.Transparent);
+        }
+
+        public void Paint(bool initializingPress, Color color) {
+            if (ScreenManager.FocusedScreen != this) return;
+
+            if (SelectedLayer is IPaintableLayer2D paintableLayer) {
+                int penWidth = (int)(InputManager.GetPenPressure() * 5);
+                float penOpacity = InputManager.GetPenPressure() != 0 ? InputManager.GetPenPressure() : 1;
+
+                if (initializingPress) {
+                    CurrentCommandChain = CommandManager.AddCommandChain(new CommandChain());
+                    // (int)(InputManager.GetPenTilt().Length() * 5)
+                    paintableLayer.PaintCircle((Vector2I)Screen.Camera.GlobalMousePos.Value, penWidth, color, penOpacity, true, CurrentCommandChain);
+                } else {
+                    paintableLayer.PaintLine((Vector2I)Screen.Camera.PreviousGlobalMousePos.Value, (Vector2I)Screen.Camera.GlobalMousePos.Value, color, penOpacity, penWidth, CurrentCommandChain);
+                }
+            }
         }
 
         public void SelectLayer() {
@@ -151,8 +165,8 @@ namespace Somniloquy {
         }
 
         public override void Draw() {
-            Screen.Camera.DrawPoint((Vector2I)Screen.Camera.GlobalMousePos, Color.White * 0.5f);
-            SelectedLayer?.Draw(Screen.Camera);
+            Screen.Camera.DrawPoint((Vector2I)Screen.Camera.GlobalMousePos, SelectedColor * 0.5f);
+            SelectedLayer?.Draw(Screen.Camera, true);
             ColorPicker.Draw();
         }
     }

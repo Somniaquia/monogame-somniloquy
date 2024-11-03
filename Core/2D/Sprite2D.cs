@@ -1,7 +1,7 @@
 namespace Somniloquy {
     using System;
     using System.Collections.Generic;
-
+    using System.Linq;
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
 
@@ -13,36 +13,48 @@ namespace Somniloquy {
     }
 
     public class ProceduralTileSpriteSheet : ISpriteSheet {
-        public int ChunkWidth = 2560;
+        public int SheetChunkLength;
+        public int TileLength;
         public List<SQTexture2D> SheetChunks = new();
+        private HashSet<Vector2I> UnoccupiedTileSlots = new();
 
-        public Color GetColor(Vector2I position) {
-            var pair = GetChunkIndexAndPosition(position);
-            return SheetChunks[pair.Item1].GetColor(pair.Item2);
+        public ProceduralTileSpriteSheet(int tileLength, int sheetChunkLength) {
+            SheetChunkLength = sheetChunkLength;
+            TileLength = tileLength;
+            AddSheetChunk();
         }
 
-        public void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain) {
-            var pair = GetChunkIndexAndPosition(position);
-            SheetChunks[pair.Item1].PaintPixel(pair.Item2, color, opacity, chain);
-        }
-
-        public void SetPixel(Vector2I position, Color color, CommandChain chain) {
-            var pair = GetChunkIndexAndPosition(position);
-            SheetChunks[pair.Item1].SetPixel(pair.Item2, color, chain);
-        }
-
-        public void Draw(Rectangle destination, Rectangle source, Color color, SpriteEffects effects = SpriteEffects.None) {
-            var pair = GetChunkIndexAndPosition(source.Location);
-            SQ.SB.Draw(SheetChunks[pair.Item1], destination, source, color, effects);
-        }
-
-        private (int, Vector2I) GetChunkIndexAndPosition(Vector2I position) {
-            var chunkIndex = position.Y / ChunkWidth;
-            return (chunkIndex, new(position.X, position.Y - ChunkWidth * chunkIndex));
+        public void AddSheetChunk() {
+            for (int y  = 0; y < SheetChunkLength; y++) {
+                for (int x = 0; x < SheetChunkLength; x++) {
+                    UnoccupiedTileSlots.Add(new Vector2I(x, y));
+                }
+            }
         }
 
         public void AddTile() {
-            
+            if (UnoccupiedTileSlots.Count == 0) {
+                AddSheetChunk();
+            }
+            var tilePos = UnoccupiedTileSlots.First();
+            UnoccupiedTileSlots.Remove(tilePos);
+        }
+
+        public void RemoveTile(Vector2I tilePosition) {
+            UnoccupiedTileSlots.Add(tilePosition);
+        }
+
+        public Color GetColor(Vector2I position) {
+            return Color.Purple;
+        }
+
+        public void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain) {
+        }
+
+        public void SetPixel(Vector2I position, Color color, CommandChain chain) {
+        }
+
+        public void Draw(Rectangle destination, Rectangle source, Color color, SpriteEffects effects = SpriteEffects.None) {
         }
     }
 
@@ -102,7 +114,7 @@ namespace Somniloquy {
 
     public class Sprite2D {
         public Dictionary<string, Animation2D> Animations = new();
-        public Animation2D CurrentAnimation { get; private set; }
+        public Animation2D CurrentAnimation;
 
         public void ChangeAnimation() {
             
@@ -117,7 +129,7 @@ namespace Somniloquy {
         }
 
         public void Draw(Rectangle destination, Color color, SpriteEffects effects = SpriteEffects.None) {
-            CurrentAnimation.Draw(destination, color, effects);
+            CurrentAnimation?.Draw(destination, color, effects);
         }
     }
 }

@@ -74,6 +74,8 @@ namespace Somniloquy {
             CWintabContext logContext = CWintabInfo.GetDefaultSystemContext(ECTXOptionValues.CXO_MESSAGES);
             logContext.Open(systemInfo.info.win.window, true);
             wintabData = new CWintabData(logContext);
+
+            DebugInfo.Subscribe(() => $"Pressed Keys: {PrintPressedKeys()}");
         }
 
         public static void Update() {
@@ -155,19 +157,40 @@ namespace Somniloquy {
 
         private static void UpdateTabletState() {
             float maxPressure = CWintabInfo.GetMaxPressure();
-            uint count = 0; PenPressure = 1;
+            uint count = 0; PenPressure = 0;
             WintabPacket[] packets = wintabData.GetDataPackets(10, true, ref count);
             for (int i = 0; i < count; i++) {
                 PenPressure = packets[i].pkNormalPressure / maxPressure;
             }
         }
 
+        private static string PrintPressedKeys() {
+            string pressedKeys = "";
+            foreach (var pair in KeyStates) {
+                if (pair.Value.IsDown) pressedKeys += pair.Key.ToString() + " ";
+            }
+
+            return pressedKeys;
+        }
+
         public static Keybind RegisterKeybind(object button, Action action, bool triggerOnce = true) {
             return RegisterKeybind(new object[] {button}, action, triggerOnce);
         }
 
+        public static Keybind RegisterKeybind(object button, object exclusiveButton, Action action, bool triggerOnce = true) {
+            return RegisterKeybind(new object[] {button}, new object[] {exclusiveButton}, action, triggerOnce);
+        }
+
+        public static Keybind RegisterKeybind(object button, object[] exclusiveButtons, Action action, bool triggerOnce = true) {
+            return RegisterKeybind(new object[] {button}, exclusiveButtons, action, triggerOnce);
+        }
+
         public static Keybind RegisterKeybind(object[] buttons, Action action, bool triggerOnce = true, bool orderSensitive = false) {
-            return RegisterKeybind(buttons, new object[] {}, action, triggerOnce);
+            return RegisterKeybind(buttons, new object[] {}, action, triggerOnce, orderSensitive);
+        }
+
+        public static Keybind RegisterKeybind(object[] buttons, object exclusiveButton, Action action, bool triggerOnce = true, bool orderSensitive = false) {
+            return RegisterKeybind(buttons, new object[] {exclusiveButton}, action, triggerOnce, orderSensitive);
         }
 
         public static Keybind RegisterKeybind(object[] buttons, object[] exclusiveButtons, Action action, bool triggerOnce = true, bool orderSensitive = false) {

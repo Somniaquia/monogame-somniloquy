@@ -26,7 +26,7 @@ namespace Somniloquy {
 
         public virtual void Update() { }
 
-        public virtual void Draw(Camera2D camera) { }
+        public virtual void Draw(Camera2D camera, bool drawOutlines = false) { }
     }
 
     public interface IPaintableLayer2D {
@@ -49,6 +49,8 @@ namespace Somniloquy {
         }
 
         // TODO: Paint Fill
+
+        public virtual Color? GetColor(Vector2I position) { return null; }
 
         public abstract void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain = null);
     }

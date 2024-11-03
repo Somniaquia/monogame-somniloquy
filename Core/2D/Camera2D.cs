@@ -7,7 +7,7 @@ namespace Somniloquy {
 
     public class Camera2D {
         public SQSpriteBatch SB;
-        public const float LerpModifier =  0.1f;
+        public const float LerpModifier =  0.075f;
 
         public Vector2 TargetCenterPosInWorld = Vector2.Zero;
         public float TargetZoom = 1f;

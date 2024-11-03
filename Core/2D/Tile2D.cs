@@ -9,7 +9,11 @@ namespace Somniloquy {
         public Sprite2D Sprite;
 
         public Tile2D() {
+            Sprite = new();
+            Animation2D animation = new();
             
+            Sprite.Animations.Add("default", animation);
+            Sprite.CurrentAnimation = animation;
         }
 
         public Color GetColor(Vector2I position) => Sprite.GetColor(position);

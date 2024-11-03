@@ -12,7 +12,7 @@ namespace Somniloquy
     using System.Linq;
 
     public static class SoundManager {
-        public static System System;
+        public static System FMODSystem;
         public static ChannelGroup ChannelGroup;
         public static DSP PitchShiftDSP;
         public static DSP BassEnhancerDSP;
@@ -23,7 +23,7 @@ namespace Somniloquy
 
         public static float CenterFrequency = 150f;
         public static float Pitch = 1f;
-        public static string MusicName;
+        public static string CurrentMusic;
 
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
@@ -33,42 +33,50 @@ namespace Somniloquy
             string fmodPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ExternalAssemblies", "FMod");
             SetDllDirectory(fmodPath);
 
-            Factory.System_Create(out System);
-            System.init(128, FMOD.INITFLAGS.NORMAL, IntPtr.Zero);
-            System.createChannelGroup(null, out ChannelGroup);
+            Factory.System_Create(out FMODSystem);
+            FMODSystem.init(128, INITFLAGS.NORMAL, IntPtr.Zero);
+            FMODSystem.createChannelGroup(null, out ChannelGroup);
 
             DirectoryInfo directory = new(soundsDirectory);
             foreach (var path in directory.GetFiles("*.wav")) {
-                System.createSound(path.FullName, FMOD.MODE.DEFAULT, out Sound sound);
-                Sounds.Add(path.Name[..^4], sound);
+                AddSound(path);
             }
 
-            System.createDSPByType(DSP_TYPE.PITCHSHIFT, out PitchShiftDSP);
+            FMODSystem.createDSPByType(DSP_TYPE.PITCHSHIFT, out PitchShiftDSP);
 
-            System.createDSPByType(FMOD.DSP_TYPE.PARAMEQ, out BassEnhancerDSP);
-            BassEnhancerDSP.setParameterFloat((int)FMOD.DSP_PARAMEQ.CENTER, CenterFrequency);
-            BassEnhancerDSP.setParameterFloat((int)FMOD.DSP_PARAMEQ.GAIN, 12.0f);
+            FMODSystem.createDSPByType(DSP_TYPE.PARAMEQ, out BassEnhancerDSP);
+            BassEnhancerDSP.setParameterFloat((int)DSP_PARAMEQ.CENTER, CenterFrequency);
+            BassEnhancerDSP.setParameterFloat((int)DSP_PARAMEQ.GAIN, 12.0f);
 
-            ChannelGroup.addDSP(FMOD.CHANNELCONTROL_DSP_INDEX.TAIL, BassEnhancerDSP);
+            ChannelGroup.addDSP(CHANNELCONTROL_DSP_INDEX.TAIL, BassEnhancerDSP);
 
             var reverbProperties = PRESET.FOREST();
-            System.setReverbProperties(0, ref reverbProperties);
+            FMODSystem.setReverbProperties(0, ref reverbProperties);
 
-            MusicName = "My Song 3";
-            // StartLoop(MusicName, 5);
-            // SetPitch(MusicName, Pitch);
+            CurrentMusic = "My Song 3";
+        }
+
+        public static string AddSound(FileInfo path) {
+            var name = path.Name[..^4];
+            if (Sounds.ContainsKey(name)) return name;
+            FMODSystem.createSound(path.FullName, MODE.DEFAULT, out Sound sound);
+            Sounds.Add(name, sound);
+            return name;
         }
 
         public static void StartLoop(string name, float fade_seconds = 0f) {
             if (Sounds.ContainsKey(name)) {
                 if (!Channels.ContainsKey(name)) {
-                    System.playSound(Sounds[name], ChannelGroup, false, out Channel channel);
+                    StopLoop(CurrentMusic);
+                    FMODSystem.playSound(Sounds[name], ChannelGroup, false, out Channel channel);
                     channel.setMode(MODE.LOOP_NORMAL);
                     channel.setLoopCount(-1);
                     Channels.Add(name, channel);
+                    CurrentMusic = name;
+                    SetPitch(CurrentMusic, Pitch);
                 }
             } else {
-                Console.WriteLine($"No such sound named {name}!");
+                DebugInfo.AddTempLine(() => $"No such sound named {name}!", 5);
             }
         }
 
@@ -79,27 +87,27 @@ namespace Somniloquy
                     Channels.Remove(name);
                 }
             } else {
-                Console.WriteLine($"No such sound named {name}!");
+                DebugInfo.AddTempLine(() => $"No such sound named {name}!", 5);
             }
         }
 
         public static void SetPitch(string name, float pitch) {
-            if (Sounds.ContainsKey(name)) {
+            if (Channels.ContainsKey(name)) {
                 if (pitch < 0.1f) pitch = 0.1f;
                 Channels[name].removeDSP(PitchShiftDSP);
                 Channels[name].setPitch(pitch);
             } else {
-                Console.WriteLine($"No such sound named {name}!");
+                DebugInfo.AddTempLine(() => $"No such sound named {name}!", 5);
             }
         }
 
         public static void Update() {
             if (InputManager.IsKeyDown(Keys.Left)) {
                 if (Pitch > 0.1f) Pitch -= 0.001f;
-                SetPitch(MusicName, Pitch);
+                SetPitch(CurrentMusic, Pitch);
             } else if (InputManager.IsKeyDown(Keys.Right)) {
                 if (Pitch < 2f) Pitch += 0.001f;
-                SetPitch(MusicName, Pitch);
+                SetPitch(CurrentMusic, Pitch);
             } else if (InputManager.IsKeyDown(Keys.Up)) {
                 CenterFrequency *= 1.01f;
             }
@@ -107,15 +115,8 @@ namespace Somniloquy
                 CenterFrequency /= 1.01f;
             }
 
-            BassEnhancerDSP.setParameterFloat((int)FMOD.DSP_PARAMEQ.CENTER, CenterFrequency);
-            System.update();
-            if (InputManager.IsKeyPressed(Keys.Tab)) {
-                StopLoop(MusicName);
-                var rnd = new Random();
-                MusicName = Sounds.ElementAt(rnd.Next(0, Sounds.Count)).Key;
-                StartLoop(MusicName, 5);
-                SetPitch(MusicName, Pitch);
-            }
+            BassEnhancerDSP.setParameterFloat((int)DSP_PARAMEQ.CENTER, CenterFrequency);
+            FMODSystem.update();
         }
 
         public static void Dispose() {
@@ -123,8 +124,8 @@ namespace Somniloquy
                 sound.release();
             }
 
-            System.release();
-            System.close();
+            FMODSystem.release();
+            FMODSystem.close();
         }
     }
 }

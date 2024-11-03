@@ -10,24 +10,26 @@ namespace Somniloquy {
         public Section2DEditor Screen;
         
         public Texture2D Chart;
+        public Vector2I ChartDimensions;
         public Vector2 PositionOnChart = Vector2.Zero;
         public int Hue = 0;
 
-        public ColorPicker(Rectangle boundaries, Section2DEditor screen) : base(boundaries) { 
+        public ColorPicker(Rectangle boundaries, Section2DEditor screen) : base(boundaries) {
+            ChartDimensions = (Vector2I)(boundaries.Size.ToVector2() / 2);
             Screen = screen; 
         }
 
         public override void LoadContent() {
-            Chart = new Texture2D(SQ.GD, Boundaries.Width, Boundaries.Height); 
+            Chart = new Texture2D(SQ.GD, ChartDimensions.X, ChartDimensions.Y); 
             CreateChartTexture();
         }
 
         public void CreateChartTexture() {
-            Color[] chartData = new Color[Boundaries.Width * Boundaries.Height];
+            Color[] chartData = new Color[ChartDimensions.X * ChartDimensions.Y];
 
-            for (int y = 0; y < Boundaries.Height; y++) {
-                for (int x = 0; x < Boundaries.Width; x++) {
-                    chartData[y * Boundaries.Width + x] = FetchColor(new Vector2((float)x/Boundaries.Width, (float)y/Boundaries.Height));
+            for (int y = 0; y < ChartDimensions.Y; y++) {
+                for (int x = 0; x < ChartDimensions.X; x++) {
+                    chartData[y * ChartDimensions.X + x] = FetchColor(new Vector2((float)x/ChartDimensions.X, (float)y/ChartDimensions.Y));
                 }
             }
             Chart.SetData(chartData);
@@ -75,7 +77,9 @@ namespace Somniloquy {
 
         public override void Draw() {
             if (Screen.EditorState == EditorState.PaintMode) {
-                SQ.SB.DrawFilledRectangle(new Rectangle(Boundaries.X - 8, Boundaries.Y - 8, Boundaries.Width + 16, Boundaries.Height + 16), Screen.SelectedColor);
+                // int borderLength = (ScreenManager.FocusedScreen == this) ? 8 : 6;
+                int borderLength = 8;
+                SQ.SB.DrawFilledRectangle(new Rectangle(Boundaries.X - borderLength, Boundaries.Y - borderLength, Boundaries.Width + borderLength * 2, Boundaries.Height + borderLength * 2), Screen.SelectedColor);
                 SQ.SB.Draw(Chart, Boundaries, Color.White);
                 SQ.SB.DrawCircle((Vector2I)(new Vector2(Boundaries.X, Boundaries.Y) + new Vector2(PositionOnChart.X * Boundaries.Width, PositionOnChart.Y * Boundaries.Height)), 8, Util.InvertColor(Screen.SelectedColor), true);
             }

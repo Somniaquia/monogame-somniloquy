@@ -4,7 +4,7 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
 
-    public class SQTexture2D : Texture2D {
+    public class SQTexture2D : Texture2D, ISpriteSheet {
         public static HashSet<SQTexture2D> ChangedTextures = new();
 
         public Color[] TextureData;

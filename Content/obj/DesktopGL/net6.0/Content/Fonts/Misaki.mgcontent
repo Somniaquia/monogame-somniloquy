@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PipelineBuildEvent xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <SourceFile>C:/Somnia/Projects/monogame-somniloquy/Content/Fonts/Misaki.spritefont</SourceFile>
-  <SourceTime>2024-10-12T13:03:05.3658809+09:00</SourceTime>
+  <SourceTime>2024-10-26T18:39:36.5332214+09:00</SourceTime>
   <DestFile>C:/Somnia/Projects/monogame-somniloquy/Content/bin/DesktopGL/Content/Fonts/Misaki.xnb</DestFile>
-  <DestTime>2024-10-12T13:56:52.0412036+09:00</DestTime>
+  <DestTime>2024-10-26T18:40:18.9385781+09:00</DestTime>
   <Importer>FontDescriptionImporter</Importer>
   <ImporterTime>2022-07-26T20:44:56+09:00</ImporterTime>
   <Processor>FontDescriptionProcessor</Processor>

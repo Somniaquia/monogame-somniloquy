@@ -117,9 +117,9 @@ namespace Somniloquy {
     public class TileChunkSetCommand : ICommand {
         private TileLayer2D target;
         private Vector2I chunkPosition;
-        private Tile2D[,] chunkBefore, chunkAfter;
+        private TileChunk2D chunkBefore, chunkAfter;
 
-        public TileChunkSetCommand(TileLayer2D target, Vector2I chunkPosition, Tile2D[,] chunkBefore, Tile2D[,] chunkAfter) {
+        public TileChunkSetCommand(TileLayer2D target, Vector2I chunkPosition, TileChunk2D chunkBefore, TileChunk2D chunkAfter) {
             this.target = target;
             this.chunkPosition = chunkPosition;
             this.chunkBefore = chunkBefore;

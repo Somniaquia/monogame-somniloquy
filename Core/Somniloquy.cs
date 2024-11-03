@@ -20,6 +20,7 @@ namespace Somniloquy {
         public static ContentManager CM;
         public static SQSpriteBatch SB;
         public static GameTime GameTime;
+        public long GameTick = 0;
         public int TargetFPS = 120;
         public float FPS;
         private Queue<float> timeSamples;
@@ -57,7 +58,6 @@ namespace Somniloquy {
             // SerializationManager.InitializeDirectories((typeof(World), "Worlds"), (typeof(Texture2D), "Textures"));
             InputManager.Initialize(Window);
             SoundManager.Initialize("C:\\Somnia\\Projects\\monogame-somniloquy\\Assets\\Loops");
-
         }
 
         protected override void LoadContent() {
@@ -100,6 +100,7 @@ namespace Somniloquy {
 
         protected override void Update(GameTime gameTime) {
             GameTime = gameTime;
+            GameTick++;
 
             if (IsActive) {
                 InputManager.Update();
@@ -110,6 +111,7 @@ namespace Somniloquy {
 
             SoundManager.Update();
             SQTexture2D.ApplyTextureChanges();
+            DebugInfo.Update();
             
             base.Update(gameTime);
         }
@@ -122,6 +124,7 @@ namespace Somniloquy {
                 SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
                     ScreenManager.Draw();
                     DebugInfo.Draw(Misaki);
+                    FileBrowser.Draw(Misaki);
                 SB.End();
                 base.Draw(gameTime);
             }

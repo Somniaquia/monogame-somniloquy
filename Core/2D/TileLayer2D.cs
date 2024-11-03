@@ -13,98 +13,91 @@
     /// different layouts or looks for the same world in every visit, sometimes connecting a different world or triggering events such as jumpscares
     /// </summary>
     public class TileLayer2D : Layer2D, IPaintableLayer2D {
-        public static int ChunkLength { get; } = 16;
-        public static int TileLength { get; } = 16;
-        public Dictionary<Vector2I, Tile2D[,]> Chunks { get; set; } = new();
+        public static int ChunkLength = 16;
+        public static int TileLength = 16;
+        public Dictionary<Vector2I, TileChunk2D> Chunks = new();
+        public ProceduralTileSpriteSheet SpriteSheet = new(TileLength, ChunkLength);
 
         public Vector2I GetTilePosition(Vector2I worldPosition) => worldPosition / TileLength;
+        public Vector2I GetPositionInChunk(Vector2I worldPosition) => Util.PosMod(worldPosition, new Vector2I(TileLength * ChunkLength));
+        public Vector2I GetTilePositionInChunk(Vector2I tilePosition) => Util.PosMod(tilePosition, new Vector2I(ChunkLength));
         public Vector2I GetPositionInTile(Vector2I worldPosition) => Util.PosMod(worldPosition, new Vector2I(TileLength));
         public Vector2I GetChunkPosition(Vector2I tilePosition) => tilePosition / ChunkLength;
-        public Vector2I GetTilePositionInChunk(Vector2I tilePosition) => Util.PosMod(tilePosition, new Vector2I(ChunkLength));
 
-        public void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain = null) {
-            // if (sync) {
-            //     var previousTile = GetTile(tilePosition);
-            //     // SetTile(tilePosition, ParentWorld.NewTile(TileLength), command);
-            //     SetTile(tilePosition, ParentWorld.NewTile());
-            //     PaintPixel(GetTile(tilePosition), previousTile.Sprite.GetFrameColors(), command);
-            // }
-            
+        public void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain = null) {          
             var tilePosition = GetTilePosition(position);
-            var tile = GetTile(tilePosition);
+            var chunkPosition = GetChunkPosition(tilePosition);
 
-            // TODO: CHUNK CHECK!!!
+            if (!Chunks.ContainsKey(chunkPosition)) {
+                AddChunk(chunkPosition, chain);
+            }
 
-            tile.PaintPixel(GetPositionInTile(position), color, opacity, chain);
+            Chunks[chunkPosition].PaintPixel(GetPositionInChunk(position), color, opacity, chain);
         }
 
         #region Tile Methods
-        public void SetRectangle(Vector2I startPosition, Vector2I endPosition, Tile2D tile, bool filled, CommandChain chain = null, bool preview = false) {
+        public void SetRectangle(Vector2I startPosition, Vector2I endPosition, Tile2D tile, bool filled, CommandChain chain = null) {
             PixelActions.ApplyRectangleAction(startPosition, endPosition, filled, (Vector2I position) => {
-                SetTile(position, tile, chain, preview);
+                SetTile(position, tile, chain);
             });
         }
 
-        public void SetLine(Vector2I start, Vector2I end, Tile2D tile, int width = 0, CommandChain chain = null, bool preview = false) {
+        public void SetLine(Vector2I start, Vector2I end, Tile2D tile, int width = 0, CommandChain chain = null) {
             PixelActions.ApplyLineAction(start, end, width, (Vector2I position) => {
-                SetTile(position, tile, chain, preview);
+                SetTile(position, tile, chain);
             });
         }
 
-        public void SetCircle(Vector2I center, int radius, Tile2D tile, bool filled = true, CommandChain chain = null, bool preview = false) {
+        public void SetCircle(Vector2I center, int radius, Tile2D tile, bool filled = true, CommandChain chain = null) {
             PixelActions.ApplyCircleAction(center, radius, filled, (Vector2I position) => {
-                SetTile(position, tile, chain, preview);
+                SetTile(position, tile, chain);
             });
         }
 
-        public void SetTile(Vector2I tilePosition, Tile2D tile, CommandChain chain = null, bool preview = false) {
+        public void SetTile(Vector2I tilePosition, Tile2D tile, CommandChain chain = null) {
             if (GetTile(tilePosition) == tile) return;
 
-            if (preview) {
-                tile?.Draw(new Rectangle(tilePosition.X * TileLength, tilePosition.Y * TileLength, TileLength, TileLength), 0.5f);
-            } else {
-                chain?.AddCommand(new TileSetCommand(this, tilePosition, GetTile(tilePosition), tile));
+            chain?.AddCommand(new TileSetCommand(this, tilePosition, GetTile(tilePosition), tile));
 
-                var chunkPosition = GetChunkPosition(tilePosition);
-                var tilePosInChunk = GetTilePositionInChunk(tilePosition);
-                if (!Chunks.ContainsKey(chunkPosition)) AddChunk(chunkPosition);
+            var chunkPosition = GetChunkPosition(tilePosition);
+            var tilePosInChunk = GetTilePositionInChunk(tilePosition);
+            if (!Chunks.ContainsKey(chunkPosition)) AddChunk(chunkPosition);
 
-                Chunks[chunkPosition][tilePosInChunk.X, tilePosInChunk.Y] = tile;
-
-                // TODO: add tile to section tileset
-            }
+            Chunks[chunkPosition].SetTile(tilePosInChunk, tile);
         }
 
         private void AddChunk(Vector2I chunkPosition, CommandChain chain = null) {
-            var chunk = new Tile2D[ChunkLength, ChunkLength];
+            var chunk = new TileChunk2D(this, ChunkLength, TileLength);
             // Array.Fill(chunk, DefaultTile); TODO: Default tile
             Chunks.Add(chunkPosition, chunk);
             chain?.AddCommand(new TileChunkSetCommand(this, chunkPosition, null, chunk));
         }
 
-        // TODO: Tile patterns and Tile fill
-
+        /// <summary>
+        /// Capable of returning null when tile isn't present at the position!
+        /// </summary>
         public Tile2D GetTile(Vector2I tilePosition) {
             var chunkPosition = GetChunkPosition(tilePosition);
-            var posInChunk = GetTilePositionInChunk(tilePosition);
-            return Chunks.ContainsKey(chunkPosition) ? Chunks[chunkPosition][posInChunk.X, posInChunk.Y] : null;
+            var tilePosInChunk = GetTilePositionInChunk(tilePosition);
+
+            return Chunks[chunkPosition].GetTile(tilePosInChunk);
         }
 
-        public Tile2D[,] GetTiles(Vector2I tilePosition1, Vector2I tilePosition2) {
-            var (Vector2I1, Vector2I2) = Util.SortVector2Is(tilePosition1, tilePosition2);
-            int columns = Vector2I2.X - Vector2I1.X + 1;
-            int rows = Vector2I2.Y - Vector2I1.Y + 1;
+        // public Tile2D[,] GetTiles(Vector2I tilePosition1, Vector2I tilePosition2) {
+        //     var (Vector2I1, Vector2I2) = Util.SortVector2Is(tilePosition1, tilePosition2);
+        //     int columns = Vector2I2.X - Vector2I1.X + 1;
+        //     int rows = Vector2I2.Y - Vector2I1.Y + 1;
 
-            var tiles = new Tile2D[columns, rows];
+        //     var tiles = new Tile2D[columns, rows];
 
-            for (int y = 0; y < rows; y++) {
-                for (int x = 0; x < columns; x++) {
-                    tiles[x, y] = GetTile(Vector2I1 + new Vector2I(x, y));
-                }
-            }
+        //     for (int y = 0; y < rows; y++) {
+        //         for (int x = 0; x < columns; x++) {
+        //             tiles[x, y] = GetTile(Vector2I1 + new Vector2I(x, y));
+        //         }
+        //     }
 
-            return tiles;
-        }
+        //     return tiles;
+        // }
 
         #endregion
 
@@ -118,36 +111,105 @@
             // }
         }
 
-        public void Draw(Camera2D camera, float opacity = 1f) {
-            var viewportRect = camera.VisibleRectangleInWorld;
+        public override void Draw(Camera2D camera, bool drawOutlines = false) {
+            var chunkLengthInPixels = ChunkLength * TileLength;
 
-            var startChunkPosition = GetChunkPosition(GetTilePosition((Vector2I)viewportRect.TopLeft()));
-            var endChunkPosition = GetChunkPosition(GetTilePosition((Vector2I)viewportRect.BottomRight()));
+            Vector2 topLeft = camera.VisibleRectangleInWorld.TopLeft() - new Vector2(1);
+            Vector2 bottomRight = camera.VisibleRectangleInWorld.BottomRight() + new Vector2(1);
+            Vector2I topLeftChunk = new((int)(topLeft.X / chunkLengthInPixels) - 1, (int)(topLeft.Y / chunkLengthInPixels) - 1);
+            Vector2I bottomRightChunk = new((int)(bottomRight.X / chunkLengthInPixels) + 1, (int)(bottomRight.Y / chunkLengthInPixels) + 1);
 
-            for (int chunkY = startChunkPosition.Y; chunkY < endChunkPosition.Y; chunkY++) {
-                for (int chunkX = startChunkPosition.X; chunkX < endChunkPosition.X; chunkX++) {
-                    if (!Chunks.ContainsKey(new Vector2I(chunkX, chunkY))) continue;
+            for (int y = topLeftChunk.Y; y < bottomRightChunk.Y; y++) {
+                for (int x = topLeftChunk.X; x < bottomRightChunk.X; x++) {
+                    var chunkIndex = new Vector2I(x, y);
+                    var chunkPos = chunkIndex * chunkLengthInPixels;
+                    var nextChunkPos = (chunkIndex + new Vector2I(1, 1)) * chunkLengthInPixels;
 
-                    var chunk = Chunks[new Vector2I(chunkX, chunkY)];
+                    float xLeft = MathF.Min(MathF.Max(topLeft.X, chunkPos.X), bottomRight.X);
+                    float xRight = MathF.Max(MathF.Min(bottomRight.X, nextChunkPos.X), topLeft.X);
+                    float yTop = MathF.Min(MathF.Max(topLeft.Y, chunkPos.Y), bottomRight.Y);
+                    float yBottom = MathF.Max(MathF.Min(bottomRight.Y, nextChunkPos.Y), topLeft.Y);
 
-                    for (int yInChunk = 0; yInChunk < ChunkLength; yInChunk++) {
-                        for (int xInChunk = 0; xInChunk < ChunkLength; xInChunk++) {
-                            chunk[xInChunk, yInChunk]?.Draw(
-                                new Rectangle(
-                                    (chunkX * ChunkLength + xInChunk) * TileLength,
-                                    (chunkY * ChunkLength + yInChunk) * TileLength,
-                                    TileLength, TileLength), opacity);
+                    if (drawOutlines) {
+                        camera.DrawLine(chunkPos, (chunkIndex + new Vector2I(1, 0)) * chunkLengthInPixels, Color.Gray * 0.5f, scale: false);
+                        camera.DrawLine(chunkPos, (chunkIndex + new Vector2I(0, 1)) * chunkLengthInPixels, Color.Gray * 0.5f, scale: false);
+
+                        for (int tx = 0; tx < ChunkLength; tx++) {
+                            Vector2 verticalStart = chunkPos + new Vector2I(tx * TileLength, 0);
+                            Vector2 verticalEnd = verticalStart + new Vector2I(0, chunkLengthInPixels);
+
+                            verticalStart = new Vector2(verticalStart.X, MathF.Max(verticalStart.Y, yTop));
+                            verticalEnd = new Vector2(verticalEnd.X, MathF.Min(verticalEnd.Y, yBottom));
+                            camera.DrawLine((Vector2I)verticalStart, (Vector2I)verticalEnd, Color.Gray * 0.3f, scale: false);
+                        }
+
+                        for (int ty = 0; ty < ChunkLength; ty++) {
+                            Vector2 horizontalStart = chunkPos + new Vector2I(0, ty * TileLength);
+                            Vector2 horizontalEnd = horizontalStart + new Vector2I(chunkLengthInPixels, 0);
+
+                            horizontalStart = new Vector2(MathF.Max(horizontalStart.X, xLeft), horizontalStart.Y);
+                            horizontalEnd = new Vector2(MathF.Min(horizontalEnd.X, xRight), horizontalEnd.Y);
+                            camera.DrawLine((Vector2I)horizontalStart, (Vector2I)horizontalEnd, Color.Gray * 0.3f, scale: false);
                         }
                     }
+                    
+                    if (!Chunks.ContainsKey(chunkIndex)) continue;
+
+                    Chunks[chunkIndex].Draw(camera, (Rectangle)new RectangleF(xLeft, yTop, xRight - xLeft, yBottom - yTop), (Rectangle)new RectangleF(xLeft - chunkPos.X, yTop - chunkPos.Y , xRight - xLeft, yBottom - yTop));
                 }
             }
         }
+    }
 
-        public void DrawTileBounds(Camera2D camera, float opacity = 1f) {
-            var startPos = camera.VisibleRectangleInWorld.TopLeft();
-            var endChunkPosition = camera.VisibleRectangleInWorld.BottomRight();
+    public class TileChunk2D {
+        public TileLayer2D ParentLayer;
+        public Tile2D[,] Tiles;
+        public int ChunkLength;
+        public int TileLength;
 
-            
+        public Vector2I GetTilePositionInChunk(Vector2I positionInChunk) => Util.PosMod(positionInChunk, new Vector2I(ChunkLength));
+        public Vector2I GetPositionInTile(Vector2I positionInChunk) => Util.PosMod(positionInChunk, new Vector2I(TileLength));
+        
+        public TileChunk2D (TileLayer2D parentLayer, int chunkLength, int tileLength) {
+            ParentLayer = parentLayer;
+            ChunkLength = chunkLength;
+            TileLength = tileLength;
+
+            Tiles = new Tile2D[ChunkLength, ChunkLength];
+        }
+
+        public void SetTile(Vector2I positionInChunk, Tile2D tile) {
+            Tiles[positionInChunk.X, positionInChunk.Y] = tile;
+        }
+
+        public void PaintPixel(Vector2I positionInChunk, Color color, float opacity, CommandChain chain) {
+            var (tilePosInChunk, posInTile) = (GetTilePositionInChunk(positionInChunk), GetPositionInTile(positionInChunk));
+            var tile = GetTile(tilePosInChunk);
+            if (tile is null) {
+                tile = new Tile2D();
+                SetTile(positionInChunk, tile);
+            }
+            tile.PaintPixel(posInTile, color, opacity, chain);
+        }
+
+        /// <summary>
+        /// Capable of returning null when tile isn't present at the position!
+        /// </summary>
+        public Tile2D GetTile(Vector2I positionInChunk) {
+            return Tiles[positionInChunk.X, positionInChunk.Y];
+        }
+
+        public Color? GetColor(Vector2I positionInChunk) {
+            var (tilePosInChunk, posInTile) = (GetTilePositionInChunk(positionInChunk), GetPositionInTile(positionInChunk));
+            var tile = GetTile(tilePosInChunk);
+            if (tile is null) {
+                return null;
+            }
+            return tile.GetColor(posInTile);
+        }
+
+        public void Draw(Camera2D camera, Rectangle destination, Rectangle source) {
+
         }
     }
 }
