@@ -4,6 +4,7 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Input;
     using Microsoft.Xna.Framework.Graphics;
+    using System.Linq;
 
     public class Section2DScreen : Screen {
         public Section2D Section;
@@ -16,13 +17,10 @@ namespace Somniloquy {
             if (Section is null) { // temp
                 Section = new();
                 Section.AddLayerGroup("group1");
+                Section.LayerGroups["group1"].AddLayer(new TextureLayer2D());
             }
 
             Editor = new(boundaries, this);
-        }
-
-        public Section2D LoadSection() {
-            return null;
         }
 
         public override void LoadContent() {
@@ -79,14 +77,15 @@ namespace Somniloquy {
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { MouseButtons.LeftButton }, (parameters) => HandleLeftClick(), false));
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { MouseButtons.RightButton }, (parameters) => HandleRightClick(), false));
 
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.LeftControl, Keys.N }, (parameters) => AddLayer(), true, true));
+
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.Z}, new object[] {Keys.LeftShift, MouseButtons.LeftButton}, (parameters) => CommandManager.Undo(), true, true));
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.LeftShift, Keys.Z}, new object[] {MouseButtons.LeftButton}, (parameters) => CommandManager.Redo(), true, true));
 
-            SelectedLayer = new TileLayer2D();
-            Screen.Section.LayerGroups["group1"].AddLayer(SelectedLayer);
             ColorPicker = new ColorPicker(new Rectangle(SQ.WindowSize.X - 264, SQ.WindowSize.Y - 264, 256, 256), this);
 
             DebugInfo.Subscribe(() => $"Selected Color: {SelectedColor}");
+            SelectedLayer = Screen.Section.LayerGroups.First().Value.Layers.OfType<TextureLayer2D>().FirstOrDefault();
         }
 
         public override void LoadContent() {
@@ -158,6 +157,11 @@ namespace Somniloquy {
             }
         }
 
+        public void AddLayer() {
+            SelectedLayer = new TextureLayer2D();
+            Screen.Section.LayerGroups["group1"].AddLayer(SelectedLayer);
+        }
+
         public void SelectLayer() {
             // Get mouse position
             // Get top layer with texture under mouse pos
@@ -166,7 +170,16 @@ namespace Somniloquy {
 
         public override void Draw() {
             Screen.Camera.DrawPoint((Vector2I)Screen.Camera.GlobalMousePos, SelectedColor * 0.5f);
-            SelectedLayer?.Draw(Screen.Camera, true);
+            
+            foreach (var layerGroup in Screen.Section.LayerGroups) {
+                foreach (var layer in layerGroup.Value.Layers) {
+                    if (layer == SelectedLayer) {
+                        layer.Draw(Screen.Camera, true);
+                    } else {
+                        layer.Draw(Screen.Camera, false, 0.5f);
+                    }
+                }
+            }
             ColorPicker.Draw();
         }
     }

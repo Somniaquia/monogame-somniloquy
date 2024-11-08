@@ -58,6 +58,7 @@ namespace Somniloquy {
             // SerializationManager.InitializeDirectories((typeof(World), "Worlds"), (typeof(Texture2D), "Textures"));
             InputManager.Initialize(Window);
             SoundManager.Initialize("C:\\Somnia\\Projects\\monogame-somniloquy\\Assets\\Loops");
+            FileBrowser.Initialize();
         }
 
         protected override void LoadContent() {

@@ -4,6 +4,8 @@ namespace Somniloquy {
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
+    using System.Text.Json;
+
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
     using Microsoft.Xna.Framework.Input;
@@ -17,6 +19,7 @@ namespace Somniloquy {
         public static void Initialize() {
             InputManager.RegisterKeybind(new object[] { Keys.LeftControl, Keys.O }, (parameters) => { Active = true; OpenDirectory("c:\\Somnia\\Projects\\monogame-somniloquy\\Assets"); }, true, true);
             InputManager.RegisterKeybind(Keys.Tab, Keys.LeftShift, (parameters) => { if (Active) MoveHighlightedLine(1); }, true);
+            InputManager.RegisterKeybind(new object[] { Keys.LeftControl, Keys.S }, (parameters) => { if (Active) Save(); }, true);
             InputManager.RegisterKeybind(new object[] {Keys.LeftShift, Keys.Tab}, (parameters) => { if (Active) MoveHighlightedLine(-1); }, true, true);
             InputManager.RegisterKeybind(Keys.Enter, Keys.LeftShift, (parameters) => { if (Active) SelectDirectory(); }, true);
             InputManager.RegisterKeybind(new object[] {Keys.LeftShift, Keys.Enter}, (parameters) => { if (Active) LeaveDirectory(); }, true, true);
@@ -57,8 +60,23 @@ namespace Somniloquy {
                     if (path.EndsWith(".wav")) {
                         var name = SoundManager.AddSound(new FileInfo(path));
                         SoundManager.StartLoop(name);
+                        DebugInfo.AddTempLine(() => $"Playing loop 「{Path.GetFileName(path)}」.", 5);
+                    } else if (path.EndsWith(".sqSection2D")) {
+                        var sectionScreen = ScreenManager.GetFirstScreenOfType<Section2DScreen>();
+                        if (sectionScreen is null) {
+                            DebugInfo.AddTempLine(() => $"Error: Section2DScreen doesn't exist.", 5);
+                            return;
+                        }
+                        try {
+                            string json = File.ReadAllText(path);
+                            sectionScreen.Section = Section2D.Deserialize(json);
+                            sectionScreen.Editor.SelectedLayer = sectionScreen.Section.LayerGroups.First().Value.Layers.OfType<TextureLayer2D>().FirstOrDefault();
+                            DebugInfo.AddTempLine(() => $"Loaded section from {Path.GetFileName(path)}.", 5);
+                        } catch (Exception e) {
+                            DebugInfo.AddTempLine(() => $"Error reading {Path.GetFileName(path)}: {e.Message}", 5);
+                        }
                     } else {
-                        DebugInfo.AddTempLine(() => $"{Path.GetFileName(path)} is a file.", 5);
+                        DebugInfo.AddTempLine(() => $"{Path.GetFileName(path)} is an unsupported file type.", 5);
                     }
                 } else {
                     DebugInfo.AddTempLine(() => $"{Path.GetFileName(path)} does not exist.", 5);
@@ -74,7 +92,6 @@ namespace Somniloquy {
                 OpenDirectory(parentDirectory);
             }
         }
-
 
         public static void OpenDirectory(string directory) {
             lines.Clear();
@@ -92,6 +109,34 @@ namespace Somniloquy {
 
             DebugInfo.AddTempLine(() => $"Directory contents: {lines.Count}", 2);
         }
+
+        public static void Save() {
+            var section = ScreenManager.GetFirstScreenOfType<Section2DScreen>().Section;
+            if (section == null) {
+                DebugInfo.AddTempLine(() => "No section to save.", 5);
+                return;
+            }
+
+            string json = section.Serialize();
+
+            if (!Directory.Exists(CurrentDirectory)) {
+                DebugInfo.AddTempLine(() => "Current directory is invalid.", 5);
+                return;
+            }
+
+            var sectionIdentifier = section.Identifier == "" ? section.Identifier : "temp"; 
+            string filePath = Path.Combine(CurrentDirectory, $"{sectionIdentifier}.sqSection2D");
+
+            try {
+                File.WriteAllText(filePath, json);
+                DebugInfo.AddTempLine(() => $"Section saved to {filePath}.", 5);
+            } catch (Exception e) {
+                DebugInfo.AddTempLine(() => $"Error saving section: {e.Message}", 5);
+            }
+
+            OpenDirectory(CurrentDirectory);
+        }
+
 
         public static void Draw(SpriteFont font) {
             if (!Active) return;

@@ -20,13 +20,9 @@ namespace Somniloquy {
         public string LayerIdentifier { get; set; }
         // TODO: Translation expressions
 
-        public static Layer2D Read(string json) {
-            return new(); // TODO: Serialization
-        }
-
         public virtual void Update() { }
 
-        public virtual void Draw(Camera2D camera, bool drawOutlines = false) { }
+        public virtual void Draw(Camera2D camera, bool drawOutlines = false, float opacity = 1f) { }
     }
 
     public interface IPaintableLayer2D {

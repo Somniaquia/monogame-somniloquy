@@ -1172,5 +1172,14 @@ namespace Somniloquy {
         }
 
         #endregion
+
+        public string Serialize() {
+            return $"{X},{Y}";
+        }
+
+        public static Vector2I Deserialize(string args) {
+            var pair = args.Split(',');
+            return new Vector2I(int.Parse(pair[0]), int.Parse(pair[1]));
+        }
     }
 }

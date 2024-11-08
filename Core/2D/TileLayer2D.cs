@@ -111,7 +111,7 @@
             // }
         }
 
-        public override void Draw(Camera2D camera, bool drawOutlines = false) {
+        public override void Draw(Camera2D camera, bool drawOutlines = false, float opacity = 1f) {
             var chunkLengthInPixels = ChunkLength * TileLength;
 
             Vector2 topLeft = camera.VisibleRectangleInWorld.TopLeft() - new Vector2(1);
@@ -155,7 +155,7 @@
                     
                     if (!Chunks.ContainsKey(chunkIndex)) continue;
 
-                    Chunks[chunkIndex].Draw(camera, (Rectangle)new RectangleF(xLeft, yTop, xRight - xLeft, yBottom - yTop), (Rectangle)new RectangleF(xLeft - chunkPos.X, yTop - chunkPos.Y , xRight - xLeft, yBottom - yTop));
+                    Chunks[chunkIndex].Draw(camera, (Rectangle)new RectangleF(xLeft, yTop, xRight - xLeft, yBottom - yTop), (Rectangle)new RectangleF(xLeft - chunkPos.X, yTop - chunkPos.Y , xRight - xLeft, yBottom - yTop), 1f);
                 }
             }
         }
@@ -208,8 +208,8 @@
             return tile.GetColor(posInTile);
         }
 
-        public void Draw(Camera2D camera, Rectangle destination, Rectangle source) {
-
+        public void Draw(Camera2D camera, Rectangle destination, Rectangle source, float opacity = 1f) {
+            
         }
     }
 }
