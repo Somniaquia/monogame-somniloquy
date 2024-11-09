@@ -4,6 +4,19 @@
 - ~~bring TextureLayer2D and PixelAction delegates~~
 - ~~Implement Sprite, Animation~~
 - ~~Update Command system~~
+- ~~Implement TextureLayer2D Serialization~~
+- Add Line/Rectangle/Polygon drawer
+- Add Fill
+- Implement add brush types
+- Implement saving TextureLayer2Ds into image file
+- Implement loading image files into TextureLayer2D
+- Update FileExplorer, implement input devouring by screens
+- Implement SQUI elements
+    - UIPanel
+    - UITextbox
+- Implement LayerViewer UI, brush selection view
 - Implement Sprite2D, Animation2D, Spritesheet
-- Update Tile, TileLayer2D
-- Re-implement SectionEditor
+- Implement Tile, TileLayer2D
+- Add EditorTileMode and its operations
+- Add boundaries properties to TextureLayer, Tiles
+- Add Objects, ObjectEditor, boundaries to Objects, EditorObjectMode

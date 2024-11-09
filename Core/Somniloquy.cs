@@ -112,7 +112,6 @@ namespace Somniloquy {
 
             SoundManager.Update();
             SQTexture2D.ApplyTextureChanges();
-            DebugInfo.Update();
             
             base.Update(gameTime);
         }

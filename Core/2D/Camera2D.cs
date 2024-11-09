@@ -30,7 +30,7 @@ namespace Somniloquy {
 
         public void ZoomCamera(float delta) {
             TargetZoom *= MathF.Pow(MathF.E, delta);
-            TargetZoom = MathF.Min(MathF.Max(TargetZoom, 1f), 64f);
+            TargetZoom = MathF.Min(MathF.Max(TargetZoom, 0.5f), 64f);
         }
 
         public void RotateCamera(float delta) {

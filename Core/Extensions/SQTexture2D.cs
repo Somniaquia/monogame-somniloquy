@@ -57,20 +57,8 @@ namespace Somniloquy {
         // }
 
         private Color BlendColor(Vector2I position, Color paintingColor, float opacity) {
-            if (opacity == 1f) return paintingColor;
-
             Color canvasColor = TextureData[position.Unwrap(Width)];
-            
-            Color blendedColor = new(
-                (int)(paintingColor.R * opacity + canvasColor.R * (1 - opacity)),
-                (int)(paintingColor.G * opacity + canvasColor.G * (1 - opacity)),
-                (int)(paintingColor.B * opacity + canvasColor.B * (1 - opacity)),
-                (int)(paintingColor.A * opacity + canvasColor.A * (1 - opacity))
-            );
-
-            // DebugInfo.AddTempLine(() => $"PaintingColor: {paintingColor} * Opacity: {opacity} + CanvasColor {canvasColor} => BlendedColor {blendedColor}");
-            
-            return blendedColor;
+            return Util.BlendColor(canvasColor, paintingColor, opacity);
         }
 
         public void Draw(Rectangle destination, Rectangle source, Color color, SpriteEffects effects = SpriteEffects.None) {

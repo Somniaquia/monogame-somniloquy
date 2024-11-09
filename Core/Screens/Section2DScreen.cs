@@ -51,10 +51,9 @@ namespace Somniloquy {
 
         public Color SelectedColor = Color.White;
         public EditorState EditorState = EditorState.PaintMode;
+        public Brush Brush = new CosmicGummyWormBrush();
 
         public List<Keybind> GlobalKeybinds = new();
-
-        public CommandChain CurrentCommandChain;
 
         public Section2DEditor(Rectangle boundaries, Section2DScreen screen) : base(boundaries) {
             Screen = screen;
@@ -124,6 +123,8 @@ namespace Somniloquy {
         }
 
         public void HandleLeftClick() {
+            if (ScreenManager.FocusedScreen != this) return;
+            
             if (InputManager.IsKeyDown(Keys.LeftAlt)) {
                 if (SelectedLayer is IPaintableLayer2D paintableLayer) {
                     var color = paintableLayer.GetColor((Vector2I)Screen.Camera.GlobalMousePos.Value);
@@ -132,30 +133,25 @@ namespace Somniloquy {
                     ColorPicker.CreateChartTexture();
                 }
             } else {
-                Paint(InputManager.IsMouseButtonPressed(MouseButtons.LeftButton), SelectedColor);
+                if (SelectedLayer is IPaintableLayer2D paintableLayer) {
+                    Brush.Paint(paintableLayer, InputManager.IsMouseButtonPressed(MouseButtons.LeftButton), SelectedColor, Screen.Camera);
+                }
             }
         }
 
         public void HandleRightClick() {
-            Paint(InputManager.IsMouseButtonPressed(MouseButtons.RightButton), Color.Transparent);
-        }
-
-        public void Paint(bool initializingPress, Color color) {
             if (ScreenManager.FocusedScreen != this) return;
 
-            if (SelectedLayer is IPaintableLayer2D paintableLayer) {
-                int penWidth = (int)(InputManager.GetPenPressure() * 5);
-                float penOpacity = InputManager.GetPenPressure() != 0 ? InputManager.GetPenPressure() : 1;
+            if (InputManager.IsKeyDown(Keys.LeftAlt)) {
 
-                if (initializingPress) {
-                    CurrentCommandChain = CommandManager.AddCommandChain(new CommandChain());
-                    // (int)(InputManager.GetPenTilt().Length() * 5)
-                    paintableLayer.PaintCircle((Vector2I)Screen.Camera.GlobalMousePos.Value, penWidth, color, penOpacity, true, CurrentCommandChain);
-                } else {
-                    paintableLayer.PaintLine((Vector2I)Screen.Camera.PreviousGlobalMousePos.Value, (Vector2I)Screen.Camera.GlobalMousePos.Value, color, penOpacity, penWidth, CurrentCommandChain);
+            } else {
+                if (SelectedLayer is IPaintableLayer2D paintableLayer) {
+                    Brush.Paint(paintableLayer, InputManager.IsMouseButtonPressed(MouseButtons.RightButton), Color.Transparent, Screen.Camera);
                 }
             }
         }
+
+        
 
         public void AddLayer() {
             SelectedLayer = new TextureLayer2D();

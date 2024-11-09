@@ -16,12 +16,22 @@ namespace Somniloquy {
         
         public void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain = null) {
             var (chunkPosition, positionInChunk) = (GetChunkPosition(position), GetPositionInChunk(position));
+            
             if (!Chunks.ContainsKey(chunkPosition)) {
                 var chunk = new TextureChunk2D(this, ChunkLength);
                 Chunks.Add(chunkPosition, chunk);
                 chain?.AddCommand(new TextureChunkSetCommand(this, chunkPosition, null, chunk));
             }
-            Chunks[chunkPosition].PaintPixel(positionInChunk, color, opacity, chain);
+            
+            if (chain.AffectedPixels.ContainsKey(position)) {
+                if (chain.AffectedPixels[position].Item2 >= opacity) return;
+                Chunks[chunkPosition].SetPixel(positionInChunk, Util.BlendColor(chain.AffectedPixels[position].Item1, color, opacity), chain);
+                chain.AffectedPixels[position] = (chain.AffectedPixels[position].Item1, opacity);
+            } else {
+                chain.AffectedPixels[position] = (Chunks[chunkPosition].GetColor(positionInChunk), opacity);
+                Chunks[chunkPosition].PaintPixel(positionInChunk, color, opacity, chain);
+            }
+            
         }
         
         public Color? GetColor(Vector2I position) {
@@ -71,6 +81,10 @@ namespace Somniloquy {
             ParentLayer = parentLayer;
             ChunkLength = chunkLength;
             Texture = new(SQ.GD, ChunkLength, ChunkLength);
+        }
+
+        public void SetPixel(Vector2I positionInChunk, Color color, CommandChain chain) {
+            Texture.SetPixel(positionInChunk, color, chain);
         }
 
         public void PaintPixel(Vector2I positionInChunk, Color color, float opacity, CommandChain chain) {

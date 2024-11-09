@@ -276,5 +276,18 @@ namespace Somniloquy {
             }
             return min;
         }
+
+        public static Color BlendColor(Color baseColor, Color paintingColor, float opacity) {
+            if (opacity == 1f) {
+                return paintingColor;
+            } else {
+                return new(
+                    (int)(paintingColor.R * opacity + baseColor.R * (1 - opacity)),
+                    (int)(paintingColor.G * opacity + baseColor.G * (1 - opacity)),
+                    (int)(paintingColor.B * opacity + baseColor.B * (1 - opacity)),
+                    (int)(paintingColor.A * opacity + baseColor.A * (1 - opacity))
+                );
+            }
+        }
     }
 }

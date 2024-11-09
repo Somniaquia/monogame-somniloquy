@@ -44,6 +44,7 @@ namespace Somniloquy {
 
     public class CommandChain : ICommand {
         private List<ICommand> commands = new();
+        public Dictionary<Vector2I, (Color, float)> AffectedPixels = new();
 
         public void AddCommand(ICommand command) {
             commands.Add(command);

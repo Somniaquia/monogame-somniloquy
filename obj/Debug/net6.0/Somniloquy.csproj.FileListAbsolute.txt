@@ -390,4 +390,8 @@ C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\Tilesets\qxy_chi
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\Tilesets\qxy_chi_winterforest_00.png
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\wheel-of-emotions1.webp
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Loops\B3_10_stage03.rpgmvo@0000004a.ogg
+C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Worlds\coloors.sqSection2D
+C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Worlds\COSMICGUMMYWORMS.sqSection2D
+C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Worlds\weirdRattlesnakes.sqSection2D
+C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Worlds\drawTest.sqSection2D
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Worlds\temp.sqSection2D
