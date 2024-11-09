@@ -7,7 +7,7 @@
 - ~~Implement TextureLayer2D Serialization~~
 - Add Line/Rectangle/Polygon drawer
 - Add Fill
-- Implement add brush types
+- ~~Add more brush types~~
 - Implement saving TextureLayer2Ds into image file
 - Implement loading image files into TextureLayer2D
 - Update FileExplorer, implement input devouring by screens

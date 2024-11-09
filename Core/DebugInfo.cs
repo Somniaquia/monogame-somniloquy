@@ -32,7 +32,11 @@ namespace Somniloquy {
                 if (time == -1) {
                     SQ.SB.DrawString(font, lineGenerator(), position, Color.LightBlue);
                 }
-                SQ.SB.DrawString(font, lineGenerator(), position, Color.White * MathF.Min((float)time, 1f));
+                try {
+                    SQ.SB.DrawString(font, lineGenerator(), position, Color.White * MathF.Min((float)time, 1f));
+                } catch (ArgumentException) {
+                    Console.WriteLine($"Cannot display one of he characters of {lineGenerator()}");
+                }
                 position.Y -= 18;
             }
 

@@ -51,7 +51,8 @@ namespace Somniloquy {
 
         public Color SelectedColor = Color.White;
         public EditorState EditorState = EditorState.PaintMode;
-        public Brush Brush = new CosmicGummyWormBrush();
+        private int currentBrushIndex;
+        public Brush Brush => Brush.BrushTypes[currentBrushIndex];
 
         public List<Keybind> GlobalKeybinds = new();
 
@@ -77,6 +78,8 @@ namespace Somniloquy {
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { MouseButtons.RightButton }, (parameters) => HandleRightClick(), false));
 
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.LeftControl, Keys.N }, (parameters) => AddLayer(), true, true));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.B }, new object[] { MouseButtons.LeftButton, MouseButtons.RightButton }, (parameters) => SelectNextBrush(), true, true));
+            DebugInfo.Subscribe(() => $"Selected Brush: {Brush}");
 
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.Z}, new object[] {Keys.LeftShift, MouseButtons.LeftButton}, (parameters) => CommandManager.Undo(), true, true));
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.LeftShift, Keys.Z}, new object[] {MouseButtons.LeftButton}, (parameters) => CommandManager.Redo(), true, true));
@@ -162,6 +165,10 @@ namespace Somniloquy {
             // Get mouse position
             // Get top layer with texture under mouse pos
             // set SelectedLayer with that layer
+        }
+
+        public void SelectNextBrush() {
+            currentBrushIndex = (currentBrushIndex + 1) % Brush.BrushTypes.Count;
         }
 
         public override void Draw() {

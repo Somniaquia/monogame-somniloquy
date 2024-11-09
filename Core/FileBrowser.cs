@@ -20,6 +20,7 @@ namespace Somniloquy {
             InputManager.RegisterKeybind(new object[] { Keys.LeftControl, Keys.O }, (parameters) => { Active = true; OpenDirectory("c:\\Somnia\\Projects\\monogame-somniloquy\\Assets"); }, true, true);
             InputManager.RegisterKeybind(Keys.Tab, Keys.LeftShift, (parameters) => { if (Active) MoveHighlightedLine(1); }, true);
             InputManager.RegisterKeybind(new object[] { Keys.LeftControl, Keys.S }, (parameters) => { if (Active) Save(); }, true);
+            InputManager.RegisterKeybind(new object[] { Keys.LeftControl, Keys.E }, (parameters) => { if (Active) ExportTexture(); }, true);
             InputManager.RegisterKeybind(new object[] {Keys.LeftShift, Keys.Tab}, (parameters) => { if (Active) MoveHighlightedLine(-1); }, true, true);
             InputManager.RegisterKeybind(Keys.Enter, Keys.LeftShift, (parameters) => { if (Active) SelectDirectory(); }, true);
             InputManager.RegisterKeybind(new object[] {Keys.LeftShift, Keys.Enter}, (parameters) => { if (Active) LeaveDirectory(); }, true, true);
@@ -60,7 +61,7 @@ namespace Somniloquy {
                     if (path.EndsWith(".wav")) {
                         var name = SoundManager.AddSound(new FileInfo(path));
                         SoundManager.StartLoop(name);
-                        DebugInfo.AddTempLine(() => $"Playing loop 「{Path.GetFileName(path)}」.", 5);
+                        DebugInfo.AddTempLine(() => $"Playing loop - {Path.GetFileName(path)}.", 5);
                     } else if (path.EndsWith(".sqSection2D")) {
                         var sectionScreen = ScreenManager.GetFirstScreenOfType<Section2DScreen>();
                         if (sectionScreen is null) {
@@ -71,7 +72,7 @@ namespace Somniloquy {
                             string json = File.ReadAllText(path);
                             sectionScreen.Section = Section2D.Deserialize(json);
                             sectionScreen.Editor.SelectedLayer = sectionScreen.Section.LayerGroups.First().Value.Layers.OfType<TextureLayer2D>().FirstOrDefault();
-                            DebugInfo.AddTempLine(() => $"Loaded section from {Path.GetFileName(path)}.", 5);
+                            DebugInfo.AddTempLine(() => $"Loaded section from {Path.GetFileName(path)}", 5);
                         } catch (Exception e) {
                             DebugInfo.AddTempLine(() => $"Error reading {Path.GetFileName(path)}: {e.Message}", 5);
                         }
@@ -129,7 +130,7 @@ namespace Somniloquy {
 
             try {
                 File.WriteAllText(filePath, json);
-                DebugInfo.AddTempLine(() => $"Section saved to {filePath}.", 5);
+                DebugInfo.AddTempLine(() => $"Section saved to {filePath}", 5);
             } catch (Exception e) {
                 DebugInfo.AddTempLine(() => $"Error saving section: {e.Message}", 5);
             }
@@ -137,6 +138,14 @@ namespace Somniloquy {
             OpenDirectory(CurrentDirectory);
         }
 
+        public static void ExportTexture() {
+            var layerGroup = ScreenManager.GetFirstScreenOfType<Section2DScreen>().Section.LayerGroups.First().Value;
+
+            var groupIdentifier = layerGroup.Identifier == "" ? layerGroup.Identifier : "temp"; 
+            string filePath = Path.Combine(CurrentDirectory, $"{groupIdentifier}.png");
+
+            layerGroup.SaveTexture(filePath);
+        }
 
         public static void Draw(SpriteFont font) {
             if (!Active) return;

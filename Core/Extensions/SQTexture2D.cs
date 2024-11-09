@@ -35,26 +35,32 @@ namespace Somniloquy {
             }
         }
 
+    public Rectangle GetNonTransparentBounds() {
+        int width = Width; int height = Height;
+        int xMin = width; int yMin = height; int xMax = 0; int yMax = 0;
+        bool hasNonTransparentPixels = false;
+
+        for (int i = 0; i < TextureData.Length; i++) {
+            if (TextureData[i].A > 0) {
+                int x = i % width;
+                int y = i / width;
+
+                if (x < xMin) xMin = x;
+                if (x > xMax) xMax = x;
+                if (y < yMin) yMin = y;
+                if (y > yMax) yMax = y;
+
+                hasNonTransparentPixels = true;
+            }
+        }
+
+        if (!hasNonTransparentPixels) return Rectangle.Empty;
+        return new Rectangle(xMin, yMin, xMax - xMin + 1, yMax - yMin + 1);
+    }
+
         public Color GetColor(Vector2I position) {
             return TextureData[position.Unwrap(Width)];
         }
-
-        // Caused funny patterns - leaving it here
-        // private Color BlendColor(Vector2I position, Color paintingColor, float opacity) { 
-        //     if (opacity == 1f) return paintingColor;
-
-        //     Color canvasColor = TextureData[position.Unwrap(Width)];
-        //     paintingColor.A = (byte)(255 * opacity);
-            
-        //     Color blendedColor = new(
-        //         paintingColor.R * paintingColor.A + canvasColor.R * (1 - paintingColor.A),
-        //         paintingColor.G * paintingColor.A + canvasColor.G * (1 - paintingColor.A),
-        //         paintingColor.B * paintingColor.A + canvasColor.B * (1 - paintingColor.A),
-        //         paintingColor.A + canvasColor.A * (1 - paintingColor.A)
-        //     );
-
-        //     return blendedColor;
-        // }
 
         private Color BlendColor(Vector2I position, Color paintingColor, float opacity) {
             Color canvasColor = TextureData[position.Unwrap(Width)];
@@ -72,10 +78,6 @@ namespace Somniloquy {
             ChangedTextures.Clear();
         }
 
-        /// <summary>
-        /// Temp; do not use directly
-        /// </summary>
-        /// <returns></returns>
         public string Serialize() {
             var options = new JsonSerializerOptions();
             options.Converters.Add(new SQTexture2DConverter());

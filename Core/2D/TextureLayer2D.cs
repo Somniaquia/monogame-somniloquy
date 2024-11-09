@@ -1,6 +1,7 @@
 namespace Somniloquy {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Text.Json;
     using System.Text.Json.Serialization;
     
@@ -30,8 +31,7 @@ namespace Somniloquy {
             } else {
                 chain.AffectedPixels[position] = (Chunks[chunkPosition].GetColor(positionInChunk), opacity);
                 Chunks[chunkPosition].PaintPixel(positionInChunk, color, opacity, chain);
-            }
-            
+            }   
         }
         
         public Color? GetColor(Vector2I position) {
@@ -40,6 +40,57 @@ namespace Somniloquy {
             var color = Chunks[chunkPosition].GetColor(positionInChunk);
             if (color == Color.Transparent) return null;
             return color;
+        }
+
+        public Rectangle GetTextureBounds() {
+            RemoveEmptyChunks();
+            int chunkXMin = Chunks.Min(chunk => chunk.Key.X);
+            int chunkXMax = Chunks.Max(chunk => chunk.Key.X);
+            int chunkYMin = Chunks.Min(chunk => chunk.Key.Y);
+            int chunkYMax = Chunks.Max(chunk => chunk.Key.Y);
+
+            // var minChunk = Chunks[new Vector2I(chunkXMin, chunkYMin)];
+            // var maxChunk = Chunks[new Vector2I(chunkXMax, chunkYMax)];
+            
+            // var minChunkBounds = minChunk.Texture.GetNonTransparentBounds(); // Oversight!
+            // var maxChunkBounds = minChunk.Texture.GetNonTransparentBounds();
+
+            // var xMin = chunkXMin * ChunkLength + minChunkBounds.Left;
+            // var yMin = chunkYMin * ChunkLength + minChunkBounds.Top;
+            // var xMax = chunkXMax * ChunkLength + minChunkBounds.Right;
+            // var yMax = chunkYMax * ChunkLength + minChunkBounds.Bottom;
+            var xMin = chunkXMin * ChunkLength;
+            var yMin = chunkYMin * ChunkLength;
+            var xMax = (chunkXMax + 1) * ChunkLength;
+            var yMax = (chunkYMax + 1) * ChunkLength;
+
+            return new Rectangle(xMin, yMin, xMax - xMin, yMax - yMin);
+        }
+
+        public void RemoveEmptyChunks() {
+            // TODO: ensure that empty chunks are removed
+        }
+
+        public void Draw(Vector2I topLeft, Vector2I bottomRight, float opacity = 1f) {
+            Vector2I topLeftChunk = new((int)((float)topLeft.X / ChunkLength) - 1, (int)((float)topLeft.Y / ChunkLength) - 1);
+            Vector2I bottomRightChunk = new((int)((float)bottomRight.X / ChunkLength) + 1, (int)((float)bottomRight.Y / ChunkLength) + 1);
+
+            for (int y = topLeftChunk.Y; y < bottomRightChunk.Y; y++) {
+                for (int x = topLeftChunk.X; x < bottomRightChunk.X; x++) {
+                    var chunkIndex = new Vector2I(x, y);
+                    var chunkPos = new Vector2I(x, y) * ChunkLength;
+                    var nextChunkPos = (chunkIndex + new Vector2I(1, 1)) * ChunkLength;
+
+                    float xLeft = MathF.Min(MathF.Max(topLeft.X, chunkPos.X), bottomRight.X);
+                    float xRight = MathF.Max(MathF.Min(bottomRight.X, nextChunkPos.X), topLeft.X);
+                    float yTop = MathF.Min(MathF.Max(topLeft.Y, chunkPos.Y), bottomRight.Y);
+                    float yBottom = MathF.Max(MathF.Min(bottomRight.Y, nextChunkPos.Y), topLeft.Y);
+
+                    if (!Chunks.ContainsKey(chunkIndex)) continue;
+
+                    SQ.SB.Draw(Chunks[chunkIndex].Texture, (Rectangle)new RectangleF(xLeft - topLeft.X, yTop - topLeft.Y, xRight - xLeft, yBottom - yTop), (Rectangle)new RectangleF(xLeft - chunkPos.X, yTop - chunkPos.Y , xRight - xLeft, yBottom - yTop), Color.White * opacity);
+                }
+            }
         }
 
         public override void Draw(Camera2D camera, bool drawOutlines = false, float opacity = 1f) {
