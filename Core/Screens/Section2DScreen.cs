@@ -86,6 +86,10 @@ namespace Somniloquy {
 
             ColorPicker = new ColorPicker(new Rectangle(SQ.WindowSize.X - 264, SQ.WindowSize.Y - 264, 256, 256), this);
 
+            DebugInfo.Subscribe(() => $"Pen Pressure: {InputManager.PenPressure}");
+            DebugInfo.Subscribe(() => $"Pen Tilt: {InputManager.PenTilt}");
+            DebugInfo.Subscribe(() => $"Undo History: {CommandManager.UndoHistory.Count}");
+            DebugInfo.Subscribe(() => $"Redo History: {CommandManager.RedoHistory.Count}");
             DebugInfo.Subscribe(() => $"Selected Color: {SelectedColor}");
             SelectedLayer = Screen.Section.LayerGroups.First().Value.Layers.OfType<TextureLayer2D>().FirstOrDefault();
         }

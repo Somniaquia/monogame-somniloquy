@@ -210,6 +210,12 @@
           }
         }
       },
+      "Nopipeline.Task/2.3.0": {
+        "type": "package",
+        "build": {
+          "build/Nopipeline.Task.targets": {}
+        }
+      },
       "runtime.linux-arm.runtime.native.System.IO.Ports/8.0.0": {
         "type": "package",
         "runtimeTargets": {
@@ -263,6 +269,22 @@
             "assetType": "native",
             "rid": "osx-x64"
           }
+        }
+      },
+      "SixLabors.ImageSharp/3.1.5": {
+        "type": "package",
+        "compile": {
+          "lib/net6.0/SixLabors.ImageSharp.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0/SixLabors.ImageSharp.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "build/SixLabors.ImageSharp.props": {}
         }
       },
       "System.CodeDom/8.0.0": {
@@ -651,6 +673,27 @@
         "runtimes/win-x86/native/soft_oal.dll"
       ]
     },
+    "Nopipeline.Task/2.3.0": {
+      "sha512": "fOIPKfrm1+/SngeBRRGCR63l4uEatKIAns4k7YeIPa/M+H20kSaY7HXHB3841vUyugmDJVROe9iC0/GOZq6Rfg==",
+      "type": "package",
+      "path": "nopipeline.task/2.3.0",
+      "hasTools": true,
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.md",
+        "build/Nopipeline.Task.targets",
+        "icon.png",
+        "nopipeline.task.2.3.0.nupkg.sha512",
+        "nopipeline.task.nuspec",
+        "tools/net8.0/any/Newtonsoft.Json.dll",
+        "tools/net8.0/any/npl.deps.json",
+        "tools/net8.0/any/npl.dll",
+        "tools/net8.0/any/npl.exe",
+        "tools/net8.0/any/npl.pdb",
+        "tools/net8.0/any/npl.runtimeconfig.json"
+      ]
+    },
     "runtime.linux-arm.runtime.native.System.IO.Ports/8.0.0": {
       "sha512": "gK720fg6HemDg8sXcfy+xCMZ9+hF78Gc7BmREbmkS4noqlu1BAr9qZtuWGhLzFjBfgecmdtl4+SYVwJ1VneZBQ==",
       "type": "package",
@@ -744,6 +787,22 @@
         "runtime.osx-x64.runtime.native.system.io.ports.nuspec",
         "runtimes/osx-x64/native/libSystem.IO.Ports.Native.dylib",
         "useSharedDesignerContext.txt"
+      ]
+    },
+    "SixLabors.ImageSharp/3.1.5": {
+      "sha512": "lNtlq7dSI/QEbYey+A0xn48z5w4XHSffF8222cC4F4YwTXfEImuiBavQcWjr49LThT/pRmtWJRcqA/PlL+eJ6g==",
+      "type": "package",
+      "path": "sixlabors.imagesharp/3.1.5",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE",
+        "build/SixLabors.ImageSharp.props",
+        "lib/net6.0/SixLabors.ImageSharp.dll",
+        "lib/net6.0/SixLabors.ImageSharp.xml",
+        "sixlabors.imagesharp.128.png",
+        "sixlabors.imagesharp.3.1.5.nupkg.sha512",
+        "sixlabors.imagesharp.nuspec"
       ]
     },
     "System.CodeDom/8.0.0": {
@@ -1136,6 +1195,8 @@
       "LibreHardwareMonitorLib >= 0.9.3",
       "MonoGame.Content.Builder.Task >= 3.8.1.303",
       "MonoGame.Framework.DesktopGL >= 3.8.1.303",
+      "Nopipeline.Task >= 2.3.0",
+      "SixLabors.ImageSharp >= 3.1.5",
       "System.Text.Json >= 8.0.5"
     ]
   },
@@ -1204,6 +1265,14 @@
           "MonoGame.Framework.DesktopGL": {
             "target": "Package",
             "version": "[3.8.1.303, )"
+          },
+          "Nopipeline.Task": {
+            "target": "Package",
+            "version": "[2.3.0, )"
+          },
+          "SixLabors.ImageSharp": {
+            "target": "Package",
+            "version": "[3.1.5, )"
           },
           "System.Text.Json": {
             "target": "Package",

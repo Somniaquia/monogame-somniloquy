@@ -69,16 +69,11 @@ namespace Somniloquy {
 
             Misaki = Content.Load<SpriteFont>("Fonts/Misaki");
 
-            ScreenManager.AddScreen(new Section2DScreen(new Rectangle(new(), WindowSize)));
+            ScreenManager.AddScreen(new ETFractalScreen(new Rectangle(new(), WindowSize)));
             ScreenManager.LoadContent();
 
             DebugInfo.Subscribe(() => $"FPS: {FPS:n1}");
-            DebugInfo.Subscribe(() => $"Pen Pressure: {InputManager.PenPressure}");
-            DebugInfo.Subscribe(() => $"Pen Tilt: {InputManager.PenTilt}");
             DebugInfo.Subscribe(() => $"Focused Screen: {ScreenManager.FocusedScreen}");
-            
-            DebugInfo.Subscribe(() => $"Undo History: {CommandManager.UndoHistory.Count}");
-            DebugInfo.Subscribe(() => $"Redo History: {CommandManager.RedoHistory.Count}");
         }
 
         [DllImport("user32.dll")]

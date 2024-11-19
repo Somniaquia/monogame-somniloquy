@@ -153,8 +153,9 @@ namespace Somniloquy {
 
         public void SaveTexture(string path) {
             Texture2D texture = GetTexture();
-            using var fileStream = new FileStream(path, FileMode.Create);
-            texture.SaveAsPng(fileStream, texture.Width, texture.Height);
+            // using var fileStream = new FileStream(path, FileMode.Create);
+            // texture.SaveAsPng(fileStream, texture.Width, texture.Height);
+            IOManager.SaveTextureDataAsPngAsync(texture, path);
         }
 
         public Texture2D GetTexture() {

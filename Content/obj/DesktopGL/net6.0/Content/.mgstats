@@ -1,5 +1,1 @@
 Source File,Dest File,Processor Type,Content Type,Source File Size,Dest File Size,Build Seconds
-"C:/Somnia/Projects/monogame-somniloquy/Content/Fonts/Misaki.spritefont","C:/Somnia/Projects/monogame-somniloquy/Content/bin/DesktopGL/Content/Fonts/Misaki.xnb","FontDescriptionProcessor","SpriteFontContent",1369,3094191,1.3222187
-"C:/Somnia/Projects/monogame-somniloquy/Content/Shaders/BloomCombine.fx","C:/Somnia/Projects/monogame-somniloquy/Content/bin/DesktopGL/Content/Shaders/BloomCombine.xnb","EffectProcessor","CompiledEffectContent",857,1333,0.3782341
-"C:/Somnia/Projects/monogame-somniloquy/Content/Shaders/BloomExtract.fx","C:/Somnia/Projects/monogame-somniloquy/Content/bin/DesktopGL/Content/Shaders/BloomExtract.xnb","EffectProcessor","CompiledEffectContent",376,724,0.2806484
-"C:/Somnia/Projects/monogame-somniloquy/Content/Shaders/GaussianBlur.fx","C:/Somnia/Projects/monogame-somniloquy/Content/bin/DesktopGL/Content/Shaders/GaussianBlur.xnb","EffectProcessor","CompiledEffectContent",555,3324,0.2847813

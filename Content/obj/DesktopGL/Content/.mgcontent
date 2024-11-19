@@ -5,9 +5,7 @@
   <Config />
   <SourceFiles>
     <File>C:/Somnia/Projects/monogame-somniloquy/Content/Fonts/Misaki.spritefont</File>
-    <File>C:/Somnia/Projects/monogame-somniloquy/Content/Shaders/BloomCombine.fx</File>
-    <File>C:/Somnia/Projects/monogame-somniloquy/Content/Shaders/BloomExtract.fx</File>
-    <File>C:/Somnia/Projects/monogame-somniloquy/Content/Shaders/GaussianBlur.fx</File>
+    <File>C:/Somnia/Projects/monogame-somniloquy/Content/Shaders/ETFractal.fx</File>
   </SourceFiles>
   <DestFiles>
     <File xsi:nil="true" />
