@@ -323,3 +323,4 @@ C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\obj\DesktopGL\ne
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\obj\DesktopGL\net6.0\Content\Fonts\Misaki.mgcontent
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\obj\DesktopGL\net6.0\Content\Shaders\ETFractal.mgcontent
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Worlds\temp.sqSection2D
+C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\Shaders\ETFractal.mgfx

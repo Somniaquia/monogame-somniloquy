@@ -10,13 +10,13 @@ namespace Somniloquy {
         public const float LerpModifier =  0.075f;
 
         public Vector2 TargetCenterPosInWorld = Vector2.Zero;
-        public float TargetZoomInverse = 1f;
+        public float TargetZoom = 1f;
         public float TargetRotation = 0.0f;
 
         public Vector2 CenterPosInWorld = Vector2.Zero;
-        public float ZoomInverse = 1f;
-        public float MaxZoomInverse = float.PositiveInfinity;
-        public float MinZoomInverse = 0;
+        public float Zoom = 1f;
+        public float MaxZoom = float.PositiveInfinity;
+        public float MinZoom = 0;
         public float Rotation = 0.0f;
         public Matrix Transform;
         public RectangleF VisibleRectangleInWorld = RectangleF.Empty;
@@ -28,12 +28,12 @@ namespace Somniloquy {
             float theta = MathF.Atan2(displacement.Y, displacement.X) - Rotation;
             displacement = new(displacement.Length() * MathF.Cos(theta), displacement.Length() * MathF.Sin(theta));
             // TargetCenterPosInWorld += displacement * 10 / MathF.Sqrt(TargetZoomInverse);
-            TargetCenterPosInWorld += displacement * 10 * TargetZoomInverse;
+            TargetCenterPosInWorld += displacement * 10 / TargetZoom;
         }
 
         public void ZoomCamera(float delta) {
-            TargetZoomInverse *= MathF.Pow(MathF.E, delta);
-            TargetZoomInverse = MathF.Min(MathF.Max(TargetZoomInverse, MinZoomInverse), MaxZoomInverse);
+            TargetZoom *= MathF.Pow(MathF.E, delta);
+            TargetZoom = MathF.Min(MathF.Max(TargetZoom, MinZoom), MaxZoom);
         }
 
         public void RotateCamera(float delta) {
@@ -42,14 +42,14 @@ namespace Somniloquy {
 
         public void LoadContent() {
             SB = new(SQ.GD);
-            DebugInfo.Subscribe(() => $"ZoomInverse: {ZoomInverse}");
+            DebugInfo.Subscribe(() => $"Zoom: {Zoom}");
         }
 
         public void Update() {
             CenterPosInWorld.X = Util.Lerp(CenterPosInWorld.X, TargetCenterPosInWorld.X, LerpModifier);
             CenterPosInWorld.Y = Util.Lerp(CenterPosInWorld.Y, TargetCenterPosInWorld.Y, LerpModifier);
 
-            ZoomInverse = Util.Lerp(ZoomInverse, TargetZoomInverse, LerpModifier);
+            Zoom = Util.Lerp(Zoom, TargetZoom, LerpModifier);
 
             // TargetRotation = Util.PosMod(TargetRotation, 2 * MathF.PI);
             Rotation = Util.Lerp(Rotation, TargetRotation, LerpModifier);
@@ -59,7 +59,7 @@ namespace Somniloquy {
             Transform =
                 Matrix.CreateTranslation(new Vector3(-CenterPosInWorld.X, -CenterPosInWorld.Y, 0)) *
                 Matrix.CreateRotationZ(Rotation) *
-                Matrix.CreateScale(new Vector3(ZoomInverse, ZoomInverse, 1)) *
+                Matrix.CreateScale(new Vector3(Zoom, Zoom, 1)) *
                 Matrix.CreateTranslation(new Vector3(bounds.Width * 0.5f, bounds.Height * 0.5f, 0)
             );
             

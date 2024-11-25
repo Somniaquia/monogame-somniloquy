@@ -13,6 +13,10 @@ namespace Somniloquy {
             return origin * (1 - lerpModifier) + target * lerpModifier;
         }
 
+        public static double Lerp(double origin, double target, double lerpModifier) {
+            return origin * (1 - lerpModifier) + target * lerpModifier;
+        }
+
         public static Vector2I Ceiling(Vector2 v) {
             return new Vector2I((int)Math.Ceiling(v.X), (int)Math.Ceiling(v.Y));
         }

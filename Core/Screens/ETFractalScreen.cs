@@ -8,23 +8,40 @@ namespace Somniloquy {
 
     public class ETFractalScreen : Screen {
         public Camera2D Camera = new();
-        public List<Keybind> CameraKeybinds = new();
+        public List<Keybind> Keybinds = new();
         private Effect FractalEffect;
         private RenderTarget2D RenderTarget;
+        private Vector2 TargetFractalParameter = new();
+        private Vector2 FractalParameter = new();
+        private bool Julia = false;
+        private int FractalType;
 
         public ETFractalScreen(Rectangle boundaries) : base(boundaries) {
-            CameraKeybinds.Add(InputManager.RegisterKeybind(Keys.W, (parameters) => MoveScreen(new Vector2(0, -0.001f)), false));
-            CameraKeybinds.Add(InputManager.RegisterKeybind(Keys.A, (parameters) => MoveScreen(new Vector2(-0.001f, 0)), false));
-			CameraKeybinds.Add(InputManager.RegisterKeybind(Keys.S, (parameters) => MoveScreen(new Vector2(0, 0.001f)), false));
-            CameraKeybinds.Add(InputManager.RegisterKeybind(Keys.D, (parameters) => MoveScreen(new Vector2(0.001f, 0)), false));
+            Keybinds.Add(InputManager.RegisterKeybind(Keys.Tab, (parameters) => Camera.TargetCenterPosInWorld = Vector2.Zero, false));
+            Keybinds.Add(InputManager.RegisterKeybind(Keys.W, (parameters) => MoveScreen(new Vector2(0, -0.001f)), false));
+            Keybinds.Add(InputManager.RegisterKeybind(Keys.A, (parameters) => MoveScreen(new Vector2(-0.001f, 0)), false));
+			Keybinds.Add(InputManager.RegisterKeybind(Keys.S, (parameters) => MoveScreen(new Vector2(0, 0.001f)), false));
+            Keybinds.Add(InputManager.RegisterKeybind(Keys.D, (parameters) => MoveScreen(new Vector2(0.001f, 0)), false));
 
-            CameraKeybinds.Add(InputManager.RegisterKeybind(Keys.Q, (parameters) => ZoomScreen(-0.05f), false));
-            CameraKeybinds.Add(InputManager.RegisterKeybind(Keys.E, (parameters) => ZoomScreen(0.05f), false));
-            CameraKeybinds.Add(InputManager.RegisterKeybind(Keys.OemPipe, (parameters) => Camera.TargetRotation = 0, true));
-            CameraKeybinds.Add(InputManager.RegisterKeybind(Keys.OemOpenBrackets, (parameters) => RotateScreen(-0.05f), false));
-            CameraKeybinds.Add(InputManager.RegisterKeybind(Keys.OemCloseBrackets, (parameters) => RotateScreen(0.05f), false));
+            Keybinds.Add(InputManager.RegisterKeybind(Keys.I, (parameters) => ShiftShaderParameter(new Vector2(0, -1f)), false));
+            Keybinds.Add(InputManager.RegisterKeybind(Keys.J, (parameters) => ShiftShaderParameter(new Vector2(-1f, 0)), false));
+			Keybinds.Add(InputManager.RegisterKeybind(Keys.K, (parameters) => ShiftShaderParameter(new Vector2(0, 1f)), false));
+            Keybinds.Add(InputManager.RegisterKeybind(Keys.L, (parameters) => ShiftShaderParameter(new Vector2(1f, 0)), false));
+            Keybinds.Add(InputManager.RegisterKeybind(Keys.U, (parameters) => TargetFractalParameter = Vector2.Zero, false));
+
+            Keybinds.Add(InputManager.RegisterKeybind(Keys.Space, (parameters) => Julia = !Julia, true));
+            Keybinds.Add(InputManager.RegisterKeybind(Keys.OemPeriod, (parameters) =>  FractalType++, true));
+            // Keybinds.Add(InputManager.RegisterKeybind(Keys.OemComma, (parameters) => FractalType--, true));
+
+            Keybinds.Add(InputManager.RegisterKeybind(Keys.Q, (parameters) => ZoomScreen(-0.05f), false));
+            Keybinds.Add(InputManager.RegisterKeybind(Keys.E, (parameters) => ZoomScreen(0.05f), false));
+            Keybinds.Add(InputManager.RegisterKeybind(Keys.OemPipe, (parameters) => Camera.TargetRotation = 0, true));
+            Keybinds.Add(InputManager.RegisterKeybind(Keys.OemOpenBrackets, (parameters) => RotateScreen(-0.05f), false));
+            Keybinds.Add(InputManager.RegisterKeybind(Keys.OemCloseBrackets, (parameters) => RotateScreen(0.05f), false));
 
             ShaderManager.ShaderUpdated += OnShaderUpdated;
+
+            DebugInfo.Subscribe(() => $"Fractal Parameter: {FractalParameter}");
         }
 
         private void OnShaderUpdated(string shaderName, Effect newShader) {
@@ -39,6 +56,12 @@ namespace Somniloquy {
             Camera.LoadContent();
             RenderTarget = new RenderTarget2D(SQ.GD, SQ.GD.PresentationParameters.BackBufferWidth, SQ.GD.PresentationParameters.BackBufferHeight, false, SurfaceFormat.Color, DepthFormat.None);
             FractalEffect = SQ.CM.Load<Effect>("Shaders//ETFractal");
+        }
+
+        public void ShiftShaderParameter(params object[] parameters) {
+            if (parameters.Length == 1 && parameters[0] is Vector2 direction) {
+                TargetFractalParameter += direction * 0.005f / Camera.Zoom;
+            }
         }
 
         public void MoveScreen(params object[] parameters) {
@@ -62,6 +85,8 @@ namespace Somniloquy {
         public override void Update() {
             base.Update();
             Camera.Update();
+
+            FractalParameter = Vector2.Lerp(FractalParameter, TargetFractalParameter, 0.075f);
         }
 
         public override void Draw() {
@@ -73,14 +98,19 @@ namespace Somniloquy {
             SQ.GD.Clear(Color.Black);
 
             FractalEffect.Parameters["Offset"].SetValue(Camera.CenterPosInWorld);
-            FractalEffect.Parameters["Zoom"].SetValue(Camera.ZoomInverse);
+            FractalEffect.Parameters["Zoom"].SetValue(1 / Camera.Zoom);
+            FractalEffect.Parameters["Rotation"].SetValue(-Camera.Rotation);
             FractalEffect.Parameters["MaxIterations"].SetValue(500);
+            FractalEffect.Parameters["Time"].SetValue((float)SQ.GameTime.TotalGameTime.TotalSeconds);
+            FractalEffect.Parameters["Param"].SetValue(FractalParameter);
+            FractalEffect.Parameters["FractalType"].SetValue(FractalType);
+            FractalEffect.Parameters["Julia"].SetValue(Julia);
 
             // Begin the effect and draw a full-screen quad
             FractalEffect.CurrentTechnique.Passes[0].Apply();
 
             // Render a full-screen quad
-            SQ.SB.Begin(SpriteSortMode.Immediate, BlendState.Opaque, null, null, null, FractalEffect);
+            SQ.SB.Begin(SpriteSortMode.Immediate, BlendState.Opaque, SamplerState.LinearClamp, null, null, FractalEffect);
             SQ.SB.Draw(RenderTarget, new Rectangle(0, 0, RenderTarget.Width, RenderTarget.Height), Color.White);
             SQ.SB.End();
 

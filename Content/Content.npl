@@ -39,7 +39,7 @@
 		},
 		"shaders":
 		{
-			"path": "Shaders/*",
+			"path": "Shaders/*.fx",
 			"recursive": "True",
 			"action": "build",
 			"importer": "EffectImporter",

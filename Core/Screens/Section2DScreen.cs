@@ -21,8 +21,8 @@ namespace Somniloquy {
             }
 
             Editor = new(boundaries, this);
-            Camera.MaxZoomInverse = 64f;
-            Camera.MinZoomInverse = 0.5f;
+            Camera.MaxZoom = 16f;
+            Camera.MinZoom = 1 / 4f;
         }
 
         public override void LoadContent() {
