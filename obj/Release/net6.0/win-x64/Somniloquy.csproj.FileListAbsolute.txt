@@ -1,8 +1,5 @@
 C:\Somnia\Projects\monogame-somniloquy\Somniloquy\bin\Release\net6.0\win-x64\Content\Fonts\Misaki.xnb
 C:\Somnia\Projects\monogame-somniloquy\Somniloquy\bin\Release\net6.0\win-x64\Content\Fonts\UDMinchoM.xnb
-C:\Somnia\Projects\monogame-somniloquy\Somniloquy\bin\Release\net6.0\win-x64\Content\Shaders\BloomCombine.xnb
-C:\Somnia\Projects\monogame-somniloquy\Somniloquy\bin\Release\net6.0\win-x64\Content\Shaders\BloomExtract.xnb
-C:\Somnia\Projects\monogame-somniloquy\Somniloquy\bin\Release\net6.0\win-x64\Content\Shaders\GaussianBlur.xnb
 C:\Somnia\Projects\monogame-somniloquy\Somniloquy\bin\Release\net6.0\win-x64\FMod\fmod.dll
 C:\Somnia\Projects\monogame-somniloquy\Somniloquy\bin\Release\net6.0\win-x64\FMod\fmodL.dll
 C:\Somnia\Projects\monogame-somniloquy\Somniloquy\bin\Release\net6.0\win-x64\FMod\fmodstudio.dll

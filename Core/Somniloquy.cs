@@ -59,6 +59,7 @@ namespace Somniloquy {
             InputManager.Initialize(Window);
             SoundManager.Initialize("C:\\Somnia\\Projects\\monogame-somniloquy\\Assets\\Loops");
             FileBrowser.Initialize();
+            ShaderManager.Initialize();
         }
 
         protected override void LoadContent() {
@@ -71,6 +72,8 @@ namespace Somniloquy {
 
             ScreenManager.AddScreen(new ETFractalScreen(new Rectangle(new(), WindowSize)));
             ScreenManager.LoadContent();
+
+            ShaderManager.LoadContent(null);
 
             DebugInfo.Subscribe(() => $"FPS: {FPS:n1}");
             DebugInfo.Subscribe(() => $"Focused Screen: {ScreenManager.FocusedScreen}");
@@ -116,8 +119,8 @@ namespace Somniloquy {
                 UpdateFPS(gameTime);
 
                 GD.Clear(Color.Black);
+                ScreenManager.Draw();
                 SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
-                    ScreenManager.Draw();
                     DebugInfo.Draw(Misaki);
                     FileBrowser.Draw(Misaki);
                 SB.End();

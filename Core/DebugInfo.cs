@@ -35,7 +35,8 @@ namespace Somniloquy {
                 try {
                     SQ.SB.DrawString(font, lineGenerator(), position, Color.White * MathF.Min((float)time, 1f));
                 } catch (ArgumentException) {
-                    Console.WriteLine($"Cannot display one of he characters of {lineGenerator()}");
+                    string caughtString = lineGenerator();
+                    Console.WriteLine($"Cannot display one of he characters of {caughtString}");
                 }
                 position.Y -= 18;
             }

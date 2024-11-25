@@ -21,6 +21,8 @@ namespace Somniloquy {
             }
 
             Editor = new(boundaries, this);
+            Camera.MaxZoomInverse = 64f;
+            Camera.MinZoomInverse = 0.5f;
         }
 
         public override void LoadContent() {
@@ -176,6 +178,7 @@ namespace Somniloquy {
         }
 
         public override void Draw() {
+            SQ.SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
             Screen.Camera.DrawPoint((Vector2I)Screen.Camera.GlobalMousePos, SelectedColor * 0.5f);
             
             foreach (var layerGroup in Screen.Section.LayerGroups) {
@@ -188,6 +191,7 @@ namespace Somniloquy {
                 }
             }
             ColorPicker.Draw();
+            SQ.SB.End();
         }
     }
 }

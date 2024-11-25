@@ -8,7 +8,7 @@
 	{
 		"textures":
 		{
-			"path": "Graphics/*.png",
+			"path": "Textures/*",
 			"recursive": "True",
 			"action": "build",
 			"importer": "TextureImporter",
@@ -22,6 +22,31 @@
 				"ResizeToPowerOfTwo": "False",
 				"MakeSquare": "False",
 				"TextureFormat": "Color"
+			}
+		},
+		"fonts":
+		{
+			"path": "Fonts/*.spritefont",
+			"recursive": "True",
+			"action": "build",
+			"importer": "FontDescriptionImporter",
+			"processor": "FontDescriptionProcessor",
+			"processorParam":
+			{
+				"PremultiplyAlpha": "True",
+				"TextureFormat": "Compressed"
+			}
+		},
+		"shaders":
+		{
+			"path": "Shaders/*",
+			"recursive": "True",
+			"action": "build",
+			"importer": "EffectImporter",
+			"processor": "EffectProcessor",
+			"processorParam":
+			{
+				"DebugMode": "Auto",
 			}
 		}
 	}

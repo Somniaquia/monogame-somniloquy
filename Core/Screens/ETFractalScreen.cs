@@ -13,22 +13,32 @@ namespace Somniloquy {
         private RenderTarget2D RenderTarget;
 
         public ETFractalScreen(Rectangle boundaries) : base(boundaries) {
-            CameraKeybinds.Add(InputManager.RegisterKeybind(Keys.W, (parameters) => MoveScreen(new Vector2(0, -1)), false));
-            CameraKeybinds.Add(InputManager.RegisterKeybind(Keys.A, (parameters) => MoveScreen(new Vector2(-1, 0)), false));
-			CameraKeybinds.Add(InputManager.RegisterKeybind(Keys.S, (parameters) => MoveScreen(new Vector2(0, 1)), false));
-            CameraKeybinds.Add(InputManager.RegisterKeybind(Keys.D, (parameters) => MoveScreen(new Vector2(1, 0)), false));
+            CameraKeybinds.Add(InputManager.RegisterKeybind(Keys.W, (parameters) => MoveScreen(new Vector2(0, -0.001f)), false));
+            CameraKeybinds.Add(InputManager.RegisterKeybind(Keys.A, (parameters) => MoveScreen(new Vector2(-0.001f, 0)), false));
+			CameraKeybinds.Add(InputManager.RegisterKeybind(Keys.S, (parameters) => MoveScreen(new Vector2(0, 0.001f)), false));
+            CameraKeybinds.Add(InputManager.RegisterKeybind(Keys.D, (parameters) => MoveScreen(new Vector2(0.001f, 0)), false));
 
             CameraKeybinds.Add(InputManager.RegisterKeybind(Keys.Q, (parameters) => ZoomScreen(-0.05f), false));
             CameraKeybinds.Add(InputManager.RegisterKeybind(Keys.E, (parameters) => ZoomScreen(0.05f), false));
             CameraKeybinds.Add(InputManager.RegisterKeybind(Keys.OemPipe, (parameters) => Camera.TargetRotation = 0, true));
             CameraKeybinds.Add(InputManager.RegisterKeybind(Keys.OemOpenBrackets, (parameters) => RotateScreen(-0.05f), false));
             CameraKeybinds.Add(InputManager.RegisterKeybind(Keys.OemCloseBrackets, (parameters) => RotateScreen(0.05f), false));
+
+            ShaderManager.ShaderUpdated += OnShaderUpdated;
+        }
+
+        private void OnShaderUpdated(string shaderName, Effect newShader) {
+            if (shaderName == "ETFractal") {
+                FractalEffect = newShader;
+            }
+
+            DebugInfo.AddTempLine(() => $"Shader updated: {shaderName}", 5);
         }
 
         public override void LoadContent() {
             Camera.LoadContent();
             RenderTarget = new RenderTarget2D(SQ.GD, SQ.GD.PresentationParameters.BackBufferWidth, SQ.GD.PresentationParameters.BackBufferHeight, false, SurfaceFormat.Color, DepthFormat.None);
-            FractalEffect = SQ.CM.Load<Effect>("ETFractal");
+            FractalEffect = SQ.CM.Load<Effect>("Shaders//ETFractal");
         }
 
         public void MoveScreen(params object[] parameters) {
@@ -55,18 +65,16 @@ namespace Somniloquy {
         }
 
         public override void Draw() {
+            if (FractalEffect is null) {
+                SQ.GD.Clear(Color.Violet);
+                return;
+            }
             SQ.GD.SetRenderTarget(RenderTarget);
             SQ.GD.Clear(Color.Black);
 
-            FractalEffect.Parameters["ViewMatrix"].SetValue(Camera.Transform);
-            FractalEffect.Parameters["Zoom"].SetValue(Camera.Zoom);
             FractalEffect.Parameters["Offset"].SetValue(Camera.CenterPosInWorld);
-
-            FractalEffect.Parameters["ViewOffset"].SetValue(Camera.CenterPosInWorld);
-            FractalEffect.Parameters["Zoom"].SetValue(Camera.Zoom);
-            FractalEffect.Parameters["MaxIterations"].SetValue(500); // Example value
-            FractalEffect.Parameters["Color1"].SetValue(new Vector4(0.1f, 0.2f, 0.6f, 1.0f)); // Dark blue
-            FractalEffect.Parameters["Color2"].SetValue(new Vector4(1.0f, 0.8f, 0.2f, 1.0f)); // Golden yellow
+            FractalEffect.Parameters["Zoom"].SetValue(Camera.ZoomInverse);
+            FractalEffect.Parameters["MaxIterations"].SetValue(500);
 
             // Begin the effect and draw a full-screen quad
             FractalEffect.CurrentTechnique.Passes[0].Apply();

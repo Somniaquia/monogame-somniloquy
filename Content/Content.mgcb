@@ -11,3 +11,16 @@
 
 
 #---------------------------------- Content ---------------------------------#
+
+#begin Fonts/Misaki.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:Fonts/Misaki.spritefont
+
+#begin Shaders/ETFractal.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Shaders/ETFractal.fx
