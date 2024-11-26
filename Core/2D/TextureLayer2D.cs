@@ -15,6 +15,18 @@ namespace Somniloquy {
         public Vector2I GetChunkPosition(Vector2I canvasPosition) => canvasPosition / ChunkLength;
         public Vector2I GetPositionInChunk(Vector2I canvasPosition) => Util.PosMod(canvasPosition, new Vector2I(ChunkLength, ChunkLength));
         
+        public void PaintImage(Vector2I position, Texture2D texture, float opacity, CommandChain chain = null) {
+            Color[] data = new Color[texture.Width * texture.Height];
+            texture.GetData(data);
+
+            for (int y = 0; y < texture.Height; y++) {
+                for (int x = 0; x < texture.Width; x++) {
+                    var pos = new Vector2I(x, y);
+                    PaintPixel(position + pos, data[pos.Unwrap(texture.Width)], opacity, chain);
+                }
+            }
+        }
+
         public void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain = null) {
             var (chunkPosition, positionInChunk) = (GetChunkPosition(position), GetPositionInChunk(position));
             
@@ -31,7 +43,7 @@ namespace Somniloquy {
             } else {
                 chain.AffectedPixels[position] = (Chunks[chunkPosition].GetColor(positionInChunk), opacity);
                 Chunks[chunkPosition].PaintPixel(positionInChunk, color, opacity, chain);
-            }   
+            }
         }
         
         public Color? GetColor(Vector2I position) {

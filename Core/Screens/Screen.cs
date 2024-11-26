@@ -6,13 +6,13 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework.Graphics;
     using Microsoft.Xna.Framework.Input;
 
-    public enum Direction { Horizontal, Vertical }
+    public enum Orientation { Horizontal, Vertical }
 
     public class Screen {
         public Rectangle Boundaries;
         public Matrix Transform;
 
-        public Direction DividingDirection = Direction.Horizontal;
+        public Orientation DividingDirection = Orientation.Horizontal;
         public Dictionary<int, Screen> ChildScreens = new();
         public bool Focusable = true;
 

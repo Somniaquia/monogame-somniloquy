@@ -17,27 +17,27 @@ namespace Somniloquy {
         private int FractalType;
 
         public ETFractalScreen(Rectangle boundaries) : base(boundaries) {
-            Keybinds.Add(InputManager.RegisterKeybind(Keys.Tab, (parameters) => Camera.TargetCenterPosInWorld = Vector2.Zero, false));
-            Keybinds.Add(InputManager.RegisterKeybind(Keys.W, (parameters) => MoveScreen(new Vector2(0, -0.001f)), false));
-            Keybinds.Add(InputManager.RegisterKeybind(Keys.A, (parameters) => MoveScreen(new Vector2(-0.001f, 0)), false));
-			Keybinds.Add(InputManager.RegisterKeybind(Keys.S, (parameters) => MoveScreen(new Vector2(0, 0.001f)), false));
-            Keybinds.Add(InputManager.RegisterKeybind(Keys.D, (parameters) => MoveScreen(new Vector2(0.001f, 0)), false));
+            Keybinds.Add(InputManager.RegisterKeybind(Keys.Tab, (parameters) => Camera.TargetCenterPosInWorld = Vector2.Zero, TriggerOnce.False));
+            Keybinds.Add(InputManager.RegisterKeybind(Keys.W, (parameters) => MoveScreen(new Vector2(0, -0.001f)), TriggerOnce.False));
+            Keybinds.Add(InputManager.RegisterKeybind(Keys.A, (parameters) => MoveScreen(new Vector2(-0.001f, 0)), TriggerOnce.False));
+			Keybinds.Add(InputManager.RegisterKeybind(Keys.S, (parameters) => MoveScreen(new Vector2(0, 0.001f)), TriggerOnce.False));
+            Keybinds.Add(InputManager.RegisterKeybind(Keys.D, (parameters) => MoveScreen(new Vector2(0.001f, 0)), TriggerOnce.False));
 
-            Keybinds.Add(InputManager.RegisterKeybind(Keys.I, (parameters) => ShiftShaderParameter(new Vector2(0, -1f)), false));
-            Keybinds.Add(InputManager.RegisterKeybind(Keys.J, (parameters) => ShiftShaderParameter(new Vector2(-1f, 0)), false));
-			Keybinds.Add(InputManager.RegisterKeybind(Keys.K, (parameters) => ShiftShaderParameter(new Vector2(0, 1f)), false));
-            Keybinds.Add(InputManager.RegisterKeybind(Keys.L, (parameters) => ShiftShaderParameter(new Vector2(1f, 0)), false));
-            Keybinds.Add(InputManager.RegisterKeybind(Keys.U, (parameters) => TargetFractalParameter = Vector2.Zero, false));
+            Keybinds.Add(InputManager.RegisterKeybind(Keys.I, (parameters) => ShiftShaderParameter(new Vector2(0, -1f)), TriggerOnce.False));
+            Keybinds.Add(InputManager.RegisterKeybind(Keys.J, (parameters) => ShiftShaderParameter(new Vector2(-1f, 0)), TriggerOnce.False));
+			Keybinds.Add(InputManager.RegisterKeybind(Keys.K, (parameters) => ShiftShaderParameter(new Vector2(0, 1f)), TriggerOnce.False));
+            Keybinds.Add(InputManager.RegisterKeybind(Keys.L, (parameters) => ShiftShaderParameter(new Vector2(1f, 0)), TriggerOnce.False));
+            Keybinds.Add(InputManager.RegisterKeybind(Keys.U, (parameters) => TargetFractalParameter = Vector2.Zero, TriggerOnce.False));
 
-            Keybinds.Add(InputManager.RegisterKeybind(Keys.Space, (parameters) => Julia = !Julia, true));
-            Keybinds.Add(InputManager.RegisterKeybind(Keys.OemPeriod, (parameters) =>  FractalType++, true));
-            // Keybinds.Add(InputManager.RegisterKeybind(Keys.OemComma, (parameters) => FractalType--, true));
+            Keybinds.Add(InputManager.RegisterKeybind(Keys.Space, (parameters) => Julia = !Julia, TriggerOnce.True));
+            Keybinds.Add(InputManager.RegisterKeybind(Keys.OemPeriod, (parameters) =>  FractalType++, TriggerOnce.True));
+            // Keybinds.Add(InputManager.RegisterKeybind(Keys.OemComma, (parameters) => FractalType--, TriggerOnce.True));
 
-            Keybinds.Add(InputManager.RegisterKeybind(Keys.Q, (parameters) => ZoomScreen(-0.05f), false));
-            Keybinds.Add(InputManager.RegisterKeybind(Keys.E, (parameters) => ZoomScreen(0.05f), false));
-            Keybinds.Add(InputManager.RegisterKeybind(Keys.OemPipe, (parameters) => Camera.TargetRotation = 0, true));
-            Keybinds.Add(InputManager.RegisterKeybind(Keys.OemOpenBrackets, (parameters) => RotateScreen(-0.05f), false));
-            Keybinds.Add(InputManager.RegisterKeybind(Keys.OemCloseBrackets, (parameters) => RotateScreen(0.05f), false));
+            Keybinds.Add(InputManager.RegisterKeybind(Keys.Q, (parameters) => ZoomScreen(-0.05f), TriggerOnce.False));
+            Keybinds.Add(InputManager.RegisterKeybind(Keys.E, (parameters) => ZoomScreen(0.05f), TriggerOnce.False));
+            Keybinds.Add(InputManager.RegisterKeybind(Keys.OemPipe, (parameters) => Camera.TargetRotation = 0, TriggerOnce.True));
+            Keybinds.Add(InputManager.RegisterKeybind(Keys.OemOpenBrackets, (parameters) => RotateScreen(-0.05f), TriggerOnce.False));
+            Keybinds.Add(InputManager.RegisterKeybind(Keys.OemCloseBrackets, (parameters) => RotateScreen(0.05f), TriggerOnce.False));
 
             ShaderManager.ShaderUpdated += OnShaderUpdated;
 

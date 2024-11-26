@@ -303,11 +303,6 @@ C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\bin\DesktopGL\Fo
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\bin\DesktopGL\Fonts\MisakiGothic2nd.xnb
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\bin\DesktopGL\Fonts\MisakiMincho.xnb
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Loops\B3_10_stage03.rpgmvo@0000004a.ogg
-C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Worlds\coloors.sqSection2D
-C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Worlds\COSMICGUMMYWORMS.sqSection2D
-C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Worlds\weirdRattlesnakes.sqSection2D
-C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Worlds\drawTest.sqSection2D
-C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Worlds\temp.png
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\SixLabors.ImageSharp.dll
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\bin\watch.npl.temp
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\Shaders\ETFractal.xnb
@@ -322,5 +317,4 @@ C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\obj\DesktopGL\ne
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\obj\DesktopGL\net6.0\Content\.mgstats
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\obj\DesktopGL\net6.0\Content\Fonts\Misaki.mgcontent
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\obj\DesktopGL\net6.0\Content\Shaders\ETFractal.mgcontent
-C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Worlds\temp.sqSection2D
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\Shaders\ETFractal.mgfx

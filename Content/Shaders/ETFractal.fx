@@ -214,7 +214,7 @@ float4 PixelShaderFunction(float2 uv : TEXCOORD0) : COLOR {
     
     if (iter >= MaxIterations / 2) return float4(1, 1, 1, 1);
 
-    float hue = (float)iter / MaxIterations + Time / 5.0; 
+    float hue = (float)iter / MaxIterations * 5 + Time / 5.0; 
     // return float4(HSVtoRGB(hue, 1, 1), 1);
     return float4(sin(hue * 2) / 2 + 0.5, sin(hue * 3) / 2 + 0.5, sin(hue * 5) / 2 + 0.5, 1) / 2;
 }

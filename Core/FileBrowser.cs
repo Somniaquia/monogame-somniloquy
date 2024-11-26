@@ -17,14 +17,14 @@ namespace Somniloquy {
         public static bool Active = false;
 
         public static void Initialize() {
-            InputManager.RegisterKeybind(new object[] { Keys.LeftControl, Keys.O }, (parameters) => { Active = true; OpenDirectory("c:\\Somnia\\Projects\\monogame-somniloquy\\Assets"); }, true, true);
-            InputManager.RegisterKeybind(Keys.Tab, Keys.LeftShift, (parameters) => { if (Active) MoveHighlightedLine(1); }, true);
-            InputManager.RegisterKeybind(new object[] { Keys.LeftControl, Keys.S }, (parameters) => { if (Active) Save(); }, true);
-            InputManager.RegisterKeybind(new object[] { Keys.LeftControl, Keys.E }, (parameters) => { if (Active) ExportTexture(); }, true);
-            InputManager.RegisterKeybind(new object[] {Keys.LeftShift, Keys.Tab}, (parameters) => { if (Active) MoveHighlightedLine(-1); }, true, true);
-            InputManager.RegisterKeybind(Keys.Enter, Keys.LeftShift, (parameters) => { if (Active) SelectDirectory(); }, true);
-            InputManager.RegisterKeybind(new object[] {Keys.LeftShift, Keys.Enter}, (parameters) => { if (Active) LeaveDirectory(); }, true, true);
-            InputManager.RegisterKeybind(Keys.Escape, (parameters) => { if (Active) Active = false; }, true);
+            InputManager.RegisterKeybind(new object[] { Keys.LeftControl, Keys.O }, (parameters) => { Active = true; OpenDirectory("c:\\Somnia\\Projects\\monogame-somniloquy\\Assets"); }, TriggerOnce.True, true);
+            InputManager.RegisterKeybind(Keys.Tab, Keys.LeftShift, (parameters) => { if (Active) MoveHighlightedLine(1); }, TriggerOnce.Block);
+            InputManager.RegisterKeybind(new object[] {Keys.LeftShift, Keys.Tab}, (parameters) => { if (Active) MoveHighlightedLine(-1); }, TriggerOnce.Block, true);
+            InputManager.RegisterKeybind(new object[] { Keys.LeftControl, Keys.S }, (parameters) => { if (Active) Save(); }, TriggerOnce.True);
+            InputManager.RegisterKeybind(new object[] { Keys.LeftControl, Keys.E }, (parameters) => { if (Active) ExportTexture(); }, TriggerOnce.True);
+            InputManager.RegisterKeybind(Keys.Enter, Keys.LeftShift, (parameters) => { if (Active) SelectDirectory(); }, TriggerOnce.True);
+            InputManager.RegisterKeybind(new object[] {Keys.LeftShift, Keys.Enter}, (parameters) => { if (Active) LeaveDirectory(); }, TriggerOnce.True, true);
+            InputManager.RegisterKeybind(Keys.Escape, (parameters) => { if (Active) Active = false; }, TriggerOnce.True);
         }
 
         public static (List<string> folders, List<string> files) ListDirectoryContents(string directoryPath) {
@@ -62,6 +62,21 @@ namespace Somniloquy {
                         var name = SoundManager.AddSound(new FileInfo(path));
                         SoundManager.StartLoop(name);
                         DebugInfo.AddTempLine(() => $"Playing loop - {Path.GetFileName(path)}.", 5);
+                    } else if (path.EndsWith(".png")) {
+                        var sectionScreen = ScreenManager.GetFirstScreenOfType<Section2DScreen>();
+                        if (sectionScreen is null) {
+                            DebugInfo.AddTempLine(() => $"Error: Section2DScreen doesn't exist.", 5);
+                            return;
+                        }
+                        try {
+                            Texture2D texture = Texture2D.FromFile(SQ.GD, path);
+                            if (sectionScreen.Editor.SelectedLayer is TextureLayer2D textureLayer) {
+                                textureLayer.PaintImage((Vector2I)sectionScreen.Camera.GlobalMousePos.Value, texture, 1f, CommandManager.AddCommandChain(new CommandChain()));
+                            }
+                            DebugInfo.AddTempLine(() => $"Imported image - {Path.GetFileName(path)}.", 5);
+                        } catch (Exception e) {
+                            DebugInfo.AddTempLine(() => $"Error reading {Path.GetFileName(path)}: {e.Message}", 5);
+                        }
                     } else if (path.EndsWith(".sqSection2D")) {
                         var sectionScreen = ScreenManager.GetFirstScreenOfType<Section2DScreen>();
                         if (sectionScreen is null) {
@@ -71,7 +86,7 @@ namespace Somniloquy {
                         try {
                             string json = File.ReadAllText(path);
                             sectionScreen.Section = Section2D.Deserialize(json);
-                            sectionScreen.Editor.SelectedLayer = sectionScreen.Section.LayerGroups.First().Value.Layers.OfType<TextureLayer2D>().FirstOrDefault();
+                            sectionScreen.Editor.SelectedLayer = sectionScreen.Section.LayerGroups.First().Value.Layers.Values.OfType<TextureLayer2D>().FirstOrDefault();
                             DebugInfo.AddTempLine(() => $"Loaded section from {Path.GetFileName(path)}", 5);
                         } catch (Exception e) {
                             DebugInfo.AddTempLine(() => $"Error reading {Path.GetFileName(path)}: {e.Message}", 5);
@@ -152,9 +167,13 @@ namespace Somniloquy {
             Vector2 position = new Vector2(SQ.WindowSize.X - 1, 1);
             SQ.SB.DrawString(font, CurrentDirectory + "\\", position - new Vector2(font.MeasureString(CurrentDirectory + "\\    ").X, 0), Color.White);
             position.Y += 20;
-            for (int i = 0; i < lines.Count; i++) {
-                Color color = i == HighlightedLine ? Color.Yellow : Color.White;
-                var name = Path.GetFileName(lines[i]);
+
+            int linesMax = (SQ.WindowSize.Y - 20) / 18 - 1;
+            for (int i = 0; i < Util.Min(lines.Count, linesMax); i++) {
+                int line = i + Util.Max(0, HighlightedLine - linesMax - 1);
+
+                Color color = line == HighlightedLine ? Color.Yellow : Color.White;
+                var name = Path.GetFileName(lines[line]);
                 try{
                     SQ.SB.DrawString(font, name, position - new Vector2(font.MeasureString(name).X, 0), color);
                 } catch (ArgumentException) {

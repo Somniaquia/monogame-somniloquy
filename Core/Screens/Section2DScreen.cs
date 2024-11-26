@@ -16,8 +16,8 @@ namespace Somniloquy {
 
             if (Section is null) { // temp
                 Section = new();
-                Section.AddLayerGroup("group1");
-                Section.LayerGroups["group1"].AddLayer(new TextureLayer2D());
+                Section.LayerGroups.Add(0, new LayerGroup2D());
+                Section.LayerGroups[0].Layers.Add(0, new TextureLayer2D());
             }
 
             Editor = new(boundaries, this);
@@ -38,9 +38,11 @@ namespace Somniloquy {
         }
 
         public override void Draw() {
+            SQ.SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
             Camera.SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, transformMatrix: Camera.Transform);
             Editor?.Draw();
             Camera.SB.End();
+            SQ.SB.End();
         }
     }
     
@@ -50,6 +52,7 @@ namespace Somniloquy {
         public Section2DScreen Screen;
         public Layer2D SelectedLayer;
         public ColorPicker ColorPicker;
+        public LayerTable LayerTable;
 
         public Color SelectedColor = Color.White;
         public EditorState EditorState = EditorState.PaintMode;
@@ -61,39 +64,39 @@ namespace Somniloquy {
         public Section2DEditor(Rectangle boundaries, Section2DScreen screen) : base(boundaries) {
             Screen = screen;
 
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.W, (parameters) => MoveScreen(new Vector2(0, -1)), false));
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.A, (parameters) => MoveScreen(new Vector2(-1, 0)), false));
-			GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.S, (parameters) => MoveScreen(new Vector2(0, 1)), false));
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.D, (parameters) => MoveScreen(new Vector2(1, 0)), false));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.W, (parameters) => MoveScreen(new Vector2(0, -1)), TriggerOnce.False));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.A, (parameters) => MoveScreen(new Vector2(-1, 0)), TriggerOnce.False));
+			GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.S, (parameters) => MoveScreen(new Vector2(0, 1)), TriggerOnce.False));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.D, (parameters) => MoveScreen(new Vector2(1, 0)), TriggerOnce.False));
 
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.Q, (parameters) => ZoomScreen(-0.05f), false));
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.E, (parameters) => ZoomScreen(0.05f), false));
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.OemPipe, (parameters) => Screen.Camera.TargetRotation = 0, true));
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.OemOpenBrackets, (parameters) => RotateScreen(-0.05f), false));
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.OemCloseBrackets, (parameters) => RotateScreen(0.05f), false));
-            // GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.U, (parameters) => ShiftHue(-0.005f), false));
-            // GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.O, (parameters) => ShiftHue(0.005f), false));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.Q, (parameters) => ZoomScreen(-0.05f), TriggerOnce.False));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.E, (parameters) => ZoomScreen(0.05f), TriggerOnce.False));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.OemPipe, (parameters) => Screen.Camera.TargetRotation = 0, TriggerOnce.True));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.OemOpenBrackets, (parameters) => RotateScreen(-0.05f), TriggerOnce.False));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.OemCloseBrackets, (parameters) => RotateScreen(0.05f), TriggerOnce.False));
+            // GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.U, (parameters) => ShiftHue(-0.005f), TriggerOnce.False));
+            // GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.O, (parameters) => ShiftHue(0.005f), TriggerOnce.False));
 
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.LeftAlt, (parameters) => SelectLayer(), false));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.LeftAlt, (parameters) => SelectLayerUnderMouse(), TriggerOnce.False));
 
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { MouseButtons.LeftButton }, (parameters) => HandleLeftClick(), false));
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { MouseButtons.RightButton }, (parameters) => HandleRightClick(), false));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { MouseButtons.LeftButton }, (parameters) => HandleLeftClick(), TriggerOnce.False));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { MouseButtons.RightButton }, (parameters) => HandleRightClick(), TriggerOnce.False));
 
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.LeftControl, Keys.N }, (parameters) => AddLayer(), true, true));
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.B }, new object[] { MouseButtons.LeftButton, MouseButtons.RightButton }, (parameters) => SelectNextBrush(), true, true));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.B }, new object[] { MouseButtons.LeftButton, MouseButtons.RightButton }, (parameters) => SelectNextBrush(), TriggerOnce.True, true));
             DebugInfo.Subscribe(() => $"Selected Brush: {Brush}");
 
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.Z}, new object[] {Keys.LeftShift, MouseButtons.LeftButton}, (parameters) => CommandManager.Undo(), true, true));
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.LeftShift, Keys.Z}, new object[] {MouseButtons.LeftButton}, (parameters) => CommandManager.Redo(), true, true));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.Z}, new object[] {Keys.LeftShift, MouseButtons.LeftButton}, (parameters) => CommandManager.Undo(), TriggerOnce.True, true));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.LeftShift, Keys.Z}, new object[] {MouseButtons.LeftButton}, (parameters) => CommandManager.Redo(), TriggerOnce.True, true));
 
             ColorPicker = new ColorPicker(new Rectangle(SQ.WindowSize.X - 264, SQ.WindowSize.Y - 264, 256, 256), this);
+            LayerTable = new LayerTable(Screen);
 
             DebugInfo.Subscribe(() => $"Pen Pressure: {InputManager.PenPressure}");
             DebugInfo.Subscribe(() => $"Pen Tilt: {InputManager.PenTilt}");
             DebugInfo.Subscribe(() => $"Undo History: {CommandManager.UndoHistory.Count}");
             DebugInfo.Subscribe(() => $"Redo History: {CommandManager.RedoHistory.Count}");
             DebugInfo.Subscribe(() => $"Selected Color: {SelectedColor}");
-            SelectedLayer = Screen.Section.LayerGroups.First().Value.Layers.OfType<TextureLayer2D>().FirstOrDefault();
+            SelectedLayer = Screen.Section.LayerGroups.First().Value.Layers.Values.OfType<TextureLayer2D>().FirstOrDefault();
         }
 
         public override void LoadContent() {
@@ -160,17 +163,20 @@ namespace Somniloquy {
             }
         }
 
-        
-
-        public void AddLayer() {
-            SelectedLayer = new TextureLayer2D();
-            Screen.Section.LayerGroups["group1"].AddLayer(SelectedLayer);
-        }
-
-        public void SelectLayer() {
-            // Get mouse position
-            // Get top layer with texture under mouse pos
-            // set SelectedLayer with that layer
+        public void SelectLayerUnderMouse() {
+            foreach (var pair in Screen.Section.LayerGroups) {
+                var layerGroup = pair.Value;
+                foreach (var layer in layerGroup.Layers) {
+                    if (layer.Value is IPaintableLayer2D paintableLayer) {
+                        Color? color = paintableLayer.GetColor((Vector2I)Screen.Camera.GlobalMousePos.Value);
+                        if (color != null) {
+                            if (color.Value.A != 0) {
+                                SelectedLayer = layer.Value;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         public void SelectNextBrush() {
@@ -178,20 +184,20 @@ namespace Somniloquy {
         }
 
         public override void Draw() {
-            SQ.SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
             Screen.Camera.DrawPoint((Vector2I)Screen.Camera.GlobalMousePos, SelectedColor * 0.5f);
             
             foreach (var layerGroup in Screen.Section.LayerGroups) {
                 foreach (var layer in layerGroup.Value.Layers) {
-                    if (layer == SelectedLayer) {
-                        layer.Draw(Screen.Camera, true);
+                    if (layer.Value == SelectedLayer) {
+                        layer.Value.Draw(Screen.Camera, true);
                     } else {
-                        layer.Draw(Screen.Camera, false, 0.5f);
+                        layer.Value.Draw(Screen.Camera, false, 0.5f);
                     }
                 }
             }
+
             ColorPicker.Draw();
-            SQ.SB.End();
+            LayerTable.Draw();
         }
     }
 }

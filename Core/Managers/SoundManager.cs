@@ -25,6 +25,7 @@ namespace Somniloquy
         public static float Pitch = 1f;
         public static string CurrentMusic;
 
+        public static List<Keybind> Keybinds = new(); 
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         public static extern bool SetDllDirectory(string path);
@@ -54,6 +55,11 @@ namespace Somniloquy
             FMODSystem.setReverbProperties(0, ref reverbProperties);
 
             CurrentMusic = "My Song 3";
+
+            Keybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.M, Keys.Left}, (parameters) => { if (Pitch > 0.1f) Pitch -= 0.001f; }, TriggerOnce.False, true ));
+            Keybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.M, Keys.Right}, (parameters) => { if (Pitch < 2f) Pitch += 0.001f; }, TriggerOnce.False, true ));
+            Keybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.M, Keys.Up}, (parameters) => { CenterFrequency *= 1.01f; }, TriggerOnce.False, true ));
+            Keybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.M, Keys.Down}, (parameters) => { CenterFrequency /= 1.01f; }, TriggerOnce.False, true ));
         }
 
         public static string AddSound(FileInfo path) {
@@ -102,19 +108,6 @@ namespace Somniloquy
         }
 
         public static void Update() {
-            if (InputManager.IsKeyDown(Keys.Left)) {
-                if (Pitch > 0.1f) Pitch -= 0.001f;
-                SetPitch(CurrentMusic, Pitch);
-            } else if (InputManager.IsKeyDown(Keys.Right)) {
-                if (Pitch < 2f) Pitch += 0.001f;
-                SetPitch(CurrentMusic, Pitch);
-            } else if (InputManager.IsKeyDown(Keys.Up)) {
-                CenterFrequency *= 1.01f;
-            }
-            else if (InputManager.IsKeyDown(Keys.Down)) {
-                CenterFrequency /= 1.01f;
-            }
-
             BassEnhancerDSP.setParameterFloat((int)DSP_PARAMEQ.CENTER, CenterFrequency);
             FMODSystem.update();
         }

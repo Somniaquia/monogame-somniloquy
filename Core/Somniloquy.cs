@@ -70,7 +70,7 @@ namespace Somniloquy {
 
             Misaki = Content.Load<SpriteFont>("Fonts/Misaki");
 
-            ScreenManager.AddScreen(new ETFractalScreen(new Rectangle(new(), WindowSize)));
+            ScreenManager.AddScreen(new Section2DScreen(new Rectangle(new(), WindowSize)));
             ScreenManager.LoadContent();
 
             ShaderManager.LoadContent(null);

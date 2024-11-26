@@ -153,14 +153,14 @@ namespace Somniloquy {
             return sampleWeights;
         }
 
-        public static Vector2[] GetSampleOffsets(Direction direction, int sampleCount) {
+        public static Vector2[] GetSampleOffsets(Orientation direction, int sampleCount) {
             Vector2[] sampleOffsets = new Vector2[sampleCount];
 
-            var length = direction == Direction.Horizontal ? SQ.WindowSize.X : SQ.WindowSize.Y;
+            var length = direction == Orientation.Horizontal ? SQ.WindowSize.X : SQ.WindowSize.Y;
             float delta = 1.0f / length;
 
             for (int i = 0; i < sampleCount; i++) {
-                sampleOffsets[i] = direction == Direction.Horizontal ? new Vector2((i - sampleCount / 2) * delta, 0) : new Vector2(0, (i - sampleCount / 2) * delta);
+                sampleOffsets[i] = direction == Orientation.Horizontal ? new Vector2((i - sampleCount / 2) * delta, 0) : new Vector2(0, (i - sampleCount / 2) * delta);
             }
 
             return sampleOffsets;
@@ -218,8 +218,8 @@ namespace Somniloquy {
             return result;
         }
 
-        public static Rectangle ResizeRectangle(Rectangle target, Direction direction, float ratio, float offset) {
-            if (direction == Direction.Horizontal) {
+        public static Rectangle ResizeRectangle(Rectangle target, Orientation direction, float ratio, float offset) {
+            if (direction == Orientation.Horizontal) {
                 return new Rectangle(target.X + (int)(target.Width * offset), target.Y, (int) (target.Width * ratio), target.Height);
             } else {
                 return new Rectangle(target.X, target.Y + (int)(target.Height * offset), target.Width, (int)(target.Height * ratio));

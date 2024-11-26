@@ -27,6 +27,7 @@ namespace Somniloquy {
         }
 
         public void PaintPixel(Vector2I position, Color color, float opacity = 1f, CommandChain chain = null) {
+            // opacity = color.A * opacity;
             if (opacity == 1f) {
                 SetPixel(position, color, chain);
             } else {

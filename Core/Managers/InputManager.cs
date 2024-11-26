@@ -8,15 +8,15 @@ namespace Somniloquy {
 
     public delegate void Action(params object[] parameters);
     public enum MouseButtons { LeftButton, RightButton, MiddleButton, XButton1, XButton2 }
-
+    public enum TriggerOnce { True, False, Block }
     public class Keybind {
-        public bool TriggerOnce;
+        public TriggerOnce TriggerOnce;
         public bool OrderSensitive;
         public object[] Buttons;
         public object[] ExclusiveButtons;
         public Action Action;
 
-        public Keybind(object[] buttons, object[] exclusiveButtons, Action action, bool triggerOnce, bool orderSensitive) {
+        public Keybind(object[] buttons, object[] exclusiveButtons, Action action, TriggerOnce triggerOnce, bool orderSensitive) {
             foreach (var button in buttons.Concat(exclusiveButtons)) {
                 // Check that it's either a key or a valid mouse button input (Keys or MouseButton).
                 if (button is not Keys && button is not MouseButtons) {
@@ -173,27 +173,27 @@ namespace Somniloquy {
             return pressedKeys;
         }
 
-        public static Keybind RegisterKeybind(object button, Action action, bool triggerOnce = true) {
+        public static Keybind RegisterKeybind(object button, Action action, TriggerOnce triggerOnce) {
             return RegisterKeybind(new object[] {button}, action, triggerOnce);
         }
 
-        public static Keybind RegisterKeybind(object button, object exclusiveButton, Action action, bool triggerOnce = true) {
+        public static Keybind RegisterKeybind(object button, object exclusiveButton, Action action, TriggerOnce triggerOnce) {
             return RegisterKeybind(new object[] {button}, new object[] {exclusiveButton}, action, triggerOnce);
         }
 
-        public static Keybind RegisterKeybind(object button, object[] exclusiveButtons, Action action, bool triggerOnce = true) {
+        public static Keybind RegisterKeybind(object button, object[] exclusiveButtons, Action action, TriggerOnce triggerOnce) {
             return RegisterKeybind(new object[] {button}, exclusiveButtons, action, triggerOnce);
         }
 
-        public static Keybind RegisterKeybind(object[] buttons, Action action, bool triggerOnce = true, bool orderSensitive = false) {
+        public static Keybind RegisterKeybind(object[] buttons, Action action, TriggerOnce triggerOnce, bool orderSensitive = false) {
             return RegisterKeybind(buttons, new object[] {}, action, triggerOnce, orderSensitive);
         }
 
-        public static Keybind RegisterKeybind(object[] buttons, object exclusiveButton, Action action, bool triggerOnce = true, bool orderSensitive = false) {
+        public static Keybind RegisterKeybind(object[] buttons, object exclusiveButton, Action action, TriggerOnce triggerOnce, bool orderSensitive = false) {
             return RegisterKeybind(buttons, new object[] {exclusiveButton}, action, triggerOnce, orderSensitive);
         }
 
-        public static Keybind RegisterKeybind(object[] buttons, object[] exclusiveButtons, Action action, bool triggerOnce = true, bool orderSensitive = false) {
+        public static Keybind RegisterKeybind(object[] buttons, object[] exclusiveButtons, Action action, TriggerOnce triggerOnce, bool orderSensitive = false) {
             foreach (var button in buttons.Concat(exclusiveButtons)) {
                 if (button is Keys key) {
                     if (!KeyStates.ContainsKey(key))
@@ -251,7 +251,7 @@ namespace Somniloquy {
             return PenButtons[buttonIndex - 1];
         }
 
-        public static bool IsKeyCombinationPressed(bool triggerOnce, bool orderSensitive, object[] buttons, object[] exclusiveButtons) {
+        public static bool IsKeyCombinationPressed(TriggerOnce triggerOnce, bool orderSensitive, object[] buttons, object[] exclusiveButtons) {
             foreach (var button in exclusiveButtons) {
                 if (button is Keys key) {
                     if (IsKeyDown(key)) return false;
@@ -262,11 +262,19 @@ namespace Somniloquy {
                 }
             }
             
-            if (triggerOnce) {
+            if (triggerOnce == TriggerOnce.True) {
                 if (buttons[^1] is Keys key) {
                     if (!IsKeyPressed(key)) return false;
                 } else if (buttons[^1] is MouseButtons mouseButton) {
                     if (!IsMouseButtonPressed(mouseButton)) return false; 
+                } else {
+                    throw new Exception("Non-Key or MouseButton type passed to Key Combinations");
+                }
+            } else if (triggerOnce == TriggerOnce.Block) {
+                if (buttons[^1] is Keys key) {
+                    if (!IsKeyPressed(key) && ElapsedTicksSinceKeyPressed(key) < 60 && ElapsedTicksSinceKeyPressed(key) % 5 != 0) return false;
+                } else if (buttons[^1] is MouseButtons mouseButton) {
+                    if (!IsMouseButtonPressed(mouseButton) && ElapsedSecondsSinceMouseButtonPressed(mouseButton) < 60 && ElapsedTicksSinceMouseButtonPressed(mouseButton) % 5 != 0) return false; 
                 } else {
                     throw new Exception("Non-Key or MouseButton type passed to Key Combinations");
                 }
