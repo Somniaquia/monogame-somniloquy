@@ -36,11 +36,11 @@ namespace Somniloquy {
                 r = c; g = 0; b = x;
             }
 
-            byte red = (byte)((r + m) * 255);
-            byte green = (byte)((g + m) * 255);
-            byte blue = (byte)((b + m) * 255);
+            byte red = (byte)MathF.Round((r + m) * 255);
+            byte green = (byte)MathF.Round((g + m) * 255);
+            byte blue = (byte)MathF.Round((b + m) * 255);
 
-            return new Color(red, green, blue);
+            return new Color(red, green, blue, hsl.A);
         }
 
 
@@ -69,11 +69,11 @@ namespace Somniloquy {
             float l = (max + min) / 2f;
             float s = (delta == 0) ? 0 : delta / (1f - Math.Abs(2f * l - 1f));
 
-            byte hue = (byte)(h / 360f * 255);
-            byte saturation = (byte)(s * 255);
-            byte lightness = (byte)(l * 255);
+            byte hue = (byte)MathF.Round(h / 360f * 255);
+            byte saturation = (byte)MathF.Round(s * 255);
+            byte lightness = (byte)MathF.Round(l * 255);
 
-            return new ColorOkHSL(hue, saturation, lightness);
+            return new ColorOkHSL(hue, saturation, lightness, color.A);
         }
     }
 }

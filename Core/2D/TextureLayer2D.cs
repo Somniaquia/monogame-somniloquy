@@ -56,6 +56,7 @@ namespace Somniloquy {
 
         public Rectangle GetTextureBounds() {
             RemoveEmptyChunks();
+            
             int chunkXMin = Chunks.Min(chunk => chunk.Key.X);
             int chunkXMax = Chunks.Max(chunk => chunk.Key.X);
             int chunkYMin = Chunks.Min(chunk => chunk.Key.Y);

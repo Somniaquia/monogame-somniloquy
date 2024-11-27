@@ -26,7 +26,7 @@ namespace Somniloquy {
         public virtual void LoadContent() { }
 
         /// <summary>
-        /// Base updates if the screen is focused. Call base.Update() at top!
+        /// The base update function focuses the screen if the mouse is inside it. Call base.Update() at top!
         /// </summary>
         public virtual void Update() {
             if (Focusable) {

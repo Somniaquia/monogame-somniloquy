@@ -272,9 +272,9 @@ namespace Somniloquy {
                 }
             } else if (triggerOnce == TriggerOnce.Block) {
                 if (buttons[^1] is Keys key) {
-                    if (!IsKeyPressed(key) && ElapsedTicksSinceKeyPressed(key) < 60 && ElapsedTicksSinceKeyPressed(key) % 5 != 0) return false;
+                    if ((!IsKeyPressed(key) && ElapsedTicksSinceKeyPressed(key) < 60) || ElapsedTicksSinceKeyPressed(key) % 5 != 0) return false;
                 } else if (buttons[^1] is MouseButtons mouseButton) {
-                    if (!IsMouseButtonPressed(mouseButton) && ElapsedSecondsSinceMouseButtonPressed(mouseButton) < 60 && ElapsedTicksSinceMouseButtonPressed(mouseButton) % 5 != 0) return false; 
+                    if ((!IsMouseButtonPressed(mouseButton) && ElapsedSecondsSinceMouseButtonPressed(mouseButton) < 60) || ElapsedTicksSinceMouseButtonPressed(mouseButton) % 5 != 0) return false; 
                 } else {
                     throw new Exception("Non-Key or MouseButton type passed to Key Combinations");
                 }

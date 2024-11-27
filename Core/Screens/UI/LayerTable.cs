@@ -27,6 +27,8 @@ namespace Somniloquy {
             InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.Right }, new object[] {  }, (parameters) => AddLayer(Directions.Right), TriggerOnce.True, true);
             InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.Up }, new object[] {  }, (parameters) => AddLayer(Directions.Up), TriggerOnce.True, true);
             InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.Down }, new object[] {  }, (parameters) => AddLayer(Directions.Down), TriggerOnce.True, true);   
+            
+            InputManager.RegisterKeybind(new object[] { Keys.Delete }, new object[] {  }, (parameters) => RemoveLayer(), TriggerOnce.True, true);   
         }
 
         public void ElevateLayers(int layerIndex) {
@@ -48,6 +50,13 @@ namespace Somniloquy {
                 }
             }
         }
+
+        public void RemoveLayer() {
+            if (LayerGroups[LayerGroupIndex].Layers.ContainsKey(LayerIndex)) {
+                LayerGroups[LayerGroupIndex].Layers.Remove(LayerIndex);
+            }
+        }
+
         // TODO: Rewrite garbage code
         public void AddLayer(Directions direction) {
             if (direction is Directions.Up or Directions.Down) {

@@ -26,7 +26,8 @@ namespace Somniloquy {
     public class OilPaintBrush : Brush {
         public override void Paint(IPaintableLayer2D paintableLayer, bool initializingPress, Color color, Camera2D camera) {
             int penWidth = (int)(InputManager.GetPenPressure() * 16 / camera.Zoom);
-            float penOpacity = InputManager.GetPenPressure() != 0 ? InputManager.GetPenPressure() : 1;
+            float penOpacity = 1;
+            // float penOpacity = InputManager.GetPenPressure() != 0 ? InputManager.GetPenPressure() : 1;
 
             if (initializingPress) {   
                 if (CurrentCommandChain is not null) CurrentCommandChain.AffectedPixels = null;
@@ -42,7 +43,8 @@ namespace Somniloquy {
     public class PixelArtBrush : Brush {
         public override void Paint(IPaintableLayer2D paintableLayer, bool initializingPress, Color color, Camera2D camera) {
             int penWidth = 0;
-            float penOpacity = InputManager.GetPenPressure() != 0 ? InputManager.GetPenPressure() : 1;
+            float penOpacity = 1;
+            // float penOpacity = InputManager.GetPenPressure() != 0 ? InputManager.GetPenPressure() : 1;
 
             if (initializingPress) {
                 if (CurrentCommandChain is not null) CurrentCommandChain.AffectedPixels = null;

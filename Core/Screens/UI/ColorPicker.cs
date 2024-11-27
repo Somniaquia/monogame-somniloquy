@@ -8,8 +8,10 @@ namespace Somniloquy {
 
     public class ColorPicker : Screen {
         public Section2DEditor Screen;
-        
-        public Texture2D Chart;
+        public ColorOkHSL ColorOkHSL;
+
+        public HuePicker HuePicker;
+        public Texture2D ChartTexture;
         public Vector2I ChartDimensions;
         public Vector2 PositionOnChart = Vector2.Zero;
         public int Hue = 0;
@@ -17,11 +19,15 @@ namespace Somniloquy {
         public ColorPicker(Rectangle boundaries, Section2DEditor screen) : base(boundaries) {
             ChartDimensions = (Vector2I)(boundaries.Size.ToVector2() / 2);
             Screen = screen; 
+
+            HuePicker = new(new Rectangle(boundaries.X, boundaries.Y - 24, boundaries.Width, 10), this);
         }
 
         public override void LoadContent() {
-            Chart = new Texture2D(SQ.GD, ChartDimensions.X, ChartDimensions.Y); 
+            ChartTexture = new Texture2D(SQ.GD, ChartDimensions.X, ChartDimensions.Y); 
             CreateChartTexture();
+
+            HuePicker.LoadContent();
         }
 
         public void CreateChartTexture() {
@@ -32,22 +38,29 @@ namespace Somniloquy {
                     chartData[y * ChartDimensions.X + x] = FetchColor(new Vector2((float)x/ChartDimensions.X, (float)y/ChartDimensions.Y));
                 }
             }
-            Chart.SetData(chartData);
+            ChartTexture.SetData(chartData);
         }
 
         private Color FetchColor(Vector2 positionOnChart) {
             return new ColorOkHSL((byte)Hue, (byte)(positionOnChart.X * 255), (byte)(255 - positionOnChart.Y * 255)).ToRGB();
         }
 
-        public void FetchPositionAndHueFromColor(Color desiredColor) {
+        public void SetColor(Color desiredColor) {
             var hsl = desiredColor.ToOkHSL();
-            PositionOnChart = new Vector2(hsl.S, 1 - hsl.L);
+            SetColor(hsl);
+        }
+
+        public void SetColor(ColorOkHSL hsl) {
+            ColorOkHSL = hsl;
+            PositionOnChart = new Vector2(hsl.S / 255f, (255 - hsl.L) / 255f);
             Hue = hsl.H;
             CreateChartTexture();
         }
 
         public override void Update() {
             base.Update();
+
+            HuePicker.Update();
 
             bool updateChart = false;
             if (InputManager.IsKeyDown(Keys.U)) { Hue--; updateChart = true; }
@@ -66,6 +79,7 @@ namespace Somniloquy {
                 if (InputManager.IsMouseButtonDown(MouseButtons.LeftButton)) {
                     PositionOnChart = Vector2.Transform(InputManager.GetMousePosition(), Transform);
                     Screen.SelectedColor = FetchColor(PositionOnChart);
+                    ColorOkHSL = Screen.SelectedColor.ToOkHSL();
                     CreateChartTexture();
                 }
             }
@@ -73,15 +87,57 @@ namespace Somniloquy {
             PositionOnChart = new Vector2(MathF.Max(MathF.Min(1, PositionOnChart.X), 0), MathF.Max(MathF.Min(1, PositionOnChart.Y), 0));
             Hue = Util.PosMod(Hue, 255);
             Screen.SelectedColor = FetchColor(PositionOnChart);
+            ColorOkHSL = Screen.SelectedColor.ToOkHSL();
         }
 
         public override void Draw() {
             if (Screen.EditorState == EditorState.PaintMode) {
+                HuePicker.Draw();
+
                 // int borderLength = (ScreenManager.FocusedScreen == this) ? 8 : 6;
-                int borderLength = 8;
+                int borderLength = 4;
                 SQ.SB.DrawFilledRectangle(new Rectangle(Boundaries.X - borderLength, Boundaries.Y - borderLength, Boundaries.Width + borderLength * 2, Boundaries.Height + borderLength * 2), Screen.SelectedColor);
-                SQ.SB.Draw(Chart, Boundaries, Color.White);
+                SQ.SB.Draw(ChartTexture, Boundaries, Color.White);
                 SQ.SB.DrawCircle((Vector2I)(new Vector2(Boundaries.X, Boundaries.Y) + new Vector2(PositionOnChart.X * Boundaries.Width, PositionOnChart.Y * Boundaries.Height)), 8, Util.InvertColor(Screen.SelectedColor), true);
+            }
+        }
+    }
+
+    public class HuePicker : Screen {
+        public ColorPicker ColorPicker;
+        public Texture2D BarTexture;
+
+        public HuePicker(Rectangle boundaries, ColorPicker colorPicker) : base(boundaries) {
+            ColorPicker = colorPicker;
+            BarTexture = new(SQ.GD, ColorPicker.ChartDimensions.X, 1);
+        }
+
+        public override void LoadContent() {
+            Color[] data = new Color[ColorPicker.ChartDimensions.X];
+            for (int i = 0; i < ColorPicker.ChartDimensions.X; i++) {
+                data[i] = new ColorOkHSL((byte)((float)i / ColorPicker.ChartDimensions.X * 255), 127, 127).ToRGB();
+            }
+            BarTexture.SetData(data);
+        }
+
+        public override void Update() {
+            if (ScreenManager.FocusedScreen == this) {
+                if (InputManager.IsMouseButtonDown(MouseButtons.LeftButton)) {
+                    var positionOnBar = Vector2.Transform(InputManager.GetMousePosition(), Transform).X;
+                    positionOnBar = Util.PosMod(positionOnBar, 1);
+                    // Mouse.SetPosition(Util.PosMod);
+                    ColorPicker.SetColor(new ColorOkHSL((byte)(positionOnBar * 255), ColorPicker.ColorOkHSL.S, ColorPicker.ColorOkHSL.L));
+                }
+            }
+            base.Update();
+        }
+
+        public override void Draw() {
+            if (ColorPicker.Screen.EditorState == EditorState.PaintMode) {
+                int borderLength = 4;
+                SQ.SB.DrawFilledRectangle(new Rectangle(Boundaries.X - borderLength, Boundaries.Y - borderLength, Boundaries.Width + borderLength * 2, Boundaries.Height + borderLength * 2), ColorPicker.Screen.SelectedColor);
+                SQ.SB.Draw(BarTexture, Boundaries, Color.White);
+                SQ.SB.DrawCircle((Vector2I)(new Vector2(Boundaries.X, Boundaries.Y) + new Vector2(ColorPicker.Hue / 255f * Boundaries.Width, Boundaries.Height / 2)), 8, Util.InvertColor(new ColorOkHSL((byte)ColorPicker.Hue, 255, 255).ToRGB()), true);
             }
         }
     }

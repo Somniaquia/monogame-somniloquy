@@ -74,8 +74,6 @@ namespace Somniloquy {
             GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.OemPipe, (parameters) => Screen.Camera.TargetRotation = 0, TriggerOnce.True));
             GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.OemOpenBrackets, (parameters) => RotateScreen(-0.05f), TriggerOnce.False));
             GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.OemCloseBrackets, (parameters) => RotateScreen(0.05f), TriggerOnce.False));
-            // GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.U, (parameters) => ShiftHue(-0.005f), TriggerOnce.False));
-            // GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.O, (parameters) => ShiftHue(0.005f), TriggerOnce.False));
 
             GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.LeftAlt, (parameters) => SelectLayerUnderMouse(), TriggerOnce.False));
 
@@ -140,9 +138,10 @@ namespace Somniloquy {
             if (InputManager.IsKeyDown(Keys.LeftAlt)) {
                 if (SelectedLayer is IPaintableLayer2D paintableLayer) {
                     var color = paintableLayer.GetColor((Vector2I)Screen.Camera.GlobalMousePos.Value);
-                    if (color != null) SelectedColor = color.Value;
-                    ColorPicker.Hue = SelectedColor.ToOkHSL().H;
-                    ColorPicker.CreateChartTexture();
+                    if (color != null) {
+                        SelectedColor = color.Value;
+                        ColorPicker.SetColor(color.Value);
+                    }
                 }
             } else {
                 if (SelectedLayer is IPaintableLayer2D paintableLayer) {
@@ -190,8 +189,10 @@ namespace Somniloquy {
                 foreach (var layer in layerGroup.Value.Layers) {
                     if (layer.Value == SelectedLayer) {
                         layer.Value.Draw(Screen.Camera, true);
-                    } else {
+                    } else if (layerGroup.Value.Layers.ContainsValue(SelectedLayer)){
                         layer.Value.Draw(Screen.Camera, false, 0.5f);
+                    } else {
+                        layer.Value.Draw(Screen.Camera, false, 0.2f);
                     }
                 }
             }
