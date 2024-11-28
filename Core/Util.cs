@@ -130,26 +130,34 @@ namespace Somniloquy {
         }
 
         public static float CalculateGaussian(float x, float sigma) {
-            const float pi = 3.14159265358979323846f;
-            return (float)(1.0 / Math.Sqrt(2 * pi * sigma * sigma) * Math.Exp(-(x * x) / (2 * sigma * sigma)));
+            return (float)(1.0 / Math.Sqrt(2 * Math.PI * sigma * sigma) * Math.Exp(-(x * x) / (2 * sigma * sigma)));
         }
 
-        public static float[] GetSampleWeights(int sampleCount) {
-            float[] sampleWeights = new float[sampleCount];
+        /// <summary>
+        /// Subtract r from both x and y for getting the positions
+        /// </summary>
+        /// <param name="r">Radius of the Gaussian kernel</param>
+        /// <returns>A 2-dimensional Gaussian kernel, of dimensions of 2*r + 1, 2*r + 1</returns>
+        public static float[,] GetGaussianKernel(int r) {
+            float[,] sampleWeights = new float[2 * r + 1, 2 * r + 1];
 
             float totalWeights = 0.0f;
-            float sigma = sampleCount / 2.0f;
+            float sigma = r;
 
-            for (int i = 0; i < sampleCount; i++) {
-                float x = i - sampleCount / 2;
-                sampleWeights[i] = CalculateGaussian(x, sigma);
-                totalWeights += sampleWeights[i];
+            for (int x = -r; x <= r; x++) {
+                for (int y = -r; y <= r; y++) {
+                    float d = MathF.Sqrt(x * x + y * y);
+                    sampleWeights[x + r, y + r] = (d > r) ? 0 : CalculateGaussian(d, sigma);
+                    totalWeights += sampleWeights[x + r, y + r];
+                }
             }
 
-            for (int i = 0; i < sampleCount; i++) {
-                sampleWeights[i] /= totalWeights;
+            for (int x = 0; x < 2 * r + 1; x++) {
+                for (int y = 0; y < 2 * r + 1; y++) {
+                    sampleWeights[x, y] /= totalWeights;
+                }
             }
-            
+
             return sampleWeights;
         }
 
