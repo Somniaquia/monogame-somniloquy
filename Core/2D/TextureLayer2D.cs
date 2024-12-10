@@ -39,7 +39,7 @@ namespace Somniloquy {
 
             if (chain.AffectedPixels.ContainsKey(position) && opacity != 1) {
                 if (chain.AffectedPixels[position].Item2 >= opacity) return;
-                Chunks[chunkPosition].SetPixel(positionInChunk, Util.BlendColor(chain.AffectedPixels[position].Item1, color, opacity), chain);
+                Chunks[chunkPosition].SetPixel(positionInChunk, chain.AffectedPixels[position].Item1.BlendWith(color, opacity), chain);
                 chain.AffectedPixels[position] = (chain.AffectedPixels[position].Item1, opacity);
             } else {
                 chain.AffectedPixels[position] = (Chunks[chunkPosition].GetColor(positionInChunk), opacity);

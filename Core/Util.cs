@@ -37,15 +37,15 @@ namespace Somniloquy {
             return (dividend%divisor + divisor) % divisor;
         }
 
-        public static bool IsWithinBoundaries(Vector2I Vector2I, Rectangle boundaries) {
-            return (boundaries.Left <= Vector2I.X && Vector2I.X <= boundaries.Right & boundaries.Top < Vector2I.Y && Vector2I.Y < boundaries.Bottom);
+        public static bool IsWithinBoundaries(Vector2 Vector2, RectangleF boundaries) {
+            return boundaries.Left <= Vector2.X && Vector2.X <= boundaries.Right & boundaries.Top < Vector2.Y && Vector2.Y < boundaries.Bottom;
         }
 
         public static Color InvertColor(Color color) {
             return new Color(255 - color.R, 255 - color.G, 255 - color.B);
         }
     
-        public static RectangleF ValidizeRectangle(RectangleF rectangle) {
+        public static RectangleF FixRectangle(RectangleF rectangle) {
             if (rectangle.Width < 0) {
                 rectangle.X += rectangle.Width;
                 rectangle.Width = -rectangle.Width;
@@ -58,6 +58,13 @@ namespace Somniloquy {
             return rectangle;
         }
 
+        public static RectangleF ShrinkRectangle(RectangleF rectangle, Sides amount) {
+            return new RectangleF(rectangle.X + amount.Left, rectangle.Y + amount.Up, rectangle.Width - amount.Left - amount.Right, rectangle.Height - amount.Up - amount.Down);
+        }
+        
+        public static RectangleF ExpandRectangle(RectangleF rectangle, Sides amount) {
+            return new RectangleF(rectangle.X - amount.Left, rectangle.Y - amount.Up, rectangle.Width + amount.Left + amount.Right, rectangle.Height + amount.Up + amount.Down);
+        }
 
         public static (Vector2I, Vector2I) SortVector2Is(Vector2I Vector2I1, Vector2I Vector2I2) {
             if (Vector2I1.X > Vector2I2.X) (Vector2I2.X, Vector2I1.X) = (Vector2I1.X, Vector2I2.X);
@@ -161,94 +168,17 @@ namespace Somniloquy {
             return sampleWeights;
         }
 
-        public static Vector2[] GetSampleOffsets(Orientation direction, int sampleCount) {
+        public static Vector2[] GetSampleOffsets(Axis direction, int sampleCount) {
             Vector2[] sampleOffsets = new Vector2[sampleCount];
 
-            var length = direction == Orientation.Horizontal ? SQ.WindowSize.X : SQ.WindowSize.Y;
+            var length = direction == Axis.Horizontal ? SQ.WindowSize.X : SQ.WindowSize.Y;
             float delta = 1.0f / length;
 
             for (int i = 0; i < sampleCount; i++) {
-                sampleOffsets[i] = direction == Orientation.Horizontal ? new Vector2((i - sampleCount / 2) * delta, 0) : new Vector2(0, (i - sampleCount / 2) * delta);
+                sampleOffsets[i] = direction == Axis.Horizontal ? new Vector2((i - sampleCount / 2) * delta, 0) : new Vector2(0, (i - sampleCount / 2) * delta);
             }
 
             return sampleOffsets;
-        }
-
-        public static T[,] ConvertTo2D<T>(T[] oneDimensionalArray, int newWidth) {
-            int length = oneDimensionalArray.Length;
-            int newHeight = (length + newWidth - 1) / newWidth;
-
-            T[,] result = new T[newWidth, newHeight];
-
-            for (int i = 0; i < length; i++) {
-                int x = i % newWidth;
-                int y = i / newWidth;
-
-                result[x, y] = oneDimensionalArray[i];
-            }
-
-            return result;
-        }
-
-
-        public static Color?[,] ToNullableColors(Color[,] colors) {
-            int width = colors.GetLength(0);
-            int height = colors.GetLength(1);
-
-            Color?[,] result = new Color?[width, height];
-
-            for (int i = 0; i < width; i++) {
-                for (int j = 0; j < height; j++) {
-                    result[i, j] = colors[i, j];
-                }
-            }
-
-            return result;
-        }
-
-        public static Color[,] FromNullableColors(Color?[,] nullableColors) {
-            int width = nullableColors.GetLength(0);
-            int height = nullableColors.GetLength(1);
-
-            Color[,] result = new Color[width, height];
-
-            for (int i = 0; i < width; i++) {
-                for (int j = 0; j < height; j++) {
-                    if (nullableColors[i, j].HasValue) {
-                        result[i, j] = nullableColors[i, j].Value;
-                    }
-                    else {
-                        result[i, j] = Color.Transparent;
-                    }
-                }
-            }
-
-            return result;
-        }
-
-        public static Rectangle ResizeRectangle(Rectangle target, Orientation direction, float ratio, float offset) {
-            if (direction == Orientation.Horizontal) {
-                return new Rectangle(target.X + (int)(target.Width * offset), target.Y, (int) (target.Width * ratio), target.Height);
-            } else {
-                return new Rectangle(target.X, target.Y + (int)(target.Height * offset), target.Width, (int)(target.Height * ratio));
-            }  
-        }
-
-        public static void TransparentizeTexture(Texture2D target, Color? targetColor) {
-            Color[] colorData = new Color[target.Width * target.Height];
-            target.GetData(colorData);
-
-            for (int i = 0; i < colorData.Length; i++) {
-                if (colorData[i] == targetColor) {
-                    colorData[i] = Color.Transparent;
-                }
-            }
-
-            target.SetData(colorData);
-        }
-
-        public static int RandomInteger(int min, int nonInclusiveMax) {
-            return random.Next(min, nonInclusiveMax);
         }
 
         public static T GetNextEnumValue<T>(T currentValue) where T : Enum {
@@ -287,19 +217,6 @@ namespace Somniloquy {
                 if (numbers[i] < min) min = numbers[i];
             }
             return min;
-        }
-
-        public static Color BlendColor(Color baseColor, Color paintingColor, float opacity) {
-            if (opacity == 1f) {
-                return paintingColor;
-            } else {
-                return new(
-                    (int)(paintingColor.R * opacity + baseColor.R * (1 - opacity)),
-                    (int)(paintingColor.G * opacity + baseColor.G * (1 - opacity)),
-                    (int)(paintingColor.B * opacity + baseColor.B * (1 - opacity)),
-                    (int)(paintingColor.A * opacity + baseColor.A * (1 - opacity))
-                );
-            }
         }
     }
 }

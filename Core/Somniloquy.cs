@@ -71,8 +71,14 @@ namespace Somniloquy {
             Misaki = Content.Load<SpriteFont>("Fonts/Misaki");
 
             ScreenManager.AddScreen(new Section2DScreen(new Rectangle(new(), WindowSize)));
+            BoxScreen testBox = (BoxScreen)ScreenManager.AddScreen(new BoxScreen(new Rectangle(10, 10, 1200, 800)));
+            new BoxScreen(testBox, 10, 10);
+            new BoxScreen(testBox, 10, 10);
+            var innerBox3 = new BoxScreen(testBox, 10, 10) { Axis = Axis.Vertical };
+            new BoxScreen(innerBox3, 10, 10);
+            new BoxScreen(innerBox3, 10, 10);
+            new BoxScreen(innerBox3, 10, 10);
             ScreenManager.LoadContent();
-
             ShaderManager.LoadContent(null);
 
             DebugInfo.Subscribe(() => $"FPS: {FPS:n1}");
@@ -119,8 +125,8 @@ namespace Somniloquy {
                 UpdateFPS(gameTime);
 
                 GD.Clear(Color.Black);
-                ScreenManager.Draw();
                 SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
+                    ScreenManager.Draw();
                     DebugInfo.Draw(Misaki);
                     FileBrowser.Draw(Misaki);
                 SB.End();

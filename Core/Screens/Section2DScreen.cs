@@ -6,7 +6,7 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework.Graphics;
     using System.Linq;
 
-    public class Section2DScreen : Screen {
+    public class Section2DScreen : BoxScreen {
         public Section2D Section;
         public Camera2D Camera = new();
         public Section2DEditor Editor;
@@ -38,17 +38,15 @@ namespace Somniloquy {
         }
 
         public override void Draw() {
-            SQ.SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
             Camera.SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, transformMatrix: Camera.Transform);
             Editor?.Draw();
             Camera.SB.End();
-            SQ.SB.End();
         }
     }
     
     public enum EditorState { PaintMode, TileMode, }
 
-    public class Section2DEditor : Screen {
+    public class Section2DEditor : BoxScreen {
         public Section2DScreen Screen;
         public Layer2D SelectedLayer;
         public ColorPicker ColorPicker;
@@ -133,7 +131,7 @@ namespace Somniloquy {
         }
 
         public void HandleLeftClick() {
-            if (ScreenManager.FocusedScreen != this) return;
+            if (!IsFocused()) return;
             
             if (InputManager.IsKeyDown(Keys.LeftAlt)) {
                 if (SelectedLayer is IPaintableLayer2D paintableLayer) {
@@ -151,7 +149,7 @@ namespace Somniloquy {
         }
 
         public void HandleRightClick() {
-            if (ScreenManager.FocusedScreen != this) return;
+            if (!IsFocused()) return;
 
             if (InputManager.IsKeyDown(Keys.LeftAlt)) {
 
@@ -190,7 +188,7 @@ namespace Somniloquy {
                     if (layer.Value == SelectedLayer) {
                         layer.Value.Draw(Screen.Camera, true);
                     } else if (layerGroup.Value.Layers.ContainsValue(SelectedLayer)){
-                        layer.Value.Draw(Screen.Camera, false, 0.5f);
+                        layer.Value.Draw(Screen.Camera, false, 0.8f);
                     } else {
                         layer.Value.Draw(Screen.Camera, false, 0.2f);
                     }

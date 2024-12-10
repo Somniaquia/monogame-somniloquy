@@ -65,7 +65,7 @@ namespace Somniloquy {
 
         private Color BlendColor(Vector2I position, Color paintingColor, float opacity) {
             Color canvasColor = TextureData[position.Unwrap(Width)];
-            return Util.BlendColor(canvasColor, paintingColor, opacity);
+            return canvasColor.BlendWith(paintingColor, opacity);
         }
 
         public void Draw(Rectangle destination, Rectangle source, Color color, SpriteEffects effects = SpriteEffects.None) {

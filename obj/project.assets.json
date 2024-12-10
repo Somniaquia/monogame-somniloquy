@@ -45,6 +45,19 @@
           }
         }
       },
+      "MagicPhysX/1.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/net6.0/MagicPhysX.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0/MagicPhysX.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "Microsoft.NETCore.Platforms/5.0.0": {
         "type": "package",
         "compile": {
@@ -541,6 +554,20 @@
         "librehardwaremonitorlib.0.9.3.nupkg.sha512",
         "librehardwaremonitorlib.nuspec",
         "packageicon.png"
+      ]
+    },
+    "MagicPhysX/1.0.0": {
+      "sha512": "FV7YSsnU2WhtVUEAAi8Jou22v7H7CvS+ALBUjiXQChwXw8uVMBZSDTZS9eQQiFZ0EpXAqB9us4hYk6YZsEj1xg==",
+      "type": "package",
+      "path": "magicphysx/1.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "lib/net6.0/MagicPhysX.dll",
+        "lib/net6.0/MagicPhysX.xml",
+        "magicphysx.1.0.0.nupkg.sha512",
+        "magicphysx.nuspec"
       ]
     },
     "Microsoft.NETCore.Platforms/5.0.0": {
@@ -1193,6 +1220,7 @@
     "net6.0": [
       "FmodForFoxes >= 3.1.0",
       "LibreHardwareMonitorLib >= 0.9.3",
+      "MagicPhysX >= 1.0.0",
       "MonoGame.Content.Builder.Task >= 3.8.1.303",
       "MonoGame.Framework.DesktopGL >= 3.8.1.303",
       "Nopipeline.Task >= 2.3.0",
@@ -1257,6 +1285,10 @@
           "LibreHardwareMonitorLib": {
             "target": "Package",
             "version": "[0.9.3, )"
+          },
+          "MagicPhysX": {
+            "target": "Package",
+            "version": "[1.0.0, )"
           },
           "MonoGame.Content.Builder.Task": {
             "target": "Package",

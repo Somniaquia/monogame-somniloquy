@@ -12,7 +12,7 @@ namespace Somniloquy {
                 }
             }
         }
-
+ 
         public static void ApplyLineAction(Vector2I start, Vector2I end, int width, PixelAction action) {
             int x0 = start.X;
             int y0 = start.Y;

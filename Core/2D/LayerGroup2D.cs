@@ -127,7 +127,6 @@ namespace Somniloquy {
             return new LayerGroup2D() { Identifier = identifier, Layers = layers };
         }
 
-
         public override void Write(Utf8JsonWriter writer, LayerGroup2D value, JsonSerializerOptions options) {
             writer.WriteStartObject();
 

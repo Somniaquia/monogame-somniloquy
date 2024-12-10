@@ -6,7 +6,7 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework.Graphics;
     using Microsoft.Xna.Framework.Input;
 
-    public class ColorPicker : Screen {
+    public class ColorPicker : BoxScreen {
         public Section2DEditor Screen;
         public ColorOkHSL ColorOkHSL;
 
@@ -75,7 +75,7 @@ namespace Somniloquy {
 
             if (updateChart) CreateChartTexture();
 
-            if (ScreenManager.FocusedScreen == this) {
+            if (IsFocused()) {
                 if (InputManager.IsMouseButtonDown(MouseButtons.LeftButton)) {
                     PositionOnChart = Vector2.Transform(InputManager.GetMousePosition(), Transform);
                     Screen.SelectedColor = FetchColor(PositionOnChart);
@@ -94,16 +94,16 @@ namespace Somniloquy {
             if (Screen.EditorState == EditorState.PaintMode) {
                 HuePicker.Draw();
 
-                // int borderLength = (ScreenManager.FocusedScreen == this) ? 8 : 6;
+                // int borderLength = (IsFocused()) ? 8 : 6;
                 int borderLength = 4;
-                SQ.SB.DrawFilledRectangle(new Rectangle(Boundaries.X - borderLength, Boundaries.Y - borderLength, Boundaries.Width + borderLength * 2, Boundaries.Height + borderLength * 2), Screen.SelectedColor);
-                SQ.SB.Draw(ChartTexture, Boundaries, Color.White);
+                SQ.SB.DrawFilledRectangle(new RectangleF(Boundaries.X - borderLength, Boundaries.Y - borderLength, Boundaries.Width + borderLength * 2, Boundaries.Height + borderLength * 2), Screen.SelectedColor);
+                SQ.SB.Draw(ChartTexture, (Rectangle)Boundaries, Color.White);
                 SQ.SB.DrawCircle((Vector2I)(new Vector2(Boundaries.X, Boundaries.Y) + new Vector2(PositionOnChart.X * Boundaries.Width, PositionOnChart.Y * Boundaries.Height)), 8, Util.InvertColor(Screen.SelectedColor), true);
             }
         }
     }
 
-    public class HuePicker : Screen {
+    public class HuePicker : BoxScreen {
         public ColorPicker ColorPicker;
         public Texture2D BarTexture;
 
@@ -121,7 +121,7 @@ namespace Somniloquy {
         }
 
         public override void Update() {
-            if (ScreenManager.FocusedScreen == this) {
+            if (IsFocused()) {
                 if (InputManager.IsMouseButtonDown(MouseButtons.LeftButton)) {
                     var positionOnBar = Vector2.Transform(InputManager.GetMousePosition(), Transform).X;
                     positionOnBar = Util.PosMod(positionOnBar, 1);
@@ -135,8 +135,8 @@ namespace Somniloquy {
         public override void Draw() {
             if (ColorPicker.Screen.EditorState == EditorState.PaintMode) {
                 int borderLength = 4;
-                SQ.SB.DrawFilledRectangle(new Rectangle(Boundaries.X - borderLength, Boundaries.Y - borderLength, Boundaries.Width + borderLength * 2, Boundaries.Height + borderLength * 2), ColorPicker.Screen.SelectedColor);
-                SQ.SB.Draw(BarTexture, Boundaries, Color.White);
+                SQ.SB.DrawFilledRectangle(new RectangleF(Boundaries.X - borderLength, Boundaries.Y - borderLength, Boundaries.Width + borderLength * 2, Boundaries.Height + borderLength * 2), ColorPicker.Screen.SelectedColor);
+                SQ.SB.Draw(BarTexture, (Rectangle)Boundaries, Color.White);
                 SQ.SB.DrawCircle((Vector2I)(new Vector2(Boundaries.X, Boundaries.Y) + new Vector2(ColorPicker.Hue / 255f * Boundaries.Width, Boundaries.Height / 2)), 8, Util.InvertColor(new ColorOkHSL((byte)ColorPicker.Hue, 255, 255).ToRGB()), true);
             }
         }

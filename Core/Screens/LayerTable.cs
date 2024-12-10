@@ -138,7 +138,7 @@ namespace Somniloquy {
         }
     }
 
-    public class LayerLabel : Screen {
+    public class LayerLabel : BoxScreen {
         public LayerLabel(Rectangle boundaries) : base(boundaries) {
         }
     }

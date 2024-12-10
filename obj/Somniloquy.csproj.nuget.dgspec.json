@@ -58,6 +58,10 @@
               "target": "Package",
               "version": "[0.9.3, )"
             },
+            "MagicPhysX": {
+              "target": "Package",
+              "version": "[1.0.0, )"
+            },
             "MonoGame.Content.Builder.Task": {
               "target": "Package",
               "version": "[3.8.1.303, )"

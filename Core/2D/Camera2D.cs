@@ -118,8 +118,8 @@ namespace Somniloquy {
             SB.Draw(SB.Pixel, new Rectangle(worldPos, new(1, 1)), color);
         }
 
-        public void DrawFilledRectangle(Rectangle destination, Color color) {
-            SB.Draw(SB.Pixel, destination, null, color, 0f, Vector2.Zero, SpriteEffects.None, 0f);
+        public void DrawFilledRectangle(RectangleF destination, Color color) {
+            SB.Draw(SB.Pixel, (Rectangle)destination, null, color, 0f, Vector2.Zero, SpriteEffects.None, 0f);
         }
  
         public void DrawLine(Vector2I start, Vector2I end, Color color, int width = 0, bool scale = false) {

@@ -1,12 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "VppmG+ICI4A=",
+  "dgSpecHash": "3xpcPwyUCa4=",
   "success": true,
   "projectFilePath": "C:\\Somnia\\Projects\\monogame-somniloquy\\Somniloquy.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Somni\\.nuget\\packages\\fmodforfoxes\\3.1.0\\fmodforfoxes.3.1.0.nupkg.sha512",
     "C:\\Users\\Somni\\.nuget\\packages\\hidsharp\\2.1.0\\hidsharp.2.1.0.nupkg.sha512",
     "C:\\Users\\Somni\\.nuget\\packages\\librehardwaremonitorlib\\0.9.3\\librehardwaremonitorlib.0.9.3.nupkg.sha512",
+    "C:\\Users\\Somni\\.nuget\\packages\\magicphysx\\1.0.0\\magicphysx.1.0.0.nupkg.sha512",
     "C:\\Users\\Somni\\.nuget\\packages\\microsoft.netcore.platforms\\5.0.0\\microsoft.netcore.platforms.5.0.0.nupkg.sha512",
     "C:\\Users\\Somni\\.nuget\\packages\\microsoft.win32.registry\\5.0.0\\microsoft.win32.registry.5.0.0.nupkg.sha512",
     "C:\\Users\\Somni\\.nuget\\packages\\mono.posix.netstandard\\1.0.0\\mono.posix.netstandard.1.0.0.nupkg.sha512",
