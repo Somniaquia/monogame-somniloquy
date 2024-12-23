@@ -56,8 +56,8 @@ namespace Somniloquy
 
             CurrentMusic = "My Song 3";
 
-            Keybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.M, Keys.Left}, (parameters) => { if (Pitch > 0.1f) Pitch -= 0.001f; }, TriggerOnce.False, true ));
-            Keybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.M, Keys.Right}, (parameters) => { if (Pitch < 2f) Pitch += 0.001f; }, TriggerOnce.False, true ));
+            Keybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.M, Keys.Left}, (parameters) => { if (Pitch > 0.1f) Pitch -= 0.001f; SetPitch(CurrentMusic, Pitch); }, TriggerOnce.False, true ));
+            Keybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.M, Keys.Right}, (parameters) => { if (Pitch < 2f) Pitch += 0.001f; SetPitch(CurrentMusic, Pitch); }, TriggerOnce.False, true ));
             Keybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.M, Keys.Up}, (parameters) => { CenterFrequency *= 1.01f; }, TriggerOnce.False, true ));
             Keybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.M, Keys.Down}, (parameters) => { CenterFrequency /= 1.01f; }, TriggerOnce.False, true ));
         }

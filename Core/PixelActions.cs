@@ -6,40 +6,54 @@ namespace Somniloquy {
 
     public class PixelActions {
         public static void ApplyRectangleAction(Vector2I start, Vector2I end, bool filled, PixelAction action) {
-            for (int y = start.Y; y < end.Y; y++) {
-                for (int x = start.X; x < end.X; x++) {
-                    action(new Vector2I(x, y));
+            if (filled) {
+                for (int y = start.Y; y < end.Y; y++) {
+                    for (int x = start.X; x < end.X; x++) {
+                        action(new Vector2I(x, y));
+                    }
                 }
+            } else {
+                ApplyLineAction(start, new(start.X, end.Y), 0, action);
+                ApplyLineAction(start, new(end.X, start.Y), 0, action);
+                ApplyLineAction(end, new(start.X, end.Y), 0, action);
+                ApplyLineAction(end, new(end.X, start.Y), 0, action);
             }
         }
  
-        public static void ApplyLineAction(Vector2I start, Vector2I end, int width, PixelAction action) {
-            int x0 = start.X;
-            int y0 = start.Y;
-            int x1 = end.X;
-            int y1 = end.Y;
+        public static void ApplyLineAction(Vector2I start, Vector2I end, int radius, PixelAction action) {
+            var (x0, y0, x1, y1) = (start.X, start.Y, end.X, end.Y);
 
-            int dx = Math.Abs(x1 - x0);
-            int dy = Math.Abs(y1 - y0);
+            if (radius > 0) {
+                ApplyCircleAction(new Vector2I(x0, y0), radius, true, action);
+                ApplyCircleAction(new Vector2I(x1, y1), radius, true, action);
 
-            int sx = x0 < x1 ? 1 : -1;
-            int sy = y0 < y1 ? 1 : -1;
-
-            int err = dx - dy;
-
-            while (true) {
-                ApplyCircleAction(new Vector2I(x0, y0), width, true, action);
-
-                if (x0 == x1 && y0 == y1) break;
-
-                int e2 = 2 * err;
-                if (e2 > -dy) {
-                    err -= dy;
-                    x0 += sx;
+                float gradient = -(float)(x1 - x0) / (y1 - y0);
+                for (int i = - radius; i <= radius; i++) {
+                    Vector2 d = Vector2.Normalize(end - start).PerpendicularClockwise();
+                    ApplyLineAction((Vector2I)(start + (float)i / radius * d), (Vector2I)(end + (float)i / radius * d), 0, action);
                 }
-                if (e2 < dx) {
-                    err += dx;
-                    y0 += sy;
+            } else {
+                while (true) {
+                    int dx = Math.Abs(x1 - x0);
+                    int dy = Math.Abs(y1 - y0);
+
+                    int sx = x0 < x1 ? 1 : -1;
+                    int sy = y0 < y1 ? 1 : -1;
+
+                    int err = dx - dy;
+
+                    action(new Vector2I(x0, y0));
+                    if (x0 == x1 && y0 == y1) break;
+
+                    int e2 = 2 * err;
+                    if (e2 > -dy) {
+                        err -= dy;
+                        x0 += sx;
+                    }
+                    if (e2 < dx) {
+                        err += dx;
+                        y0 += sy;
+                    }
                 }
             }
         }

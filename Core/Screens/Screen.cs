@@ -8,7 +8,22 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework.Input;
 
     public enum Axis { Horizontal, Vertical }
-    public enum Align { Start, Center, End }
+    public abstract class Align { // rustlike enums when
+        public static Align Begin = new BeginAlign();
+        public static Align Center = new CenterAlign();
+        public static Align End = new EndAlign();
+        public static Align Fill(float strength) => new FillAlign(strength);
+
+        private sealed class BeginAlign : Align {}
+        private sealed class CenterAlign : Align {}
+        private sealed class EndAlign : Align {}
+        private sealed class FillAlign : Align {
+            public float Strength { get; }
+            public FillAlign(float strength) {
+                Strength = strength;
+            }
+        }
+    }
     
     public struct Sides {
         public float Left, Right, Up, Down;
@@ -109,10 +124,8 @@ namespace Somniloquy {
         public Sides Padding = Sides.None;
 
         public Axis Axis = Axis.Horizontal;
-        public Align AxisAlign = Align.Start;
-        public Align PerpendicularAlign = Align.Start;
-
-        public float FillStrength = 0f; // 0 for fitting to minimum length
+        public Align AxisAlign = Align.Begin;
+        public Align PerpendicularAlign = Align.Begin;
 
         public RectangleF CalculateBoundaries() {
             Debug.Assert(Parent is not null);
@@ -129,17 +142,17 @@ namespace Somniloquy {
 
                 for (int i = 0; i < Siblings.Count - 1; i++) {
                     availableLength -= Util.Max(Siblings[i].Margin.GetSide(Parent.Axis, false), Siblings[i + 1].Margin.GetSide(Parent.Axis, true));
-                    accumulatedFillStrength += Siblings[i].FillStrength;
+                    // accumulatedFillStrength += Siblings[i].AxisFillStrength;
                 }
                 
-                accumulatedFillStrength += Siblings.Last().FillStrength;
+                // accumulatedFillStrength += Siblings.Last().AxisFillStrength;
 
                 
                 int j = 0;
                 accumulatedLength += Util.Max(Parent.Padding.GetSide(Parent.Axis, true), Siblings[0].Margin.GetSide(Parent.Axis, true));
 
                 for (j = 0; j < Siblings.FindIndex(j => j == this); j++) {
-                    accumulatedLength += availableLength * (Siblings[j].FillStrength / accumulatedFillStrength);
+                    // accumulatedLength += availableLength * (Siblings[j].AxisFillStrength / accumulatedFillStrength);
                     accumulatedLength += Util.Max(Siblings[j].Margin.GetSide(Parent.Axis, false), Siblings[j + 1].Margin.GetSide(Parent.Axis, true));
                 }
             }
@@ -147,23 +160,22 @@ namespace Somniloquy {
             if (Parent.Axis == Axis.Horizontal) {
                 var paddingUp = Util.Max(Parent.Padding.Up, Margin.Up);
                 var paddingDown = Util.Max(Parent.Padding.Down, Margin.Down);
-                Boundaries = new RectangleF(Parent.Boundaries.X + accumulatedLength, Parent.Boundaries.Y + paddingUp, availableLength * FillStrength / accumulatedFillStrength, Parent.Boundaries.Height - paddingUp - paddingDown);
+                // Boundaries = new RectangleF(Parent.Boundaries.X + accumulatedLength, Parent.Boundaries.Y + paddingUp, availableLength * AxisFillStrength / accumulatedFillStrength, Parent.Boundaries.Height - paddingUp - paddingDown);
             } else {
                 var paddingLeft = Util.Max(Parent.Padding.Left, Margin.Left);
                 var paddingRight = Util.Max(Parent.Padding.Right, Margin.Right);
-                Boundaries = new RectangleF(Parent.Boundaries.X + paddingLeft, Parent.Boundaries.Y + accumulatedLength, Parent.Boundaries.Width - paddingLeft - paddingRight, availableLength * FillStrength / accumulatedFillStrength);
+                // Boundaries = new RectangleF(Parent.Boundaries.X + paddingLeft, Parent.Boundaries.Y + accumulatedLength, Parent.Boundaries.Width - paddingLeft - paddingRight, availableLength * AxisFillStrength / accumulatedFillStrength);
             }
 
             return Boundaries;
         }
 
-        public BoxScreen(BoxScreen parent, float fillStrength = 1f, float margin = 0, float padding = 0) : this(parent, new Sides(margin), new Sides(padding), fillStrength) {}
+        public BoxScreen(BoxScreen parent, float margin = 0, float padding = 0) : this(parent, new Sides(margin), new Sides(padding), Axis.Horizontal, Align.Begin, Align.Begin) { }
 
-        public BoxScreen(BoxScreen parent, Sides margin, Sides padding, float fillStrength = 1f, Axis axis = Axis.Horizontal, Align axisAlign = Align.Start, Align perpendicularAlign = Align.Start) {
+        public BoxScreen(BoxScreen parent, Sides margin, Sides padding, Axis axis, Align axisAlign, Align perpendicularAlign) {
             Parent = parent;
             Margin = margin;
             Padding = padding;
-            FillStrength = fillStrength;
             Axis = axis;
             AxisAlign = axisAlign;
             PerpendicularAlign = perpendicularAlign;
@@ -180,7 +192,7 @@ namespace Somniloquy {
                         Matrix.CreateScale(1f / boundaries.Width, 1f / boundaries.Height, 1f);
         }
         
-        public BoxScreen(Rectangle boundaries, Sides padding, Axis axis, Align axisAlign = Align.Start, Align perpendicularAlign = Align.Start) {
+        public BoxScreen(Rectangle boundaries, Sides padding, Axis axis, Align axisAlign, Align perpendicularAlign) {
             Boundaries = boundaries;
             Transform = Matrix.CreateTranslation(-boundaries.X, -boundaries.Y, 0f) * 
                         Matrix.CreateScale(1f / boundaries.Width, 1f / boundaries.Height, 1f);
@@ -225,11 +237,13 @@ namespace Somniloquy {
         public Axis AlignAxis; // Line up letters in either horizontal or vertical
         public Axis LetterAxis; // is each letter standing upright are or lying 90 degrees
 
-        public TextLabel(BoxScreen parent, string text, bool editable = false, Axis textAxis = Axis.Horizontal, Axis letterAxis = Axis.Vertical, float padding = 10) : base(parent, padding) {
+        public TextLabel(BoxScreen parent, string text, bool editable = false, Axis textAxis = Axis.Horizontal, Axis letterAxis = Axis.Vertical, float margin = 0) : base(parent, margin: margin) {
             Text = text;
             Editable = editable;
             AlignAxis = textAxis;
             LetterAxis = letterAxis;
+
+            Renderer = null;
         }
 
         public TextLabel(Rectangle boundaries, string text, bool editable = false, Axis textAxis = Axis.Horizontal, Axis letterAxis = Axis.Vertical) : base(boundaries) {
@@ -237,6 +251,8 @@ namespace Somniloquy {
             Editable = editable;
             AlignAxis = textAxis;
             LetterAxis = letterAxis;
+
+            Renderer = null;
         }
             
         public override float GetMinimumLength(Axis axis) {
@@ -268,7 +284,7 @@ namespace Somniloquy {
         }
 
         public override void Draw() {
-
+            SQ.SB.DrawString(SQ.Misaki, Text, Boundaries.TopLeft(), Color.White);
             base.Draw();
         }
     }

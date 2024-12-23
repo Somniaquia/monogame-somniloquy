@@ -97,7 +97,7 @@ namespace Somniloquy {
                 paintableLayer.PaintLine((Vector2I)camera.PreviousGlobalMousePos.Value, (Vector2I)camera.GlobalMousePos.Value, color, penOpacity, penWidth, CurrentCommandChain);
             }
 
-            Blur(paintableLayer, penWidth, penWidth, camera);
+            // Blur(paintableLayer, penWidth, penWidth, camera);
         }
     }
 
