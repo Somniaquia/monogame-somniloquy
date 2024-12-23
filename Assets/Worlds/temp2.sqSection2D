@@ -1,0 +1,107 @@
+{
+  "Identifier": null,
+  "CoordsInWorldMap": {},
+  "LayerGroups": {
+    "0": {
+      "Identifier": null,
+      "Layers": {
+        "0": {
+          "Type": "TextureLayer2D",
+          "ChunkLength": 128,
+          "Chunks": {
+            "0,-2": {
+              "Texture": {
+                "Width": 128,
+                "Height": 128,
+                "TextureData": "H4sIAAAAAAAACu3awQkCQRQFQVMzCWMwCuMwEO\u002BmJgsj7MHzfKSrIhjofaMuXi4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFFyX6XMw298z0KR9m/5t\u002Brfp3\u002BW7X5vtd90Wv/va/Q/TZ2E/7dv0b9O/Tf82/dv0b9O/Tf82/dv0b9O/y7v/Ntvvsv022\u002B\u002By/Tbb77L9Ntvvsv022\u002B\u002By/Tbb77ov/uPf7n\u002BYPgv7ad\u002Bmf5e7v832u2y/zfa7bL/N9rsei/c97f6H6bOwn/Zt\u002Brfp3\u002BWzv832u2y/63kyfRbm2nsGevRv07/N3d\u002Bmf5e7v832u2y/zfa7bL/tdeKdb7f91/SZ2Ef/rl/t7b9D\u002By7t29z5XbbfZvtdtt9m\u002B13vE7/1m93Pps/FXHvPQIP\u002B/\u002B8D7xT53gAAAQA="
+              },
+              "ChunkLength": 128
+            },
+            "0,-1": {
+              "Texture": {
+                "Width": 128,
+                "Height": 128,
+                "TextureData": "H4sIAAAAAAAACu3YsQ3CMBRFUfZfgoaSHShpaNgIp7AURSFEkWILv3MGQF\u002B\u002B/onC5XLMY4eDP80f0D6X9tk883PZ/Wx2P5fdz2b3c9n9bFP/54z/eXLMu6/dgd7z0b595ezHpn\u002BuX\u002B3t/9imvu8Z7XPbL\u002B9A7/k411r7ytmPT/9s\u002Bud6FZ79mbbae/eP317/XPrnqu237kDvGWnXf3kHnH1e/6r3bJzrXuif3f/bHeg9G23ar90BZ5/Xf9J7JtrRP5v\u002B2W6FZ392/7ne89CW/tnsfjb9s3nvZ9M/m/7Z9M/mmz/bteg9AwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOz1AdR/gygAAAEA"
+              },
+              "ChunkLength": 128
+            },
+            "-1,-1": {
+              "Texture": {
+                "Width": 128,
+                "Height": 128,
+                "TextureData": "H4sIAAAAAAAACu3YsW3DMBBAUe9fp0uRJntkhcyQBbJC1Ag4CHLhhgTy35vgoH8kaD8eAAAAAAAAAAAAAAAAAAAAAACs9nnw1bv0b7fXv0v/rrO989\u002Bkf5v\u002BbR8H93\u002B3/bR7HtbSv\u002Bva3vlv0b/rrr3z36F9l/Zt7vwuZ79N/zb9294Pfu\u002B1\u002B0\u002B752Et/dv0b9O/Tf82/buu7b3/W7Tvcvbb9G/Tv\u002B3t4N3X7j/tnoe19G/Tv03/Nv27vgbvv2770\u002B6Z2NfeDnTo36Z/m7u/Tf82/dv0b9O/Tf92\u002B\u002B/Bfz8ts/3cgd1zsaf9yff///Rv07/N3d\u002Bmf5v\u002Bbfq36d\u002Bmf5v\u002Bbfq36d\u002Bmf5v\u002Bbfq36d\u002Bmf5v\u002Bbfq36d\u002Bmf5v\u002Bbfq36d\u002Bmf5v\u002BbbP/z7B7Lta4a28HOp61twMd\u002Brfp3\u002Bbub9O/Tf82/dv0b9O/Tf82/duu/X\u002BH3bOxxl17O9DxrL0d6NC/7dX\u002Bf9Fwrw8AAAEA"
+              },
+              "ChunkLength": 128
+            },
+            "-1,0": {
+              "Texture": {
+                "Width": 128,
+                "Height": 128,
+                "TextureData": "H4sIAAAAAAAACu3ZMRJAMBRAQfe/rEZPozAZaTHe7gkyXuaLWBb\u002BZJ14e108Q/82/dv0b9O/bdbfGbBD/zYzADOgbey/Xby9Np5x194e6Ji1twc69G/Tv83sb9O/Tf8273/MgDYzgHEP7CdPpuGuvf4tY3v9W8b2\u002Brfo36Z/m/5t\u002Brfp36Y/vv/a9Mf9T5v\u002BuP9t0x//f9r0BwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADg6w6NWI0QAAABAA=="
+              },
+              "ChunkLength": 128
+            },
+            "0,0": {
+              "Texture": {
+                "Width": 128,
+                "Height": 128,
+                "TextureData": "H4sIAAAAAAAACu3cUU7DMBBF0e5/08BPJYRKmjp2rJl3zgpQ5nbsVBWPBwAAAAAAAAAAAFDN14/dfwN756\u002BBXM/5ayDT7/lrII/5ZzP/bHZ/Np//bOaf7e/8vQNkMf9sr\u002BZvB\u002BT4b/4ayHA0fw30927\u002BGujtzPw10NfZ\u002BWugp0/mr4F\u002BPp2/BvrRABrAOYAGcBdEA3gfzGYHYAdkswOwA7LZAdgB2ewA7IBsdgB2QDY7AA1k8xsBNJDN7wXRABpAA7gPogF8N4QG0EA2dwE0kM33Amgg28j8/Y\u002BZXjSQbXT\u002B9kAfGkADaIArDbgT9KABNIAG0AAaQANogKvvh55gDxpAA7gTcLUB94L6ZjSgg9pmNaCDumY2oIOaZjegg3pWNKCDWlY1oINadMDKBuyDGlY3oIMadIAOsA9wLuB\u002BgHsiO98XRpnafXbP\u002BogOdKCDe\u002B3\u002BzB\u002BxD3SgA/vAPrjf3s1/zLmgAx3YB/aBc8G5oAH3Aw24K\u002B4xun\u002B9K3BHB55yDebPig481ZrMnxkdeIo9mD8jHXhqPZ2d/zfQ0gdXAAABAA=="
+              },
+              "ChunkLength": 128
+            },
+            "0,1": {
+              "Texture": {
+                "Width": 128,
+                "Height": 128,
+                "TextureData": "H4sIAAAAAAAACu3SwQkAMAgDQPdfWv\u002BF4ksEuZsgJIngsmxs52Oe/Xl/oBEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4KcAFdvElgAAAQA="
+              },
+              "ChunkLength": 128
+            },
+            "1,0": {
+              "Texture": {
+                "Width": 128,
+                "Height": 128,
+                "TextureData": "H4sIAAAAAAAACu3RwQ3AMAwDsey/dJNPF2gAq4bJCQTdWgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABw5zl8OLP7K72FTHf9Z3fXf3Z3/Wd31/\u002BfPbopvLGtdKMK6Y\u002B/SH8GAAAAUGED1g\u002B1hwAAAQA="
+              },
+              "ChunkLength": 128
+            },
+            "1,1": {
+              "Texture": {
+                "Width": 128,
+                "Height": 128,
+                "TextureData": "H4sIAAAAAAAACu3SgQ0AIAgDQfdfGncgKmm8m4DwrQJ\u002BtZqm72amuw1kO9HdDvLc6J7u5Z80AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAINEGThuDoAAAAQA="
+              },
+              "ChunkLength": 128
+            },
+            "2,0": {
+              "Texture": {
+                "Width": 128,
+                "Height": 128,
+                "TextureData": "H4sIAAAAAAAACu3ZUY7aQABEwb3/pTfhAwkhZ5VYSd5quuoEuJ8GbPPxAQAAAAAAAAAAAAAAAAAAAAAAAAAAAPxNnz9ZdLP7U/1ZaLrrv\u002BWqvfO/Q/9Nv\u002Bru/G9313\u002B7u/7b3fXf7q7/dnf9t7vrv91d/\u002B3u\u002Bn9//7r9Q32NdO31326v/3Z7/b8Xzfc465t036T7Jt036b5J912e43Zpv8t3/i7vbXdpv\u002Bl/d/d/zW537Xe7a7/bXfvd7g/h5c/SfJPum3TfpPsu7Xdpv6nu/lBvsKhu/lTvsKbu/areYknd\u002Bl29x4q685V6kwV14yv1JgvqxlfqTRbUja/UmyyoG1\u002BpN1lQN75Sb7Ki7vyu3mNJ3fpVvcWauvdTvcOauvdTvcOauvereosldet39R4r6s7v6j1W1J3f1XusqDu/q/c4Qd3wjnqzE9QN76g3O0Hd8I56sxPUDe\u002BoNztB3fCOerMT1A3vqDc7Qd3wjnqzE9QN76p3O0Hd8K56t1PUHf9EvdWJ6qa/o97oZHXbr9TbLKgbX6k3WVK3flVvsahu/lBvsEz3bc7zNt/h2/x2b3PPts29\u002BjbPaNs8m2/zTmabd3HbfgCV1YbWAAABAA=="
+              },
+              "ChunkLength": 128
+            },
+            "2,1": {
+              "Texture": {
+                "Width": 128,
+                "Height": 128,
+                "TextureData": "H4sIAAAAAAAACu3BMQEAAAwCoPUv7Q5jCCR1AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAATHu/ZgtRAAABAA=="
+              },
+              "ChunkLength": 128
+            },
+            "3,0": {
+              "Texture": {
+                "Width": 128,
+                "Height": 128,
+                "TextureData": "H4sIAAAAAAAACu3awQnCQBCGUWtR9GZrNmM5FqcreAghV7OE770Khv0Hkp3Z0wkAAAAAAAAAAAAAAICjugyza2B\u002BD\u002BgDroNTaPv2gD5AD\u002BC/gPPPbXAaXfJvuw\u002Bza2Cex\u002BD8m54Ls2thX68VPdDxXlj2wOy6\u002BH/eW\u002BTfy3yrB2bXzL6Zrzn/bvby7\u002BYu/2OSfZv82\u002BTf5rvfJv82//xt7ntt7vltZjxt5nttZrtt5vptdjpt9nlt9rht9vdt3m20ebMFAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABA0Qc/e3TBAAABAA=="
+              },
+              "ChunkLength": 128
+            }
+          },
+          "Identifier": null,
+          "CoordsInSection": {}
+        }
+      }
+    }
+  }
+}

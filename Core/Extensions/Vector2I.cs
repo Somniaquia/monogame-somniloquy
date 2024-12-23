@@ -3,10 +3,12 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
-
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Xna.Framework;
 
 namespace Somniloquy {
@@ -1182,4 +1184,53 @@ namespace Somniloquy {
             return new Vector2I(int.Parse(pair[0]), int.Parse(pair[1]));
         }
     }
+
+    public class Vector2IConverter : JsonConverter<Vector2I> {
+        public override Vector2I Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
+            if (reader.TokenType != JsonTokenType.String)
+                throw new JsonException("Expected string for Vector2I.");
+
+            string serializedValue = reader.GetString();
+            return Vector2I.Deserialize(serializedValue);
+        }
+
+        public override void Write(Utf8JsonWriter writer, Vector2I value, JsonSerializerOptions options) {
+            writer.WriteStringValue(value.Serialize());
+        }
+    }
+
+    public class Vector2IKeyDictionaryConverter<TValue> : JsonConverter<Dictionary<Vector2I, TValue>> {
+        public override Dictionary<Vector2I, TValue> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
+            var result = new Dictionary<Vector2I, TValue>();
+            if (reader.TokenType != JsonTokenType.StartObject)
+                throw new JsonException();
+
+            reader.Read(); // Move past StartObject
+            while (reader.TokenType == JsonTokenType.PropertyName) {
+                string key = reader.GetString();
+                Vector2I vectorKey = Vector2I.Deserialize(key);
+
+                reader.Read(); // Move to value
+                TValue value = JsonSerializer.Deserialize<TValue>(ref reader, options);
+                result.Add(vectorKey, value);
+
+                reader.Read(); // Move to next property or EndObject
+            }
+
+            if (reader.TokenType != JsonTokenType.EndObject)
+                throw new JsonException();
+
+            return result;
+        }
+
+        public override void Write(Utf8JsonWriter writer, Dictionary<Vector2I, TValue> value, JsonSerializerOptions options) {
+            writer.WriteStartObject();
+            foreach (var kvp in value) {
+                writer.WritePropertyName(kvp.Key.Serialize());
+                JsonSerializer.Serialize(writer, kvp.Value, options);
+            }
+            writer.WriteEndObject();
+        }
+    }
+
 }

@@ -319,6 +319,6 @@ C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\obj\DesktopGL\ne
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\Shaders\ETFractal.mgfx
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Worlds\temp.sqSection2D
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\MagicPhysX.dll
-C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Worlds\temp.png
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\temp.png
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Worlds\image.png
+C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Worlds\temp2.sqSection2D

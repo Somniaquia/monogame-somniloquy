@@ -1,6 +1,8 @@
 namespace Somniloquy {
     using System;
     using System.Collections.Generic;
+    using System.Text.Json;
+    using System.Text.Json.Serialization;
     using Microsoft.Xna.Framework;
 
     /// <summary>
@@ -14,10 +16,9 @@ namespace Somniloquy {
     /// <br/><br/>
     /// It is a more viable choice to render the chunks in the Layer2D classes, rather than to have the datatypes as Node2Ds, that will cause drawbacks in performance.
     /// </summary>
-    public partial class Layer2D {
-        public string Identifier;
-        public Vector2 CoordsInSection;
-        public string LayerIdentifier { get; set; }
+    public class Layer2D {
+        [JsonInclude] public string Identifier;
+        [JsonInclude] public Vector2 CoordsInSection;
         // TODO: Translation expressions
 
         public virtual void Update() { }
@@ -49,5 +50,33 @@ namespace Somniloquy {
         public virtual Color? GetColor(Vector2I position) { return null; }
 
         public abstract void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain = null);
+    }
+
+    public class Layer2DConverter : JsonConverter<Layer2D> {
+        public override Layer2D Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
+            using (JsonDocument document = JsonDocument.ParseValue(ref reader)) {
+                var root = document.RootElement;
+
+                if (!root.TryGetProperty("Type", out var typeProp))
+                    throw new JsonException("Missing type discriminator in JSON.");
+
+                string type = typeProp.GetString();
+
+                return type switch {
+                    "TextureLayer2D" => JsonSerializer.Deserialize<TextureLayer2D>(root.GetRawText(), options),
+                    _ => throw new JsonException($"Unsupported type: {type}")
+                };
+            }
+        }
+
+        public override void Write(Utf8JsonWriter writer, Layer2D value, JsonSerializerOptions options) {
+            writer.WriteStartObject();
+            writer.WriteString("Type", value.GetType().Name);
+            foreach (var property in JsonSerializer.SerializeToElement(value, value.GetType(), options).EnumerateObject()) {
+                property.WriteTo(writer);
+            }
+
+            writer.WriteEndObject();
+        }
     }
 }

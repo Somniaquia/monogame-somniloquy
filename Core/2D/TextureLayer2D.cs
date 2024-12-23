@@ -9,8 +9,8 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework.Graphics;
 
     public partial class TextureLayer2D : Layer2D, IPaintableLayer2D {
-        public int ChunkLength = 128;
-        public Dictionary<Vector2I, TextureChunk2D> Chunks = new();
+        [JsonInclude] public int ChunkLength = 128;
+        [JsonInclude] public Dictionary<Vector2I, TextureChunk2D> Chunks = new();
 
         public Vector2I GetChunkPosition(Vector2I canvasPosition) => canvasPosition / ChunkLength;
         public Vector2I GetPositionInChunk(Vector2I canvasPosition) => Util.PosMod(canvasPosition, new Vector2I(ChunkLength, ChunkLength));
@@ -138,10 +138,12 @@ namespace Somniloquy {
     }
     
     public class TextureChunk2D {
-        public TextureLayer2D ParentLayer;
-        public SQTexture2D Texture;
-        public int ChunkLength;
+        [JsonIgnore] public TextureLayer2D ParentLayer;
+        [JsonInclude] public SQTexture2D Texture;
+        [JsonInclude] public int ChunkLength;
         
+        public TextureChunk2D() { }
+
         public TextureChunk2D (TextureLayer2D parentLayer, int chunkLength) {
             ParentLayer = parentLayer;
             ChunkLength = chunkLength;
@@ -160,103 +162,4 @@ namespace Somniloquy {
             return Texture.GetColor(positionInChunk);
         }
     }
-
-    public class TextureLayer2DConverter : JsonConverter<TextureLayer2D> {
-        public override TextureLayer2D Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
-            reader.Read();
-
-            int chunkLength = 0;
-            var chunks = new Dictionary<Vector2I, TextureChunk2D>();
-
-            while (reader.TokenType == JsonTokenType.PropertyName) {
-                string propertyName = reader.GetString();
-                reader.Read();
-
-                if (propertyName == "ChunkLength") {
-                    chunkLength = reader.GetInt32();
-                } else if (propertyName == "Chunks") {
-                    if (reader.TokenType != JsonTokenType.StartObject)
-                        throw new JsonException("Chunks should be an object");
-
-                    reader.Read();
-                    while (reader.TokenType == JsonTokenType.PropertyName) {
-                        string chunkKey = reader.GetString();
-                        Vector2I chunkPosition = Vector2I.Deserialize(chunkKey);
-
-                        reader.Read();
-                        TextureChunk2D chunk = JsonSerializer.Deserialize<TextureChunk2D>(ref reader, options);
-                        chunks.Add(chunkPosition, chunk);
-
-                        reader.Read();
-                    }
-                }
-                reader.Read();
-            }
-
-            var textureLayer = new TextureLayer2D();
-            textureLayer.ChunkLength = chunkLength;
-
-            foreach (var chunk in chunks) {
-                chunk.Value.ParentLayer = textureLayer;
-            }
-
-            textureLayer.Chunks = chunks;
-            return textureLayer;
-        }
-
-        public override void Write(Utf8JsonWriter writer, TextureLayer2D value, JsonSerializerOptions options) {
-            writer.WriteStartObject();
-
-            writer.WriteNumber("ChunkLength", value.ChunkLength);
-            writer.WritePropertyName("Chunks");
-            writer.WriteStartObject();
-
-            foreach (var pair in value.Chunks) {
-                string chunkKey = pair.Key.Serialize();
-                writer.WritePropertyName(chunkKey);
-                JsonSerializer.Serialize(writer, pair.Value, options);
-            }
-
-            writer.WriteEndObject();
-            writer.WriteEndObject();
-        }
-    }
-
-    public class TextureChunk2DConverter : JsonConverter<TextureChunk2D> {
-        public override TextureChunk2D Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
-            reader.Read();
-
-            int chunkLength = 0;
-            SQTexture2D texture = null;
-
-            while (reader.TokenType == JsonTokenType.PropertyName) {
-                string propertyName = reader.GetString();
-                reader.Read();
-
-                if (propertyName == "ChunkLength") {
-                    chunkLength = reader.GetInt32();
-                } else if (propertyName == "Texture") {
-                    texture = JsonSerializer.Deserialize<SQTexture2D>(ref reader, options);
-                }
-                reader.Read();
-            }
-
-            if (texture == null)
-                throw new JsonException("Missing Texture in JSON.");
-
-            var chunk = new TextureChunk2D(null, chunkLength) { Texture = texture };
-            return chunk;
-        }
-
-        public override void Write(Utf8JsonWriter writer, TextureChunk2D value, JsonSerializerOptions options) {
-            writer.WriteStartObject();
-
-            writer.WriteNumber("ChunkLength", value.ChunkLength);
-            writer.WritePropertyName("Texture");
-            JsonSerializer.Serialize(writer, value.Texture, options);
-
-            writer.WriteEndObject();
-        }
-    }
-
 }

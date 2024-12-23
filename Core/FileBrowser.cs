@@ -83,14 +83,14 @@ namespace Somniloquy {
                             DebugInfo.AddTempLine(() => $"Error: Section2DScreen doesn't exist.", 5);
                             return;
                         }
-                        try {
+                        // try {
                             string json = File.ReadAllText(path);
                             sectionScreen.Section = Section2D.Deserialize(json);
                             sectionScreen.Editor.SelectedLayer = sectionScreen.Section.LayerGroups.First().Value.Layers.Values.OfType<TextureLayer2D>().FirstOrDefault();
                             DebugInfo.AddTempLine(() => $"Loaded section from {Path.GetFileName(path)}", 5);
-                        } catch (Exception e) {
-                            DebugInfo.AddTempLine(() => $"Error reading {Path.GetFileName(path)}: {e.Message}", 5);
-                        }
+                        // } catch (Exception e) {
+                        //     DebugInfo.AddTempLine(() => $"Error reading {Path.GetFileName(path)}: {e.Message}", 5);
+                        // }
                     } else {
                         DebugInfo.AddTempLine(() => $"{Path.GetFileName(path)} is an unsupported file type.", 5);
                     }

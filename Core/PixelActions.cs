@@ -22,6 +22,9 @@ namespace Somniloquy {
  
         public static void ApplyLineAction(Vector2I start, Vector2I end, int radius, PixelAction action) {
             var (x0, y0, x1, y1) = (start.X, start.Y, end.X, end.Y);
+            var (dx, dy) = (Math.Abs(x1 - x0), Math.Abs(y1 - y0));
+            int sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
+            int err = dx - dy;
 
             if (radius > 0) {
                 ApplyCircleAction(new Vector2I(x0, y0), radius, true, action);
@@ -45,10 +48,6 @@ namespace Somniloquy {
                 }
             } else {
                 while (true) {
-                    int dx = Math.Abs(x1 - x0), dy = Math.Abs(y1 - y0);
-                    int sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
-                    int err = dx - dy;
-
                     action(new Vector2I(x0, y0));
                     if (x0 == x1 && y0 == y1) break;
 
