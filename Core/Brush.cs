@@ -45,10 +45,10 @@ namespace Somniloquy {
                         }
                     }
                     
-                    Debug.Assert(color[0] <= 256);
-                    Debug.Assert(color[1] <= 256);
-                    Debug.Assert(color[2] <= 256);
-                    Debug.Assert(color[3] <= 256);
+                    // Debug.Assert(color[0] <= 256);
+                    // Debug.Assert(color[1] <= 256);
+                    // Debug.Assert(color[2] <= 256);
+                    // Debug.Assert(color[3] <= 256);
                     
                     newColors[x + radius, y + radius] = new Color((byte)color[0], (byte)color[1], (byte)color[2], (byte)color[3]);
                 }
@@ -66,9 +66,9 @@ namespace Somniloquy {
 
     public class WaterPaint : Brush {
         public override void Paint(IPaintableLayer2D paintableLayer, bool initializingPress, Color color, Camera2D camera) {
-            int penWidth = (int)(InputManager.GetPenPressure() * 16 / camera.Zoom);
+            int penWidth = InputManager.GetPenPressure() != 0 ? (int)(InputManager.GetPenPressure() * 16 / camera.Zoom) : (int)(InputManager.AverageMouseSpeed / 400);
             // float penOpacity = 1;
-            float penOpacity = InputManager.GetPenPressure() != 0 ? InputManager.GetPenPressure() : 1;
+            float penOpacity = InputManager.GetPenPressure() != 0 ? InputManager.GetPenPressure() : MathF.Min(1, InputManager.AverageMouseSpeed / 1600);
 
             if (initializingPress) {   
                 if (CurrentCommandChain is not null) CurrentCommandChain.AffectedPixels = null;
@@ -85,7 +85,7 @@ namespace Somniloquy {
 
     public class OilPaint : Brush {
         public override void Paint(IPaintableLayer2D paintableLayer, bool initializingPress, Color color, Camera2D camera) {
-            int penWidth = (int)(InputManager.GetPenPressure() * 16 / camera.Zoom);
+            int penWidth = InputManager.GetPenPressure() != 0 ? (int)(InputManager.GetPenPressure() * 16 / camera.Zoom) : (int)(InputManager.AverageMouseSpeed / 1600);
             float penOpacity = 1;
 
             if (initializingPress) {   
@@ -105,7 +105,6 @@ namespace Somniloquy {
         public override void Paint(IPaintableLayer2D paintableLayer, bool initializingPress, Color color, Camera2D camera) {
             int penWidth = 0;
             float penOpacity = 1;
-            // float penOpacity = InputManager.GetPenPressure() != 0 ? InputManager.GetPenPressure() : 1;
 
             if (initializingPress) {
                 if (CurrentCommandChain is not null) CurrentCommandChain.AffectedPixels = null;

@@ -107,7 +107,7 @@ namespace Somniloquy {
             }
         }
 
-        public override void Draw(Camera2D camera, bool drawOutlines = false, float opacity = 1f) {
+        public override void Draw(Camera2D camera, float opacity = 1f, float gridOpacity = 0f) {
             Vector2 topLeft = camera.VisibleRectangleInWorld.TopLeft() - new Vector2(1);
             Vector2 bottomRight = camera.VisibleRectangleInWorld.BottomRight() + new Vector2(1);
             Vector2I topLeftChunk = new((int)(topLeft.X / ChunkLength) - 1, (int)(topLeft.Y / ChunkLength) - 1);
@@ -124,9 +124,9 @@ namespace Somniloquy {
                     float yTop = MathF.Min(MathF.Max(topLeft.Y, chunkPos.Y), bottomRight.Y);
                     float yBottom = MathF.Max(MathF.Min(bottomRight.Y, nextChunkPos.Y), topLeft.Y);
 
-                    if (drawOutlines) {   
-                        camera.DrawLine(chunkPos, (chunkIndex + new Vector2I(1, 0)) * ChunkLength, Color.Gray * 0.5f, scale: false);
-                        camera.DrawLine(chunkPos, (chunkIndex + new Vector2I(0, 1)) * ChunkLength, Color.Gray * 0.5f, scale: false);
+                    if (gridOpacity > 0.1f) {
+                        camera.DrawLine(chunkPos, (chunkIndex + new Vector2I(1, 0)) * ChunkLength, Color.Gray * (gridOpacity / 2), scale: false);
+                        camera.DrawLine(chunkPos, (chunkIndex + new Vector2I(0, 1)) * ChunkLength, Color.Gray * (gridOpacity / 2), scale: false);
                     }
                     
                     if (!Chunks.ContainsKey(chunkIndex)) continue;

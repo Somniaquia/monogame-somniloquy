@@ -37,13 +37,16 @@ namespace Somniloquy {
 
         private static MouseState CurrentMouseState;
         public static int ScrollWheelDelta;
+        public static Queue<float> MouseSpeedSamples = new();
+        public static float AverageMouseSpeed;
         private static Dictionary<Keys, KeyState> KeyStates = new();
         private static Dictionary<MouseButtons, KeyState> MouseButtonStates = new();
         public static List<Keybind> Keybinds = new();
         public static List<Action> PostKeyActions = new();
 
         public static bool[] PenButtons = new bool[3];
-        public static float PenPressure = 1.0f;
+        public static float AveragePenPressure;
+        public static Queue<float> PenPressureSamples = new();
         public static Vector2 PenTilt = Vector2.Zero;
 
         private class KeyState {
@@ -76,6 +79,7 @@ namespace Somniloquy {
             wintabData = new CWintabData(logContext);
 
             DebugInfo.Subscribe(() => $"Pressed Keys: {PrintPressedKeys()}");
+            DebugInfo.Subscribe(() => $"Mouse Speed / 100: {AverageMouseSpeed / 100}");
         }
 
         public static void Update() {
@@ -125,9 +129,19 @@ namespace Somniloquy {
         }
 
         private static void UpdateMouseState() {
-            var previousScrollWheelValue = CurrentMouseState.ScrollWheelValue;
+            var previousMouseState = CurrentMouseState;
             CurrentMouseState = Mouse.GetState();
-            ScrollWheelDelta = CurrentMouseState.ScrollWheelValue - previousScrollWheelValue;
+
+            ScrollWheelDelta = CurrentMouseState.ScrollWheelValue - previousMouseState.ScrollWheelValue;
+            float currentMouseSpeed = (float)((CurrentMouseState.Position - previousMouseState.Position).ToVector2().Length() / (float)SQ.GameTime.ElapsedGameTime.TotalSeconds);
+            MouseSpeedSamples.Enqueue(currentMouseSpeed);
+
+            if (MouseSpeedSamples.Count > 10) {
+                MouseSpeedSamples.Dequeue();
+                AverageMouseSpeed = MouseSpeedSamples.Average(i => i);
+            } else {
+                AverageMouseSpeed = currentMouseSpeed;
+            }
 
             foreach (MouseButtons button in Enum.GetValues(typeof(MouseButtons))) {
                 bool isDown = IsMouseButtonDown(button);
@@ -157,10 +171,19 @@ namespace Somniloquy {
 
         private static void UpdateTabletState() {
             float maxPressure = CWintabInfo.GetMaxPressure();
-            uint count = 0; PenPressure = 0;
-            WintabPacket[] packets = wintabData.GetDataPackets(10, true, ref count);
+            uint count = 10; float currentPressure = 0f;
+            WintabPacket[] packets = wintabData.GetDataPackets(count, true, ref count);
             for (int i = 0; i < count; i++) {
-                PenPressure = packets[i].pkNormalPressure / maxPressure;
+                currentPressure = MathF.Max(currentPressure, packets[i].pkNormalPressure / maxPressure);
+            }
+
+            PenPressureSamples.Enqueue(currentPressure);
+
+            if (PenPressureSamples.Count > 10) {
+                PenPressureSamples.Dequeue();
+                AveragePenPressure = PenPressureSamples.Average(i => i);
+            } else {
+                AveragePenPressure = currentPressure;
             }
         }
 
@@ -242,7 +265,7 @@ namespace Somniloquy {
         public static double ElapsedSecondsSinceMouseButtonPressed(MouseButtons mouseButton) => MouseButtonStates[mouseButton].IsDown ? MouseButtonStates[mouseButton].ElapsedSeconds : -1;
         public static double ElapsedSecondsSinceKeyReleased(MouseButtons mouseButton) => !MouseButtonStates[mouseButton].IsDown ? MouseButtonStates[mouseButton].ElapsedSeconds : -1;
 
-        public static float GetPenPressure() => PenPressure;
+        public static float GetPenPressure() => AveragePenPressure;
         public static Vector2 GetPenTilt() => PenTilt;
         public static bool IsPenButtonPressed(int buttonIndex) {
             if (buttonIndex < 1 || buttonIndex > 3) {

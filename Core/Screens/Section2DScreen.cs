@@ -87,7 +87,7 @@ namespace Somniloquy {
             ColorPicker = new ColorPicker(new Rectangle(SQ.WindowSize.X - 264, SQ.WindowSize.Y - 264, 256, 256), this);
             LayerTable = new LayerTable(Screen);
 
-            DebugInfo.Subscribe(() => $"Pen Pressure: {InputManager.PenPressure}");
+            DebugInfo.Subscribe(() => $"Pen Pressure: {InputManager.AveragePenPressure}");
             DebugInfo.Subscribe(() => $"Pen Tilt: {InputManager.PenTilt}");
             DebugInfo.Subscribe(() => $"Undo History: {CommandManager.UndoHistory.Count}");
             DebugInfo.Subscribe(() => $"Redo History: {CommandManager.RedoHistory.Count}");
@@ -186,11 +186,12 @@ namespace Somniloquy {
             foreach (var layerGroup in Screen.Section.LayerGroups) {
                 foreach (var layer in layerGroup.Value.Layers) {
                     if (layer.Value == SelectedLayer) {
-                        layer.Value.Draw(Screen.Camera, true);
+                        // layer.Value.Draw(Screen.Camera, 1f, MathF.Min(Screen.Camera.Zoom, 1f));
+                        layer.Value.Draw(Screen.Camera, 1f, 1f);
                     } else if (layerGroup.Value.Layers.ContainsValue(SelectedLayer)){
-                        layer.Value.Draw(Screen.Camera, false, 0.8f);
+                        layer.Value.Draw(Screen.Camera, 0.8f);
                     } else {
-                        layer.Value.Draw(Screen.Camera, false, 0.2f);
+                        layer.Value.Draw(Screen.Camera, 0.2f);
                     }
                 }
             }

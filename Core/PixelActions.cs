@@ -26,20 +26,27 @@ namespace Somniloquy {
             if (radius > 0) {
                 ApplyCircleAction(new Vector2I(x0, y0), radius, true, action);
                 ApplyCircleAction(new Vector2I(x1, y1), radius, true, action);
+    
+                Vector2 d = Vector2.Normalize(end - start).PerpendicularClockwise() * radius;
 
-                float gradient = -(float)(x1 - x0) / (y1 - y0);
+                Vector2I previousOffsettedStart = (Vector2I)(start - d);
+                Vector2I previousOffsettedEnd = (Vector2I)(end - d);
+
                 for (int i = - radius; i <= radius; i++) {
-                    Vector2 d = Vector2.Normalize(end - start).PerpendicularClockwise();
-                    ApplyLineAction((Vector2I)(start + (float)i / radius * d), (Vector2I)(end + (float)i / radius * d), 0, action);
+                    Vector2I offsettedStart = (Vector2I)(start + (float)i / radius * d);
+                    Vector2I offsettedEnd = (Vector2I)(end + (float)i / radius * d);
+                    if ((previousOffsettedStart - offsettedStart).Length() > 1.4) {
+                        ApplyLineAction(new Vector2I(previousOffsettedStart.X, offsettedStart.Y), new Vector2I(previousOffsettedEnd.X, offsettedEnd.Y), 0, action);
+                    }
+                    previousOffsettedStart = offsettedStart;
+                    previousOffsettedEnd = offsettedEnd;
+
+                    ApplyLineAction(offsettedStart, offsettedEnd, 0, action);
                 }
             } else {
                 while (true) {
-                    int dx = Math.Abs(x1 - x0);
-                    int dy = Math.Abs(y1 - y0);
-
-                    int sx = x0 < x1 ? 1 : -1;
-                    int sy = y0 < y1 ? 1 : -1;
-
+                    int dx = Math.Abs(x1 - x0), dy = Math.Abs(y1 - y0);
+                    int sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
                     int err = dx - dy;
 
                     action(new Vector2I(x0, y0));

@@ -111,7 +111,7 @@
             // }
         }
 
-        public override void Draw(Camera2D camera, bool drawOutlines = false, float opacity = 1f) {
+        public override void Draw(Camera2D camera, float opacity = 1f, float gridOpacity = 0f) {
             var chunkLengthInPixels = ChunkLength * TileLength;
 
             Vector2 topLeft = camera.VisibleRectangleInWorld.TopLeft() - new Vector2(1);
@@ -130,9 +130,9 @@
                     float yTop = MathF.Min(MathF.Max(topLeft.Y, chunkPos.Y), bottomRight.Y);
                     float yBottom = MathF.Max(MathF.Min(bottomRight.Y, nextChunkPos.Y), topLeft.Y);
 
-                    if (drawOutlines) {
-                        camera.DrawLine(chunkPos, (chunkIndex + new Vector2I(1, 0)) * chunkLengthInPixels, Color.Gray * 0.5f, scale: false);
-                        camera.DrawLine(chunkPos, (chunkIndex + new Vector2I(0, 1)) * chunkLengthInPixels, Color.Gray * 0.5f, scale: false);
+                    if (gridOpacity > 0.1f) {
+                        camera.DrawLine(chunkPos, (chunkIndex + new Vector2I(1, 0)) * chunkLengthInPixels, Color.Gray * (gridOpacity / 2), scale: false);
+                        camera.DrawLine(chunkPos, (chunkIndex + new Vector2I(0, 1)) * chunkLengthInPixels, Color.Gray * (gridOpacity / 2), scale: false);
 
                         for (int tx = 0; tx < ChunkLength; tx++) {
                             Vector2 verticalStart = chunkPos + new Vector2I(tx * TileLength, 0);
@@ -140,7 +140,7 @@
 
                             verticalStart = new Vector2(verticalStart.X, MathF.Max(verticalStart.Y, yTop));
                             verticalEnd = new Vector2(verticalEnd.X, MathF.Min(verticalEnd.Y, yBottom));
-                            camera.DrawLine((Vector2I)verticalStart, (Vector2I)verticalEnd, Color.Gray * 0.3f, scale: false);
+                            camera.DrawLine((Vector2I)verticalStart, (Vector2I)verticalEnd, Color.Gray * (gridOpacity / 4), scale: false);
                         }
 
                         for (int ty = 0; ty < ChunkLength; ty++) {
@@ -149,7 +149,7 @@
 
                             horizontalStart = new Vector2(MathF.Max(horizontalStart.X, xLeft), horizontalStart.Y);
                             horizontalEnd = new Vector2(MathF.Min(horizontalEnd.X, xRight), horizontalEnd.Y);
-                            camera.DrawLine((Vector2I)horizontalStart, (Vector2I)horizontalEnd, Color.Gray * 0.3f, scale: false);
+                            camera.DrawLine((Vector2I)horizontalStart, (Vector2I)horizontalEnd, Color.Gray * (gridOpacity / 4), scale: false);
                         }
                     }
                     

@@ -22,7 +22,7 @@ namespace Somniloquy {
 
         public virtual void Update() { }
 
-        public virtual void Draw(Camera2D camera, bool drawOutlines = false, float opacity = 1f) { }
+        public virtual void Draw(Camera2D camera, float opacity = 1f, float gridOpacity = 0f) { }
     }
 
     public interface IPaintableLayer2D {
