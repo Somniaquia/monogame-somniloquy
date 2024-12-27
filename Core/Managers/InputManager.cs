@@ -136,7 +136,7 @@ namespace Somniloquy {
             float currentMouseSpeed = (float)((CurrentMouseState.Position - previousMouseState.Position).ToVector2().Length() / (float)SQ.GameTime.ElapsedGameTime.TotalSeconds);
             MouseSpeedSamples.Enqueue(currentMouseSpeed);
 
-            if (MouseSpeedSamples.Count > 10) {
+            if (MouseSpeedSamples.Count > 20) {
                 MouseSpeedSamples.Dequeue();
                 AverageMouseSpeed = MouseSpeedSamples.Average(i => i);
             } else {

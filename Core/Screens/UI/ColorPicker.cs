@@ -91,7 +91,7 @@ namespace Somniloquy {
         }
 
         public override void Draw() {
-            if (Screen.EditorState == EditorState.PaintMode) {
+            if (Screen.EditorMode == EditorMode.PaintMode) {
                 HuePicker.Draw();
 
                 // int borderLength = (IsFocused()) ? 8 : 6;
@@ -133,7 +133,7 @@ namespace Somniloquy {
         }
 
         public override void Draw() {
-            if (ColorPicker.Screen.EditorState == EditorState.PaintMode) {
+            if (ColorPicker.Screen.EditorMode == EditorMode.PaintMode) {
                 int borderLength = 4;
                 SQ.SB.DrawFilledRectangle(new RectangleF(Boundaries.X - borderLength, Boundaries.Y - borderLength, Boundaries.Width + borderLength * 2, Boundaries.Height + borderLength * 2), ColorPicker.Screen.SelectedColor);
                 SQ.SB.Draw(BarTexture, (Rectangle)Boundaries, Color.White);

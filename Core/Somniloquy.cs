@@ -71,17 +71,6 @@ namespace Somniloquy {
             Misaki = Content.Load<SpriteFont>("Fonts/Misaki");
 
             ScreenManager.AddScreen(new Section2DScreen(new Rectangle(new(), WindowSize)));
-            // BoxScreen testBox = (BoxScreen)ScreenManager.AddScreen(new BoxScreen(new Rectangle(10, 10, 1200, 800)));
-            // new BoxScreen(testBox, 10, 10);
-            // new BoxScreen(testBox, 10, 10);
-            // var innerBox3 = new BoxScreen(testBox, 10, 10) { Axis = Axis.Vertical };
-            // new BoxScreen(innerBox3, 10, 10);
-            // new BoxScreen(innerBox3, 10, 10);
-            // var innerinnerBox = new BoxScreen(innerBox3, 10, 10) { Axis = Axis.Vertical };
-
-            // new TextLabel(innerinnerBox, "Hellooo");
-            // new TextLabel(innerinnerBox, "I am your father");
-            // new TextLabel(innerinnerBox, "NOOOOOOOO");
             ScreenManager.LoadContent();
             ShaderManager.LoadContent(null);
 

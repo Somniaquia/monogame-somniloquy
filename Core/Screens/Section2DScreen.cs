@@ -44,7 +44,8 @@ namespace Somniloquy {
         }
     }
     
-    public enum EditorState { PaintMode, TileMode, }
+    public enum EditorMode { PaintMode, TileMode, }
+    public enum PaintModeState { Idle, Rectangle, Line, Select }
 
     public class Section2DEditor : BoxScreen {
         public Section2DScreen Screen;
@@ -53,7 +54,7 @@ namespace Somniloquy {
         public LayerTable LayerTable;
 
         public Color SelectedColor = Color.White;
-        public EditorState EditorState = EditorState.PaintMode;
+        public EditorMode EditorMode = EditorMode.PaintMode;
         private int currentBrushIndex;
         public Brush Brush => Brush.BrushTypes[currentBrushIndex];
 
