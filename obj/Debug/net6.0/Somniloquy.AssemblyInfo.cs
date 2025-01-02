@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Somniloquy")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b5fbe66c2f73e5a687d33564353b3f9241f4f824")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4420334cc4ea1383f44792fb24bd2956c04b84ac")]
 [assembly: System.Reflection.AssemblyProductAttribute("Somniloquy")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Somniloquy")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

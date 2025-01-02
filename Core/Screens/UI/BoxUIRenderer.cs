@@ -13,4 +13,10 @@ namespace Somniloquy {
             SQ.SB.DrawLine((Vector2I)rectangle.BottomLeft(), (Vector2I)rectangle.TopLeft(), Color.Purple * 0.5f, 1);
         }
     }
+
+    public class BoxUIDefaultRenderer : BoxUIRenderer {
+        public override void Draw(RectangleF rectangle) {
+            SQ.SB.DrawRectangle(rectangle, Color.White);
+        }
+    }
 }

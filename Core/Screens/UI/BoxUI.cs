@@ -14,7 +14,7 @@ namespace Somniloquy {
         public BoxUI Parent;
         public RectangleF Boundaries;
         public Matrix Transform;
-        public BoxUIRenderer Renderer = new BoxUIDebugRenderer();
+        public BoxUIRenderer Renderer = new BoxUIDefaultRenderer();
 
         public Sides Margin = Sides.None;
         public Sides Padding = Sides.None;
@@ -34,7 +34,7 @@ namespace Somniloquy {
 
         public BoxUI() {}
 
-        public BoxUI(BoxUI parent, float margin = 20, float padding = 20) : this(parent, new Sides(margin), new Sides(padding), Axis.Horizontal, Align.Begin, Align.Center) { }
+        public BoxUI(BoxUI parent, float margin = 0, float padding = 0) : this(parent, new Sides(margin), new Sides(padding), Axis.Horizontal, Align.Begin, Align.Center) { }
         public BoxUI(BoxUI parent, Sides margin, Sides padding, Axis axis, Align mainAxisAlign, Align perpendicularAxisAlign) {
             Parent = parent;
             Margin = margin;
@@ -81,15 +81,12 @@ namespace Somniloquy {
                 if (contentLength <= MaxLength) {
                     if (MainAxisAlign == Align.Begin) {
                         float position = MainAxis == Axis.Horizontal ? Boundaries.X : Boundaries.Y;
-                        position += Util.Max(Padding.GetSide(MainAxis, false), children[0].Margin.GetSide(MainAxis, true));
                         position += ScrollValue;
 
-                        for (int i = 0; i < children.Count - 1; i++) {
-                            children[i].SetBoundariesAxis(MainAxis, position, position + children[i].GetContentLength(MainAxis));
-                            position += children[i].GetContentLength(MainAxis);
-                            position += Util.Max(children[i].Margin.GetSide(MainAxis, true), children[i + 1].Margin.GetSide(MainAxis, false));
+                        for (int i = 0; i < children.Count; i++) {
+                            position += GetSeperationByIndex(MainAxis, i);
+                            children[i].SetBoundariesAxis(MainAxis, position, position += children[i].GetContentLength(MainAxis));
                         }
-                        children[^1].SetBoundariesAxis(MainAxis, position, position + children[^1].GetContentLength(MainAxis));
                     } else if (MainAxisAlign == Align.End) {
 
                     } else if (MainAxisAlign == Align.Center) {
@@ -113,7 +110,7 @@ namespace Somniloquy {
                         } else if (PerpendicularAxisAlign == Align.End) {
 
                         } else if (PerpendicularAxisAlign is Align.Center or Align.Even) {
-                            var begin = Boundaries.GetSide(PerpendicularAxis, true) 
+                            var begin = Boundaries.GetSide(PerpendicularAxis, true)
                                 + Util.Max(Padding.GetSide(PerpendicularAxis, true), child.Margin.GetSide(PerpendicularAxis, true));
                             var end = Boundaries.GetSide(PerpendicularAxis, false) 
                                 - Util.Max(Padding.GetSide(PerpendicularAxis, false), child.Margin.GetSide(PerpendicularAxis, false));
@@ -121,7 +118,7 @@ namespace Somniloquy {
                             child.SetBoundariesAxis(PerpendicularAxis, begin, end);
                         }
                     } else {
-                        
+                        throw new System.Exception("AAAAAAAA Unimplemented!!");
                     }
                 }
             }
@@ -129,7 +126,12 @@ namespace Somniloquy {
             Parent?.PositionChildren();
         }
 
-        
+        public float GetSeperationByIndex(Axis axis, int i) {
+            float start = i == 0 ? Padding.GetSide(axis, false) : ((BoxUI)Children[i - 1]).Margin.GetSide(axis, false);
+            float end = i == Children.Count ? Padding.GetSide(axis, true) : ((BoxUI)Children[i]).Margin.GetSide(axis, true);
+
+            return Util.Max(start, end);
+        }
 
         // An element cannot be expanded if it is the Root element, a child of a divisionPositioner
         public float GetMaxLength(Axis axis) {
@@ -149,18 +151,17 @@ namespace Somniloquy {
             if (children.Count == 0) return Padding.GetSideSum(axis);
 
             if (MainAxis == axis) {
-                float length = Util.Max(Padding.GetSide(axis, false), children[0].Margin.GetSide(axis, true))
-                    + Util.Max(children[^1].Margin.GetSide(axis, false), Padding.GetSide(axis, true));
+                float length = 0;
 
-                for (int i = 0; i < children.Count - 1; i++) {
+                for (int i = 0; i < children.Count; i++) {
+                    length += GetSeperationByIndex(axis, i);
                     length += children[i].GetContentLength(axis);
-                    length += Util.Max(children[i].Margin.GetSide(axis, true), children[i + 1].Margin.GetSide(axis, false));
                 }
-                length += children[^1].GetContentLength(axis);
+                length += GetSeperationByIndex(axis, children.Count);
 
                 return length;
             } else {
-                return children.Max(child => child.GetContentLength(axis));
+                return children.Max(child => Util.Max(child.Margin.GetSide(axis, true), Padding.GetSide(axis, true)) + child.GetContentLength(axis) + Util.Max(child.Margin.GetSide(axis, false), Padding.GetSide(axis, false)));
             }
         }
 

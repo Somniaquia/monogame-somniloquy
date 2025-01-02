@@ -68,7 +68,7 @@ namespace Somniloquy {
             // SerializationManager.InitializeDirectories((typeof(World), "Worlds"), (typeof(Texture2D), "Textures"));
             InputManager.Initialize(Window);
             SoundManager.Initialize("C:\\Somnia\\Projects\\monogame-somniloquy\\Assets\\Loops");
-            FileBrowser.Initialize();
+            FileExplorer.Initialize();
             ShaderManager.Initialize();
         }
 
@@ -86,16 +86,6 @@ namespace Somniloquy {
             var sectionScreen = new Section2DScreen(new Rectangle(new(), WindowSize));
             ScreenManager.LoadContent();
             ShaderManager.LoadContent(null);
-
-            var root = new BoxUI(Util.ShrinkRectangle(new Rectangle(0, 0, WindowSize.X, WindowSize.Y), new(20)));
-            var element1 = root.AddChild(new BoxUI(root, 20, 20));
-            var element2 = root.AddChild(new BoxUI(root, 20, 20));
-            var element3 = root.AddChild(new BoxUI(root, 20, 20) { MainAxis = Axis.Horizontal });
-
-            var element31 = element3.AddChild(new BoxUI(element3, 20, 20));
-            var element32 = element3.AddChild(new BoxUI(element3, 20, 20));
-            var element33 = element3.AddChild(new BoxUI(element3, 20, 20));
-
         }
 
         [DllImport("user32.dll")]
@@ -139,7 +129,7 @@ namespace Somniloquy {
                 SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
                     ScreenManager.Draw();
                     DebugInfo.Draw(Misaki);
-                    FileBrowser.Draw(Misaki);
+                    FileBrowserLegacy.Draw(Misaki);
                 SB.End();
                 base.Draw(gameTime);
             }

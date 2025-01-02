@@ -10,7 +10,7 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework.Graphics;
     using Microsoft.Xna.Framework.Input;
 
-    public static class FileBrowser {
+    public static class FileBrowserLegacy {
         private static List<string> lines = new List<string>();
         public static string CurrentDirectory;
         public static int HighlightedLine;
