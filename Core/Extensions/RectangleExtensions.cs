@@ -35,5 +35,17 @@ namespace Somniloquy {
         public static RectangleF ExpandSouthEast(this RectangleF rectangle, float amount) {
             return new(rectangle.X, rectangle.Y, rectangle.Width + amount, rectangle.Height + amount);
         }
+
+        public static float GetAxisLength(this RectangleF rectangle, Axis axis) {
+            return (axis == Axis.Horizontal) ? rectangle.Width : rectangle.Height;
+        }
+
+        public static float GetSide(this RectangleF rectangle, Axis axis, bool start) {
+            if (axis == Axis.Horizontal) {
+                return start ? rectangle.X : rectangle.X + rectangle.Width;
+            } else {
+                return start ? rectangle.Y : rectangle.Y + rectangle.Height;
+            }
+        }
     }
 }

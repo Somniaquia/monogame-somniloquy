@@ -2,13 +2,13 @@ namespace Somniloquy {
     using System.Linq;
     using Microsoft.Xna.Framework;
 
-    public class TextLabel : BoxScreen {
+    public class TextLabel : BoxUI {
         public string Text;
         public bool Editable;
         public Axis AlignAxis; // Line up letters in either horizontal or vertical
         public Axis LetterAxis; // is each letter standing upright are or lying 90 degrees
 
-        public TextLabel(BoxScreen parent, string text, bool editable = false, Axis textAxis = Axis.Horizontal, Axis letterAxis = Axis.Vertical, float margin = 0) : base(parent, margin: margin) {
+        public TextLabel(BoxUI parent, string text, bool editable = false, Axis textAxis = Axis.Horizontal, Axis letterAxis = Axis.Vertical, float margin = 0) : base(parent, margin: margin) {
             Text = text;
             Editable = editable;
             AlignAxis = textAxis;
@@ -26,7 +26,7 @@ namespace Somniloquy {
             Renderer = null;
         }
             
-        public override float GetMinimumLength(Axis axis) {
+        public override float GetContentLength(Axis axis) {
             // 0 0 0 -> 0           This is stupidly overengineered and I hope that I have done this right
             // 0 0 1 -> 1
             // 0 1 0 -> 1
@@ -51,7 +51,7 @@ namespace Somniloquy {
                 length = Text.Count(t => t == '\n') * SQ.Misaki.LineSpacing;
             }
 
-            return length + base.GetMinimumLength(axis);
+            return length + base.GetContentLength(axis);
         }
 
         public override void Draw() {

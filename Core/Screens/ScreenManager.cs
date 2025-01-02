@@ -19,7 +19,7 @@ namespace Somniloquy {
             return screen;
         }
 
-        public static T GetFirstScreenOfType<T>() where T : BoxScreen {
+        public static T GetFirstScreenOfType<T>() where T : BoxUI {
             return Screens.OfType<T>().FirstOrDefault();
         }
 

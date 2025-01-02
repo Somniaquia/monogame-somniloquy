@@ -6,7 +6,7 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework.Graphics;
     using Microsoft.Xna.Framework.Input;
 
-    public class ColorPicker : BoxScreen {
+    public class ColorPicker : BoxUI {
         public Section2DEditor Screen;
         public ColorOkHSL ColorOkHSL;
 
@@ -103,7 +103,7 @@ namespace Somniloquy {
         }
     }
 
-    public class HuePicker : BoxScreen {
+    public class HuePicker : BoxUI {
         public ColorPicker ColorPicker;
         public Texture2D BarTexture;
 

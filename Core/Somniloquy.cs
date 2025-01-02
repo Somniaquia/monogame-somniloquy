@@ -30,17 +30,27 @@ namespace Somniloquy {
         public static Dictionary<string, Texture2D> Textures;
         public static SpriteFont Misaki;
 
+        // [DllImport("user32.dll")] private static extern bool SetProcessDpiAwarenessContext(int dpiFlag);
+        // [DllImport("user32.dll")] private static extern bool SetProcessDPIAware();
+        // [DllImport("user32.dll")] private static extern int GetSystemMetrics(int nIndex);
+
         public SQ() {
-            GDM = new GraphicsDeviceManager(this);
             base.Content.RootDirectory = "Content";
             IsMouseVisible = true;
 
-            GDM.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
-            GDM.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height - 48;
+            // SetProcessDPIAware();
+            // SetProcessDpiAwarenessContext(-4); // DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2
 
-            GDM.HardwareModeSwitch = false;
-            GDM.IsFullScreen = false;
-            GDM.SynchronizeWithVerticalRetrace = true;
+            GDM = new GraphicsDeviceManager(this) {
+                // PreferredBackBufferWidth = GetSystemMetrics(0), // SM_CXSCREEN
+                // PreferredBackBufferHeight = GetSystemMetrics(1) - 60, // SM_CYSCREEN
+                PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width, // SM_CXSCREEN
+                PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height, // SM_CYSCREEN
+
+                HardwareModeSwitch = false,
+                IsFullScreen = false,
+                SynchronizeWithVerticalRetrace = true
+            };
             GDM.ApplyChanges();
 
             TargetElapsedTime = TimeSpan.FromSeconds(1d / TargetFPS);
@@ -70,12 +80,22 @@ namespace Somniloquy {
 
             Misaki = Content.Load<SpriteFont>("Fonts/Misaki");
 
-            ScreenManager.AddScreen(new Section2DScreen(new Rectangle(new(), WindowSize)));
+            DebugInfo.Subscribe(() => $"FPS: {FPS:n1}");
+            DebugInfo.Subscribe(() => $"Focused Screen: {ScreenManager.FocusedScreen}");
+            
+            var sectionScreen = new Section2DScreen(new Rectangle(new(), WindowSize));
             ScreenManager.LoadContent();
             ShaderManager.LoadContent(null);
 
-            DebugInfo.Subscribe(() => $"FPS: {FPS:n1}");
-            DebugInfo.Subscribe(() => $"Focused Screen: {ScreenManager.FocusedScreen}");
+            var root = new BoxUI(Util.ShrinkRectangle(new Rectangle(0, 0, WindowSize.X, WindowSize.Y), new(20)));
+            var element1 = root.AddChild(new BoxUI(root, 20, 20));
+            var element2 = root.AddChild(new BoxUI(root, 20, 20));
+            var element3 = root.AddChild(new BoxUI(root, 20, 20) { MainAxis = Axis.Horizontal });
+
+            var element31 = element3.AddChild(new BoxUI(element3, 20, 20));
+            var element32 = element3.AddChild(new BoxUI(element3, 20, 20));
+            var element33 = element3.AddChild(new BoxUI(element3, 20, 20));
+
         }
 
         [DllImport("user32.dll")]
@@ -108,8 +128,6 @@ namespace Somniloquy {
             }
 
             SoundManager.Update();
-            SQTexture2D.ApplyTextureChanges();
-            
             base.Update(gameTime);
         }
 

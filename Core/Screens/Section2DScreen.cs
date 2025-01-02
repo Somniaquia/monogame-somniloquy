@@ -6,7 +6,7 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework.Graphics;
     using System.Linq;
 
-    public class Section2DScreen : BoxScreen {
+    public class Section2DScreen : BoxUI {
         public Section2D Section;
         public Camera2D Camera = new();
         public Section2DEditor Editor;
@@ -20,7 +20,7 @@ namespace Somniloquy {
                 Section.LayerGroups[0].Layers.Add(0, new TextureLayer2D());
             }
 
-            Editor = new(boundaries, this);
+            Editor = new(this);
             Camera.MaxZoom = 16f;
             Camera.MinZoom = 1 / 4f;
         }
@@ -47,7 +47,7 @@ namespace Somniloquy {
     public enum EditorMode { PaintMode, TileMode, }
     public enum PaintModeState { Idle, Rectangle, Line, Select }
 
-    public class Section2DEditor : BoxScreen {
+    public class Section2DEditor : BoxUI {
         public Section2DScreen Screen;
         public Layer2D SelectedLayer;
         public ColorPicker ColorPicker;
@@ -60,8 +60,9 @@ namespace Somniloquy {
 
         public List<Keybind> GlobalKeybinds = new();
 
-        public Section2DEditor(Rectangle boundaries, Section2DScreen screen) : base(boundaries) {
+        public Section2DEditor(Section2DScreen screen) : base(screen) {
             Screen = screen;
+            Boundaries = screen.Boundaries;
 
             GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.W, (parameters) => MoveScreen(new Vector2(0, -1)), TriggerOnce.False));
             GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.A, (parameters) => MoveScreen(new Vector2(-1, 0)), TriggerOnce.False));

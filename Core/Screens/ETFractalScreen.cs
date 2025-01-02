@@ -6,7 +6,7 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework.Graphics;
     using Microsoft.Xna.Framework.Input;
 
-    public class ETFractalScreen : BoxScreen {
+    public class ETFractalScreen : BoxUI {
         public Camera2D Camera = new();
         public List<Keybind> Keybinds = new();
         private Effect FractalEffect;

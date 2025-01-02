@@ -7,8 +7,6 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework.Graphics;
     using Microsoft.Xna.Framework.Input;
 
-    public enum Axis { Horizontal, Vertical }
-    public enum Align { Begin, Center, End, Even }
     public struct Sides {
         public float Left, Right, Up, Down;
         
@@ -31,6 +29,14 @@ namespace Somniloquy {
             } else {
                 if (start) return Up;
                 else return Down;
+            }
+        }
+
+        public float GetSideSum(Axis axis) {
+            if (axis == Axis.Horizontal) {
+                return Left + Right;
+            } else {
+                return Up + Down;
             }
         }
 

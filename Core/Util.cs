@@ -38,7 +38,7 @@ namespace Somniloquy {
         }
 
         public static bool IsWithinBoundaries(Vector2 Vector2, RectangleF boundaries) {
-            return boundaries.Left <= Vector2.X && Vector2.X <= boundaries.Right & boundaries.Top < Vector2.Y && Vector2.Y < boundaries.Bottom;
+            return boundaries.Left <= Vector2.X && Vector2.X <= boundaries.Right && boundaries.Top < Vector2.Y && Vector2.Y < boundaries.Bottom;
         }
 
         public static Color InvertColor(Color color) {
@@ -218,5 +218,8 @@ namespace Somniloquy {
             }
             return min;
         }
+
+        public static Axis Perpendicular(Axis axis) => axis == Axis.Horizontal ? Axis.Vertical : Axis.Horizontal;
+
     }
 }
