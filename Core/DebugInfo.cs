@@ -3,10 +3,16 @@ namespace Somniloquy {
     using System.Collections.Generic;
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
-    
+    using Microsoft.Xna.Framework.Input;
+
     public static class DebugInfo {
         private static List<Func<string>> lines = new();
         private static List<(Func<string>, double)> tempLines = new();
+        public static bool Active = true;
+
+        public static void Initialize() {
+            InputManager.RegisterKeybind(Keys.OemTilde, (parameters) => Active = !Active, TriggerOnce.True);
+        }
 
         public static void Subscribe(Func<string> lineGenerator) {
             lines.Add(lineGenerator);
@@ -22,9 +28,11 @@ namespace Somniloquy {
 
         public static void Draw(SpriteFont font) {
             Vector2 position = new Vector2(1, 1);
-            foreach (var lineGenerator in lines) {
-                SQ.SB.DrawString(font, lineGenerator(), position, Color.White);
-                position.Y += 18;
+            if (Active) {
+                foreach (var lineGenerator in lines) {
+                    SQ.SB.DrawString(font, lineGenerator(), position, Color.White * 0.5f);
+                    position.Y += 18;
+                }
             }
 
             position = new Vector2(1, SQ.WindowSize.Y - 17);
@@ -33,7 +41,7 @@ namespace Somniloquy {
                     SQ.SB.DrawString(font, lineGenerator(), position, Color.LightBlue);
                 }
                 try {
-                    SQ.SB.DrawString(font, lineGenerator(), position, Color.White * MathF.Min((float)time, 1f));
+                    SQ.SB.DrawString(font, lineGenerator(), position, Color.White * 0.5f * MathF.Min((float)time, 1f));
                 } catch (ArgumentException) {
                     string caughtString = lineGenerator();
                     Console.WriteLine($"Cannot display one of he characters of {caughtString}");

@@ -22,6 +22,9 @@ namespace Somniloquy {
             Down = down;
         }
 
+        public Vector2 TopLeft() => new Vector2(Left, Up);
+        public Vector2 BottomRight() => new Vector2(Right, Down);
+
         public float GetSide(Axis axis, bool start) {
             if (axis == Axis.Horizontal) {
                 if (start) return Left;
@@ -50,6 +53,7 @@ namespace Somniloquy {
     }
 
     public abstract class Screen {
+        public string Identifier;
         public List<Screen> Children = new();
         public bool Focusable = true;
         public bool Selectable = false;
@@ -85,6 +89,33 @@ namespace Somniloquy {
 
         public bool IsSelected() {
             return ScreenManager.SelectedScreen == this;
+        }
+
+        public Screen GetChildByID(string identifier) {
+            return GetAllChildren().Find(child => child.Identifier == identifier);
+        }
+
+        public List<Screen> GetAllChildren() {
+            List<Screen> allChildren = new();
+
+            foreach (var child in Children) {
+                allChildren.Add(child); // Add the current child
+                allChildren.AddRange(child.GetAllChildren()); // Add all descendants of the current child
+            }
+
+            return allChildren;
+        }
+
+        public override string ToString() {
+            if (this is null) return "";
+            return $"{base.ToString()} {Identifier}";
+        }
+
+        public void Destroy() {
+            ScreenManager.Screens.Remove(this);
+            foreach (var child in Children) {
+                child.Destroy();
+            }
         }
     }
 }

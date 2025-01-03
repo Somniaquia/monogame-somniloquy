@@ -33,6 +33,7 @@ namespace Somniloquy {
         // [DllImport("user32.dll")] private static extern bool SetProcessDpiAwarenessContext(int dpiFlag);
         // [DllImport("user32.dll")] private static extern bool SetProcessDPIAware();
         // [DllImport("user32.dll")] private static extern int GetSystemMetrics(int nIndex);
+        [DllImport("user32.dll")] private static extern bool SetForegroundWindow(IntPtr hWnd);
 
         public SQ() {
             base.Content.RootDirectory = "Content";
@@ -45,7 +46,7 @@ namespace Somniloquy {
                 // PreferredBackBufferWidth = GetSystemMetrics(0), // SM_CXSCREEN
                 // PreferredBackBufferHeight = GetSystemMetrics(1) - 60, // SM_CYSCREEN
                 PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width, // SM_CXSCREEN
-                PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height, // SM_CYSCREEN
+                PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height - 48, // SM_CYSCREEN
 
                 HardwareModeSwitch = false,
                 IsFullScreen = false,
@@ -70,6 +71,7 @@ namespace Somniloquy {
             SoundManager.Initialize("C:\\Somnia\\Projects\\monogame-somniloquy\\Assets\\Loops");
             FileExplorer.Initialize();
             ShaderManager.Initialize();
+            DebugInfo.Initialize();
         }
 
         protected override void LoadContent() {
@@ -87,9 +89,6 @@ namespace Somniloquy {
             ScreenManager.LoadContent();
             ShaderManager.LoadContent(null);
         }
-
-        [DllImport("user32.dll")]
-        private static extern bool SetForegroundWindow(IntPtr hWnd);
 
         public static void FocusWindow() {
             var process = System.Diagnostics.Process.GetCurrentProcess();
@@ -117,6 +116,7 @@ namespace Somniloquy {
                 // InputManager.ResetKeyboardState();
             }
 
+            SQTexture2D.ApplyTextureChanges();
             SoundManager.Update();
             base.Update(gameTime);
         }
@@ -129,7 +129,6 @@ namespace Somniloquy {
                 SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
                     ScreenManager.Draw();
                     DebugInfo.Draw(Misaki);
-                    FileBrowserLegacy.Draw(Misaki);
                 SB.End();
                 base.Draw(gameTime);
             }

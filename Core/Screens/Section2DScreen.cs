@@ -115,18 +115,21 @@ namespace Somniloquy {
         }
 
         public void MoveScreen(params object[] parameters) {
+            if (!IsFocused()) return;
             if (parameters.Length == 1 && parameters[0] is Vector2 direction) {
                 Screen.Camera.MoveCamera(direction * 0.75f);
             }
         }
 
         public void ZoomScreen(params object[] parameters) {
+            if (!IsFocused()) return;
             if (parameters.Length == 1 && parameters[0] is float ratio) {
                 Screen.Camera.ZoomCamera(ratio * 0.75f);
             }
         }
 
         public void RotateScreen(params object[] parameters) {
+            if (!IsFocused()) return;
             if (parameters.Length == 1 && parameters[0] is float ratio) {
                 Screen.Camera.RotateCamera(ratio);
             }
@@ -163,6 +166,8 @@ namespace Somniloquy {
         }
 
         public void SelectLayerUnderMouse() {
+            if (!IsFocused()) return;
+
             foreach (var pair in Screen.Section.LayerGroups) {
                 var layerGroup = pair.Value;
                 foreach (var layer in layerGroup.Layers) {
@@ -179,6 +184,7 @@ namespace Somniloquy {
         }
 
         public void SelectNextBrush() {
+            if (!IsFocused()) return;
             currentBrushIndex = (currentBrushIndex + 1) % Brush.BrushTypes.Count;
         }
 

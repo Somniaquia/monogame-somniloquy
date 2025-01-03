@@ -4,59 +4,42 @@ namespace Somniloquy {
 
     public class TextLabel : BoxUI {
         public string Text;
+        public Color DefaultColor = Color.White;
         public bool Editable;
-        public Axis AlignAxis; // Line up letters in either horizontal or vertical
         public Axis LetterAxis; // is each letter standing upright are or lying 90 degrees
 
-        public TextLabel(BoxUI parent, string text, bool editable = false, Axis textAxis = Axis.Horizontal, Axis letterAxis = Axis.Vertical, float margin = 0) : base(parent, margin: margin) {
+        public TextLabel(BoxUI parent, float margin = 0, float padding = 0, string text = "", Axis letterAxis = Axis.Horizontal, bool editable = false) : base(parent, margin, padding) {
             Text = text;
             Editable = editable;
-            AlignAxis = textAxis;
             LetterAxis = letterAxis;
-
-            Renderer = null;
         }
 
-        public TextLabel(Rectangle boundaries, string text, bool editable = false, Axis textAxis = Axis.Horizontal, Axis letterAxis = Axis.Vertical) : base(boundaries) {
+        public TextLabel(Rectangle boundaries, string text = "", Axis letterAxis = Axis.Horizontal, bool editable = false) : base(boundaries) {
             Text = text;
             Editable = editable;
-            AlignAxis = textAxis;
             LetterAxis = letterAxis;
-
-            Renderer = null;
         }
             
         public override float GetContentLength(Axis axis) {
-            // 0 0 0 -> 0           This is stupidly overengineered and I hope that I have done this right
-            // 0 0 1 -> 1
-            // 0 1 0 -> 1
-            // 0 1 1 -> 0
-            // 1 1 0 -> 1
-            // 1 1 1 -> 0
-            // 1 0 0 -> 0
-            // 1 0 1 -> 1
-
-            bool a = AlignAxis == Axis.Vertical;
-            bool b = LetterAxis == Axis.Vertical;
-            bool c = axis == Axis.Vertical;
-
-            bool result = c ^ (a ^ b);
-
             // TODO: Flexible indentation (wrapping text inside max axisLength)
-            int length = 0;
-            if (result) {
-                length = Text.Count(t => t == '\n') * SQ.Misaki.LineSpacing;
+            float length = base.GetContentLength(axis);
+            if (LetterAxis == axis) {
+                Vector2 dimensions = SQ.Misaki.MeasureString(Text);
+                length += axis == MainAxis ? dimensions.X : dimensions.Y;
             } else {
-                int maxLineLength = Text.Split('\n').Max(line => line.Length);
-                length = Text.Count(t => t == '\n') * SQ.Misaki.LineSpacing;
+                if (axis == MainAxis) {
+                    length += Text.Split('\n').Max(line => line.Length) * SQ.Misaki.LineSpacing;
+                } else {
+                    length += (Text.Count(s => s == '\n') + 1) * SQ.Misaki.LineSpacing;
+                }
             }
 
-            return length + base.GetContentLength(axis);
+            return length;
         }
 
         public override void Draw() {
-            SQ.SB.DrawString(SQ.Misaki, Text, Boundaries.TopLeft(), Color.White);
             base.Draw();
+            SQ.SB.DrawString(SQ.Misaki, Text, Boundaries.TopLeft() + Padding.TopLeft(), DefaultColor);
         }
     }
 }

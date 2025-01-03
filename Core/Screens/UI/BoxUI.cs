@@ -1,4 +1,5 @@
 namespace Somniloquy {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using Microsoft.Xna.Framework;
@@ -16,17 +17,18 @@ namespace Somniloquy {
         public Matrix Transform;
         public BoxUIRenderer Renderer = new BoxUIDefaultRenderer();
 
-        public Sides Margin = Sides.None;
-        public Sides Padding = Sides.None;
+        public Sides Margin;
+        public Sides Padding;
 
-        public Axis MainAxis = Axis.Vertical;
+        public Axis MainAxis;
         public Axis PerpendicularAxis => Util.Perpendicular(MainAxis);
         
         public Align MainAxisAlign = Align.Begin;
+        public Align MainAxisAlignOverflow = Align.Begin;
         public List<float> DivisionLocations = new();
         public Align PerpendicularAxisAlign = Align.Center;
         
-        public RenderTarget2D ContentRenderTaret;
+        public RenderTarget2D ContentRenderTarget;
         public float ScrollValue;
 
         public bool MainAxisFill = false;
@@ -76,35 +78,46 @@ namespace Somniloquy {
 
             } else {
                 float contentLength = GetContentLength(MainAxis);
-                float MaxLength = GetMaxLength(MainAxis);
+                float maxLength = GetMaxLength(MainAxis);
 
-                if (contentLength <= MaxLength) {
-                    if (MainAxisAlign == Align.Begin) {
-                        float position = MainAxis == Axis.Horizontal ? Boundaries.X : Boundaries.Y;
-                        position += ScrollValue;
-
-                        for (int i = 0; i < children.Count; i++) {
-                            position += GetSeperationByIndex(MainAxis, i);
-                            children[i].SetBoundariesAxis(MainAxis, position, position += children[i].GetContentLength(MainAxis));
-                        }
-                    } else if (MainAxisAlign == Align.End) {
-
-                    } else if (MainAxisAlign == Align.Center) {
-                        
-                    } else if (MainAxisAlign == Align.Even) {
-
+                if (contentLength > maxLength) {
+                    ScrollValue = Math.Clamp(ScrollValue, 0, contentLength - maxLength);
+                    if (ContentRenderTarget == null || ContentRenderTarget.Width != (int)maxLength) {
+                        ContentRenderTarget = new RenderTarget2D(SQ.GD, (int)maxLength, (int)Boundaries.Height);
                     }
-                } else { // Mostly same behavior, adds a scrollbar and place children in a seperate place, having a renderrtarget
+                } else {
+                    ScrollValue = 0;
+                    ContentRenderTarget?.Dispose();
+                    ContentRenderTarget = null;
+                }
+
+                var alignMode = contentLength > maxLength ? MainAxisAlignOverflow : MainAxisAlign;
+
+                if (alignMode == Align.Begin) {
+                    float position = MainAxis == Axis.Horizontal ? Boundaries.X : Boundaries.Y;
+                    position += ScrollValue;
+
+                    for (int i = 0; i < children.Count; i++) {
+                        position += GetSeperationByIndex(MainAxis, i);
+                        var thisLength = children[i].GetContentLength(MainAxis);
+                        thisLength = children[i].MainAxisFill ? maxLength - contentLength + thisLength : thisLength;
+                        children[i].SetBoundariesAxis(MainAxis, position, position += thisLength);
+                    }
+                } else if (alignMode == Align.End) {
                     
+                } else if (alignMode == Align.Center) {
+                    
+                } else if (alignMode == Align.Even) {
+
                 }
 
                 // Perpendicular positioning
-                MaxLength = GetMaxLength(PerpendicularAxis);
+                maxLength = GetMaxLength(PerpendicularAxis);
                 
                 foreach (var child in children) {
                     contentLength = child.GetContentLength(PerpendicularAxis);
 
-                    if (contentLength < MaxLength) {
+                    if (contentLength < maxLength) {
                         if (PerpendicularAxisAlign == Align.Begin) {
 
                         } else if (PerpendicularAxisAlign == Align.End) {
