@@ -68,7 +68,7 @@ namespace Somniloquy {
         public override void Paint(IPaintableLayer2D paintableLayer, bool initializingPress, Color color, Camera2D camera) {
             int penWidth = InputManager.GetPenPressure() != 0 ? (int)(InputManager.GetPenPressure() * 16 / camera.Zoom) : (int)(InputManager.AverageMouseSpeed / 400);
             // float penOpacity = 1;
-            float penOpacity = InputManager.GetPenPressure() != 0 ? InputManager.GetPenPressure() : MathF.Min(1, InputManager.AverageMouseSpeed / 1600);
+            float penOpacity = InputManager.GetPenPressure() != 0 ? InputManager.GetPenPressure() : MathF.Min(1, InputManager.AverageMouseSpeed / 3200);
 
             if (initializingPress) {   
                 if (CurrentCommandChain is not null) CurrentCommandChain.AffectedPixels = null;

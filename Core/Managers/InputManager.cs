@@ -9,6 +9,7 @@ namespace Somniloquy {
     public delegate void Action(params object[] parameters);
     public enum MouseButtons { LeftButton, RightButton, MiddleButton, XButton1, XButton2 }
     public enum TriggerOnce { True, False, Block }
+
     public class Keybind {
         public TriggerOnce TriggerOnce;
         public bool OrderSensitive;
@@ -39,8 +40,9 @@ namespace Somniloquy {
         public static int ScrollWheelDelta;
         public static Queue<float> MouseSpeedSamples = new();
         public static float AverageMouseSpeed;
-        private static Dictionary<Keys, KeyState> KeyStates = new();
-        private static Dictionary<MouseButtons, KeyState> MouseButtonStates = new();
+        public static Dictionary<Keys, KeyState> KeyStates = new();
+        public static List<Keys> PressedKeys = new();
+        public static Dictionary<MouseButtons, KeyState> MouseButtonStates = new();
         public static List<Keybind> Keybinds = new();
         public static List<Action> PostKeyActions = new();
 
@@ -49,7 +51,7 @@ namespace Somniloquy {
         public static Queue<float> PenPressureSamples = new();
         public static Vector2 PenTilt = Vector2.Zero;
 
-        private class KeyState {
+        public class KeyState {
             public bool IsDown;
             public int ElapsedTicks; // int can sufficiently handle roughly 165 hours of 60 frames per second before overflowing
             public double ElapsedSeconds; // These record elapsed time since STATE CHANGE, including time since key released. 
@@ -78,7 +80,7 @@ namespace Somniloquy {
             logContext.Open(systemInfo.info.win.window, true);
             wintabData = new CWintabData(logContext);
 
-            DebugInfo.Subscribe(() => $"Pressed Keys: {PrintPressedKeys()}");
+            DebugInfo.Subscribe(() => $"Pressed Keys: {string.Join(" ", PressedKeys.Select(key => key.ToString()))}");
             DebugInfo.Subscribe(() => $"Mouse Speed / 100: {AverageMouseSpeed / 100}");
         }
 
@@ -95,6 +97,12 @@ namespace Somniloquy {
 
             foreach (var postKeyAction in PostKeyActions) {
                 postKeyAction.Invoke();
+            }
+
+            // PressedKeys = KeyStates.Where(pair => pair.Value.IsDown).Select(pair => pair.Key).ToList();
+            foreach (var pair in KeyStates) {
+                if (pair.Value.IsDown && !PressedKeys.Contains(pair.Key)) PressedKeys.Add(pair.Key);
+                if (!pair.Value.IsDown && PressedKeys.Contains(pair.Key)) PressedKeys.Remove(pair.Key);
             }
         }
 
@@ -185,15 +193,6 @@ namespace Somniloquy {
             } else {
                 AveragePenPressure = currentPressure;
             }
-        }
-
-        private static string PrintPressedKeys() {
-            string pressedKeys = "";
-            foreach (var pair in KeyStates) {
-                if (pair.Value.IsDown) pressedKeys += pair.Key.ToString() + " ";
-            }
-
-            return pressedKeys;
         }
 
         public static Keybind RegisterKeybind(object button, Action action, TriggerOnce triggerOnce) {

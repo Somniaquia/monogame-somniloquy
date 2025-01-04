@@ -1,7 +1,7 @@
 namespace Somniloquy {
     using System;
     using System.Collections.Generic;
-
+    using System.Diagnostics;
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
     using Microsoft.Xna.Framework.Input;
@@ -15,6 +15,8 @@ namespace Somniloquy {
         public Vector2I ChartDimensions;
         public Vector2 PositionOnChart = Vector2.Zero;
         public int Hue = 0;
+
+        public bool Active = true;
 
         public ColorPicker(Rectangle boundaries, Section2DEditor screen) : base(boundaries) {
             ChartDimensions = (Vector2I)(boundaries.Size.ToVector2() / 2);
@@ -59,7 +61,9 @@ namespace Somniloquy {
 
         public override void Update() {
             base.Update();
+            if (!Active) return;
 
+            Debug.Assert(false);
             HuePicker.Update();
 
             bool updateChart = false;
@@ -75,7 +79,7 @@ namespace Somniloquy {
 
             if (updateChart) CreateChartTexture();
 
-            if (IsFocused()) {
+            if (Focused) {
                 if (InputManager.IsMouseButtonDown(MouseButtons.LeftButton)) {
                     PositionOnChart = Vector2.Transform(InputManager.GetMousePosition(), Transform);
                     Screen.SelectedColor = FetchColor(PositionOnChart);
@@ -91,10 +95,10 @@ namespace Somniloquy {
         }
 
         public override void Draw() {
-            if (Screen.EditorMode == EditorMode.PaintMode) {
+            if (Active && Screen.EditorMode == EditorMode.PaintMode) {
                 HuePicker.Draw();
 
-                // int borderLength = (IsFocused()) ? 8 : 6;
+                // int borderLength = (Focused) ? 8 : 6;
                 int borderLength = 4;
                 SQ.SB.DrawFilledRectangle(new RectangleF(Boundaries.X - borderLength, Boundaries.Y - borderLength, Boundaries.Width + borderLength * 2, Boundaries.Height + borderLength * 2), Screen.SelectedColor);
                 SQ.SB.Draw(ChartTexture, (Rectangle)Boundaries, Color.White);
@@ -121,7 +125,7 @@ namespace Somniloquy {
         }
 
         public override void Update() {
-            if (IsFocused()) {
+            if (Focused) {
                 if (InputManager.IsMouseButtonDown(MouseButtons.LeftButton)) {
                     var positionOnBar = Vector2.Transform(InputManager.GetMousePosition(), Transform).X;
                     positionOnBar = Util.PosMod(positionOnBar, 1);

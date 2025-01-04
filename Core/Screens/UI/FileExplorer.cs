@@ -16,11 +16,11 @@ namespace Somniloquy {
         public static int HighlightedLine;
         public static bool HighlightingDirectoryContents;
         
-        public static string SavingName;
         public static bool OverwriteWarning;
 
         public static BoxUI RootUI;
         public static BoxUI ContentsBox;
+        public static TextLabel SaveNameBox;
 
         public static void Initialize() {
             InputManager.RegisterKeybind(new object[] { Keys.LeftControl, Keys.O }, (parameters) => { ToggleFileExplorer(); }, TriggerOnce.True, true);
@@ -35,18 +35,24 @@ namespace Somniloquy {
 
         public static void BuildUI() {
             RootUI = new BoxUI(Util.ShrinkRectangle(new Rectangle(0, 0, SQ.WindowSize.X, SQ.WindowSize.Y), new(20))) { Identifier = "root" };
+            Active = true;
             DebugInfo.Active = false;
+            ScreenManager.GetFirstScreenOfType<Section2DScreen>().Editor.ColorPicker.Active = false;
             
             RootUI.AddChild(new TextLabel(RootUI, 20, 5) { Identifier = "path" });
             var mainBox = RootUI.AddChild(new BoxUI(RootUI, 20, 0) { MainAxis = Axis.Horizontal, Identifier = "mainBox", MainAxisFill = true, });
                 ContentsBox = mainBox.AddChild(new BoxUI(mainBox) { MainAxis = Axis.Vertical, Identifier = "contents" });
                 var previewBox = mainBox.AddChild(new BoxUI(mainBox) { Identifier = "previewBox" });
             var bottomBox = RootUI.AddChild(new BoxUI(RootUI, 20, 0) { Identifier = "bottomBox" });
-                var SavingNameBox = bottomBox.AddChild(new BoxUI(bottomBox, 0, 20) { Identifier = "savingNameBox", } );
+                SaveNameBox = (TextLabel)bottomBox.AddChild(new TextLabel(bottomBox, 0, 20) { Identifier = "saveNameBox", Editable = true, } );
                 var Button = bottomBox.AddChild(new BoxUI(bottomBox, 0, 20) { Identifier = "saveButton" });
         }
 
         public static void DestroyUI() {
+            Active = false;
+            DebugInfo.Active = true;
+            ScreenManager.GetFirstScreenOfType<Section2DScreen>().Editor.ColorPicker.Active = true;
+
             RootUI.Destroy();
             RootUI = null;
         }
@@ -55,10 +61,8 @@ namespace Somniloquy {
             if (!Active) {
                 BuildUI(); 
                 OpenDirectory("c:\\Somnia\\Projects\\monogame-somniloquy\\Assets");
-                Active = true;
             } else {
                 DestroyUI();
-                Active = false;
             }
         }
         
@@ -79,7 +83,7 @@ namespace Somniloquy {
                 ContentsBox.AddChild(new TextLabel(ContentsBox, 0, 10, file.Split('\\')[^1]));
             }
             ((TextLabel)RootUI.GetChildByID("path")).Text = CurrentDirectory;
-            ((TextLabel)ContentsBox.Children[HighlightedLine]).DefaultColor = Color.Yellow;
+            if (DirectoryContents.Count > 0) ((TextLabel)ContentsBox.Children[HighlightedLine]).DefaultColor = Color.Yellow;
 
             DebugInfo.AddTempLine(() => $"Directory contents: {DirectoryContents.Count}", 2);
         }
@@ -122,15 +126,90 @@ namespace Somniloquy {
         }
 
         public static void Save() {
+            var section = ScreenManager.GetFirstScreenOfType<Section2DScreen>().Section;
+            if (section == null) {
+                DebugInfo.AddTempLine(() => "No section to save.", 5);
+                return;
+            }
 
+            string json = section.Serialize();
+
+            if (!Directory.Exists(CurrentDirectory)) {
+                DebugInfo.AddTempLine(() => "Current directory is invalid.", 5);
+                return;
+            }
+
+            // var sectionIdentifier = section.Identifier == "" ? section.Identifier : "temp"; 
+            string filePath = Path.Combine(CurrentDirectory, $"{SaveNameBox.Text.Split(".")[0]}.sqSection2D");
+
+            try {
+                File.WriteAllText(filePath, json);
+                DebugInfo.AddTempLine(() => $"Section saved to {filePath}", 5);
+            } catch (Exception e) {
+                DebugInfo.AddTempLine(() => $"Error saving section: {e.Message}", 5);
+            }
+
+            OpenDirectory(CurrentDirectory);
         }
 
         public static void Load() {
+            var path = DirectoryContents[HighlightedLine];
 
+            try {
+                if (Directory.Exists(path)) {
+                    OpenDirectory(path);
+                } else if (File.Exists(path)) {
+                    if (path.EndsWith(".wav")) {
+                        var name = SoundManager.AddSound(new FileInfo(path));
+                        SoundManager.StartLoop(name);
+                        DebugInfo.AddTempLine(() => $"Playing loop - {Path.GetFileName(path)}.", 5);
+                    } else if (path.EndsWith(".png")) {
+                        var sectionScreen = ScreenManager.GetFirstScreenOfType<Section2DScreen>();
+                        if (sectionScreen is null) {
+                            DebugInfo.AddTempLine(() => $"Error: Section2DScreen doesn't exist.", 5);
+                            return;
+                        }
+                        try {
+                            Texture2D texture = Texture2D.FromFile(SQ.GD, path);
+                            if (sectionScreen.Editor.SelectedLayer is TextureLayer2D textureLayer) {
+                                textureLayer.PaintImage((Vector2I)sectionScreen.Camera.GlobalMousePos.Value, texture, 1f, CommandManager.AddCommandChain(new CommandChain()));
+                            }
+                            DebugInfo.AddTempLine(() => $"Imported image - {Path.GetFileName(path)}.", 5);
+                        } catch (Exception e) {
+                            DebugInfo.AddTempLine(() => $"Error reading {Path.GetFileName(path)}: {e.Message}", 5);
+                        }
+                    } else if (path.EndsWith(".sqSection2D")) {
+                        var sectionScreen = ScreenManager.GetFirstScreenOfType<Section2DScreen>();
+                        if (sectionScreen is null) {
+                            DebugInfo.AddTempLine(() => $"Error: Section2DScreen doesn't exist.", 5);
+                            return;
+                        }
+                        // try {
+                            string json = File.ReadAllText(path);
+                            sectionScreen.Section = Section2D.Deserialize(json);
+                            sectionScreen.Editor.SelectedLayer = sectionScreen.Section.LayerGroups.First().Value.Layers.Values.OfType<TextureLayer2D>().FirstOrDefault();
+                            DebugInfo.AddTempLine(() => $"Loaded section from {Path.GetFileName(path)}", 5);
+                        // } catch (Exception e) {
+                        //     DebugInfo.AddTempLine(() => $"Error reading {Path.GetFileName(path)}: {e.Message}", 5);
+                        // }
+                    } else {
+                        DebugInfo.AddTempLine(() => $"{Path.GetFileName(path)} is an unsupported file type.", 5);
+                    }
+                } else {
+                    DebugInfo.AddTempLine(() => $"{Path.GetFileName(path)} does not exist.", 5);
+                }
+
+                DestroyUI();
+            } catch (FileNotFoundException e) {
+                DebugInfo.AddTempLine(() => e.ToString(), 5);
+            }
         }
 
         public static void Export() {
-            
+            var path = Path.Combine(CurrentDirectory, $"{SaveNameBox.Text.Split("."[0])}.png");
+
+            var layerGroup = ScreenManager.GetFirstScreenOfType<Section2DScreen>().Section.LayerGroups.First().Value;
+            layerGroup.SaveTexture(path);
         }
     }
 }

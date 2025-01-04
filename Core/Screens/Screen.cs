@@ -58,6 +58,9 @@ namespace Somniloquy {
         public bool Focusable = true;
         public bool Selectable = false;
 
+        public bool Focused => ScreenManager.FocusedScreen == this;
+        public bool Selected => ScreenManager.SelectedScreen == this;
+
         public virtual void LoadContent() { }
 
         /// <summary>
@@ -81,14 +84,6 @@ namespace Somniloquy {
             foreach (var child in Children) {
                 child.Draw();
             }
-        }
-
-        public bool IsFocused() {
-            return ScreenManager.FocusedScreen == this;
-        }
-
-        public bool IsSelected() {
-            return ScreenManager.SelectedScreen == this;
         }
 
         public Screen GetChildByID(string identifier) {

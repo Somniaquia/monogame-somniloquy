@@ -1,0 +1,18 @@
+{
+  "Identifier": null,
+  "CoordsInWorldMap": {},
+  "LayerGroups": {
+    "0": {
+      "Identifier": null,
+      "Layers": {
+        "0": {
+          "Type": "TextureLayer2D",
+          "ChunkLength": 128,
+          "Chunks": {},
+          "Identifier": null,
+          "CoordsInSection": {}
+        }
+      }
+    }
+  }
+}

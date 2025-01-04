@@ -131,7 +131,7 @@ namespace Somniloquy {
                             child.SetBoundariesAxis(PerpendicularAxis, begin, end);
                         }
                     } else {
-                        throw new System.Exception("AAAAAAAA Unimplemented!!");
+                        throw new Exception("AAAAAAAA Unimplemented!!");
                     }
                 }
             }

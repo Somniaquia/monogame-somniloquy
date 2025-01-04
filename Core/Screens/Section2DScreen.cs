@@ -74,7 +74,7 @@ namespace Somniloquy {
             GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.OemPipe, (parameters) => Screen.Camera.TargetRotation = 0, TriggerOnce.True));
             GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.OemOpenBrackets, (parameters) => RotateScreen(-0.05f), TriggerOnce.False));
             GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.OemCloseBrackets, (parameters) => RotateScreen(0.05f), TriggerOnce.False));
-
+            
             GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.LeftAlt, (parameters) => SelectLayerUnderMouse(), TriggerOnce.False));
 
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { MouseButtons.LeftButton }, (parameters) => HandleLeftClick(), TriggerOnce.False));
@@ -115,28 +115,28 @@ namespace Somniloquy {
         }
 
         public void MoveScreen(params object[] parameters) {
-            if (!IsFocused()) return;
+            if (!Focused) return;
             if (parameters.Length == 1 && parameters[0] is Vector2 direction) {
                 Screen.Camera.MoveCamera(direction * 0.75f);
             }
         }
 
         public void ZoomScreen(params object[] parameters) {
-            if (!IsFocused()) return;
+            if (!Focused) return;
             if (parameters.Length == 1 && parameters[0] is float ratio) {
                 Screen.Camera.ZoomCamera(ratio * 0.75f);
             }
         }
 
         public void RotateScreen(params object[] parameters) {
-            if (!IsFocused()) return;
+            if (!Focused) return;
             if (parameters.Length == 1 && parameters[0] is float ratio) {
                 Screen.Camera.RotateCamera(ratio);
             }
         }
 
         public void HandleLeftClick() {
-            if (!IsFocused()) return;
+            if (!Focused) return;
             
             if (InputManager.IsKeyDown(Keys.LeftAlt)) {
                 if (SelectedLayer is IPaintableLayer2D paintableLayer) {
@@ -154,7 +154,7 @@ namespace Somniloquy {
         }
 
         public void HandleRightClick() {
-            if (!IsFocused()) return;
+            if (!Focused) return;
 
             if (InputManager.IsKeyDown(Keys.LeftAlt)) {
 
@@ -166,7 +166,7 @@ namespace Somniloquy {
         }
 
         public void SelectLayerUnderMouse() {
-            if (!IsFocused()) return;
+            if (!Focused) return;
 
             foreach (var pair in Screen.Section.LayerGroups) {
                 var layerGroup = pair.Value;
@@ -184,7 +184,7 @@ namespace Somniloquy {
         }
 
         public void SelectNextBrush() {
-            if (!IsFocused()) return;
+            if (!Focused) return;
             currentBrushIndex = (currentBrushIndex + 1) % Brush.BrushTypes.Count;
         }
 
