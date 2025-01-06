@@ -17,7 +17,7 @@ namespace Somniloquy {
             if (Section is null) { // temp
                 Section = new();
                 Section.LayerGroups.Add(0, new LayerGroup2D());
-                Section.LayerGroups[0].Layers.Add(0, new TextureLayer2D());
+                Section.LayerGroups[0].Layers.Add(0, new TileLayer2D());
             }
 
             Editor = new(this);
@@ -96,7 +96,7 @@ namespace Somniloquy {
             DebugInfo.Subscribe(() => $"Undo History: {CommandManager.UndoHistory.Count}");
             DebugInfo.Subscribe(() => $"Redo History: {CommandManager.RedoHistory.Count}");
             DebugInfo.Subscribe(() => $"Selected Color: {SelectedColor}");
-            SelectedLayer = Screen.Section.LayerGroups.First().Value.Layers.Values.OfType<TextureLayer2D>().FirstOrDefault();
+            SelectedLayer = Screen.Section.LayerGroups.First().Value.Layers.Values.OfType<TileLayer2D>().FirstOrDefault();
         }
 
         public override void LoadContent() {

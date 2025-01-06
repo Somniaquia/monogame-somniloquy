@@ -7,6 +7,16 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
 
+    public static class BrushPicker {
+        public static void BuildUI() {
+
+        }
+
+        public static void DestroyUI() {
+            
+        }
+    }
+
     public abstract class Brush {
         public CommandChain CurrentCommandChain;
         public static List<Brush> BrushTypes = new();

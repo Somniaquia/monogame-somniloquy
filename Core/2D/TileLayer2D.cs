@@ -1,7 +1,7 @@
 ﻿namespace Somniloquy {
     using System;
     using System.Collections.Generic;
-
+    using System.Text.Json.Serialization;
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
 
@@ -13,16 +13,16 @@
     /// different layouts or looks for the same world in every visit, sometimes connecting a different world or triggering events such as jumpscares
     /// </summary>
     public class TileLayer2D : Layer2D, IPaintableLayer2D {
-        public static int ChunkLength = 16;
-        public static int TileLength = 16;
-        public Dictionary<Vector2I, TileChunk2D> Chunks = new();
-        public ProceduralTileSpriteSheet SpriteSheet = new(TileLength, ChunkLength);
+        [JsonInclude] public static int ChunkLength = 16;
+        [JsonInclude] public static int TileLength = 16;
+        [JsonInclude] public Dictionary<Vector2I, TileChunk2D> Chunks = new();
+        [JsonInclude] public TileSpriteSheet SpriteSheet = new(TileLength, ChunkLength);
 
-        public Vector2I GetTilePosition(Vector2I worldPosition) => worldPosition / TileLength;
+        public Vector2I GetChunkPosition(Vector2I tilePosition) => tilePosition / ChunkLength;
         public Vector2I GetPositionInChunk(Vector2I worldPosition) => Util.PosMod(worldPosition, new Vector2I(TileLength * ChunkLength));
         public Vector2I GetTilePositionInChunk(Vector2I tilePosition) => Util.PosMod(tilePosition, new Vector2I(ChunkLength));
+        public Vector2I GetTilePosition(Vector2I worldPosition) => worldPosition / TileLength;
         public Vector2I GetPositionInTile(Vector2I worldPosition) => Util.PosMod(worldPosition, new Vector2I(TileLength));
-        public Vector2I GetChunkPosition(Vector2I tilePosition) => tilePosition / ChunkLength;
 
         public void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain = null) {          
             var tilePosition = GetTilePosition(position);
@@ -162,10 +162,10 @@
     }
 
     public class TileChunk2D {
-        public TileLayer2D ParentLayer;
-        public Tile2D[,] Tiles;
-        public int ChunkLength;
-        public int TileLength;
+        [JsonIgnore] public TileLayer2D ParentLayer;
+        [JsonInclude] public Tile2D[,] Tiles;
+        [JsonInclude] public int ChunkLength;
+        [JsonInclude] public int TileLength;
 
         public Vector2I GetTilePositionInChunk(Vector2I positionInChunk) => Util.PosMod(positionInChunk, new Vector2I(ChunkLength));
         public Vector2I GetPositionInTile(Vector2I positionInChunk) => Util.PosMod(positionInChunk, new Vector2I(TileLength));
@@ -186,8 +186,16 @@
             var (tilePosInChunk, posInTile) = (GetTilePositionInChunk(positionInChunk), GetPositionInTile(positionInChunk));
             var tile = GetTile(tilePosInChunk);
             if (tile is null) {
-                tile = new Tile2D();
-                SetTile(positionInChunk, tile);
+                var animation = new Animation2D()
+                    .AddFrame(ParentLayer.SpriteSheet, ParentLayer.SpriteSheet.AllocateSpace());
+
+                var sprite = new Sprite2D()
+                    .AddAnimation("0", animation)
+                    .SetCurrentAnimation("0");
+
+                tile = new Tile2D().SetSprite(sprite);
+
+                SetTile(GetTilePositionInChunk(positionInChunk), tile);
             }
             tile.PaintPixel(posInTile, color, opacity, chain);
         }

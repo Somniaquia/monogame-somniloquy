@@ -1,19 +1,18 @@
 namespace Somniloquy {
     using System;
     using System.Collections.Generic;
-
+    using System.Text.Json.Serialization;
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
 
     public class Tile2D {
-        public Sprite2D Sprite;
+        [JsonInclude] public Sprite2D Sprite;
 
-        public Tile2D() {
-            Sprite = new();
-            Animation2D animation = new();
-            
-            Sprite.Animations.Add("default", animation);
-            Sprite.CurrentAnimation = animation;
+        public Tile2D() { }
+
+        public Tile2D SetSprite(Sprite2D sprite) {
+            Sprite = sprite;
+            return this;
         }
 
         public Color GetColor(Vector2I position) => Sprite.GetColor(position);
@@ -21,7 +20,7 @@ namespace Somniloquy {
         public void SetPixel(Vector2I position, Color color, CommandChain chain) => Sprite.SetPixel(position, color, chain);
 
         public void Update() {
-            
+            Sprite.Update();
         }
 
         public void Draw(Rectangle destination, float opacity = 1f) {
