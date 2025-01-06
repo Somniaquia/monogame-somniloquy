@@ -105,7 +105,7 @@ namespace Somniloquy {
             base.Update();
 
             ColorPicker.Update();
-            ZoomScreen(InputManager.ScrollWheelDelta * 0.001f);
+            // ZoomScreen(InputManager.ScrollWheelDelta * 0.001f);
         }
 
         public void UnregisterEditorGlobalKeybinds() {

@@ -29,16 +29,16 @@ namespace Somniloquy {
         public List<float> DivisionLocations = new();
         public Align PerpendicularAxisAlign = Align.Center;
         
+        public bool Overflowed;
         public RenderTarget2D ContentRenderTarget;
         public float ScrollValue;
+        public float SmoothScrollValue;
 
         public bool MainAxisFill = false;
         public bool PerpendicularAxisFill = true;
 
         public bool MainAxisShrink = false;
         public bool PerpendicularAxisShrink = false;
-
-        public bool Highlighted = false;
 
         public BoxUI() {}
 
@@ -86,9 +86,9 @@ namespace Somniloquy {
             } else {
                 float contentLength = GetContentLength(MainAxis, this);
                 float maxLength = GetMaxLength(MainAxis);
-                bool overflow = contentLength > maxLength;
+                Overflowed = contentLength > maxLength;
 
-                if (overflow) {
+                if (Overflowed) {
                     ScrollValue = Math.Clamp(ScrollValue, 0, contentLength - maxLength);
                     if (ContentRenderTarget == null || ContentRenderTarget.Bounds.GetAxisLength(MainAxis) != (int)maxLength) {
                         ContentRenderTarget = MainAxis == Axis.Horizontal ? new RenderTarget2D(SQ.GD, (int)maxLength, (int)Boundaries.Height) : new RenderTarget2D(SQ.GD, (int)Boundaries.Width, (int)maxLength);
@@ -99,11 +99,11 @@ namespace Somniloquy {
                     ContentRenderTarget = null;
                 }
 
-                var alignMode = overflow ? MainAxisAlignOverflow : MainAxisAlign;
+                var alignMode = Overflowed ? MainAxisAlignOverflow : MainAxisAlign;
 
                 if (alignMode == Align.Begin) {
                     float position = MainAxis == Axis.Horizontal ? Boundaries.X : Boundaries.Y;
-                    position += ScrollValue;
+                    position -= ScrollValue;
 
                     for (int i = 0; i < children.Count; i++) {
                         position += GetSeperationByIndex(MainAxis, i);
@@ -191,21 +191,29 @@ namespace Somniloquy {
 
         public override void Update() { // TODO: Dynamic resizing
             base.Update();
+
+            if (Focused && Overflowed) {
+                ScrollValue = Math.Clamp(ScrollValue - InputManager.ScrollWheelDelta /10f, 0, GetContentLength(MainAxis, this) - Boundaries.GetAxisLength(MainAxis));
+                SmoothScrollValue = Util.Lerp(SmoothScrollValue, ScrollValue, 0.075f);
+            }
         }
 
         public override void Draw() => Draw(Vector2.Zero);
         public virtual void Draw(Vector2 displacement) {
             Renderer?.Draw(Boundaries.Displace(displacement));
 
-            if (ContentRenderTarget is null) {
-                Children.ForEach(child => child.Draw());
+            if (!Overflowed) {
+                foreach (var child in Children.OfType<BoxUI>()) {
+                    child.Draw(displacement);
+                } 
             } else {
                 SQ.SB.End();
                 SQ.GD.SetRenderTarget(ContentRenderTarget);
                 SQ.GD.Clear(Color.Transparent);
                 SQ.SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
 
-                foreach (var child in Children.OfType<BoxUI>().Where(child => Util.IntersectsOrAdjacent(child.Boundaries, Boundaries))) {
+                var scrollDisplacement = MainAxis == Axis.Horizontal ? new Vector2(SmoothScrollValue, 0) : new Vector2(0, SmoothScrollValue);
+                foreach (var child in Children.OfType<BoxUI>()) { // .Where(child => Util.IntersectsOrAdjacent(child.Boundaries.Displace(scrollDisplacement), Boundaries))
                     child.Draw(-Boundaries.TopLeft());
                 }
 
@@ -215,7 +223,7 @@ namespace Somniloquy {
                 SQ.SB.Draw(ContentRenderTarget, (Rectangle)Boundaries, Color.White);
             }
 
-            if (Highlighted) new BoxUIDebugRenderer().Draw(Boundaries);
+            if (Overflowed) new BoxUIDebugRenderer().Draw(Boundaries);
         }
     }
 }

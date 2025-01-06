@@ -41,7 +41,7 @@ namespace Somniloquy {
             
             RootUI.AddChild(new TextLabel(RootUI, 20, 5) { Identifier = "path" });
             var mainBox = RootUI.AddChild(new BoxUI(RootUI, 20, 0) { MainAxis = Axis.Horizontal, Identifier = "mainBox", MainAxisFill = true, });
-                ContentsBox = mainBox.AddChild(new BoxUI(mainBox) { MainAxis = Axis.Vertical, Identifier = "contents", MainAxisShrink = true, Highlighted = true });
+                ContentsBox = mainBox.AddChild(new BoxUI(mainBox) { MainAxis = Axis.Vertical, Identifier = "contents", MainAxisShrink = true, });
                 var previewBox = mainBox.AddChild(new BoxUI(mainBox) { Identifier = "previewBox" });
             var bottomBox = RootUI.AddChild(new BoxUI(RootUI, 20, 0) { Identifier = "bottomBox" });
                 SaveNameBox = (TextLabel)bottomBox.AddChild(new TextLabel(bottomBox, 0, 20) { Identifier = "saveNameBox", Editable = true, } );
@@ -76,16 +76,17 @@ namespace Somniloquy {
 
             foreach (var folder in folders) {
                 DirectoryContents.Add(folder);
-                ContentsBox.AddChild(new TextLabel(ContentsBox, 0, 10, folder.Split('\\')[^1]));
+                ContentsBox.AddChild(new TextLabel(ContentsBox, 0, 10, folder.Split('\\')[^1]) { Focusable = false });
             }
             foreach (var file in files) {
                 DirectoryContents.Add(file);
-                ContentsBox.AddChild(new TextLabel(ContentsBox, 0, 10, file.Split('\\')[^1]));
+                ContentsBox.AddChild(new TextLabel(ContentsBox, 0, 10, file.Split('\\')[^1]) { Focusable = false });
             }
             ((TextLabel)RootUI.GetChildByID("path")).Text = CurrentDirectory;
             if (DirectoryContents.Count > 0) ((TextLabel)ContentsBox.Children[HighlightedLine]).DefaultColor = Color.Yellow;
 
             DebugInfo.AddTempLine(() => $"Directory contents: {DirectoryContents.Count}", 2);
+            RootUI.PositionChildren();
         }
 
         public static (List<string> folders, List<string> files) ListDirectoryContents(string directoryPath) {
@@ -109,6 +110,14 @@ namespace Somniloquy {
             ((TextLabel)ContentsBox.Children[HighlightedLine]).DefaultColor = Color.White;
             HighlightedLine = Util.PosMod(HighlightedLine + amount, DirectoryContents.Count);
             ((TextLabel)ContentsBox.Children[HighlightedLine]).DefaultColor = Color.Yellow;
+
+            if (ContentsBox.Overflowed) {
+                var boxLength = ContentsBox.GetMaxLength(ContentsBox.MainAxis);
+                var entryLength = ((BoxUI)ContentsBox.Children[HighlightedLine]).GetContentLength(ContentsBox.MainAxis, null);
+                
+                if (entryLength * HighlightedLine < ContentsBox.ScrollValue) ContentsBox.ScrollValue = entryLength * HighlightedLine;
+                if (entryLength * (HighlightedLine + 1) > ContentsBox.ScrollValue + boxLength) ContentsBox.ScrollValue = entryLength * (HighlightedLine + 1) - boxLength;
+            }
         }
 
         public static void EnterDirectory() {
