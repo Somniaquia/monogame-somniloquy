@@ -63,9 +63,9 @@ namespace Somniloquy {
             LetterAxis = letterAxis;
         }
             
-        public override float GetContentLength(Axis axis) {
+        public override float GetContentLength(Axis axis, BoxUI caller) {
             // TODO: Flexible indentation (wrapping text inside max axisLength)
-            float length = base.GetContentLength(axis);
+            float length = base.GetContentLength(axis, caller);
             if (LetterAxis == axis) {
                 Vector2 dimensions = SQ.Misaki.MeasureString(Text);
                 length += axis == MainAxis ? dimensions.X : dimensions.Y;
@@ -96,6 +96,8 @@ namespace Somniloquy {
                         } else {
                             if (Text.Length != 0) Text = Text.Remove(Text.Length - 1);
                         }
+                    } else if (lastKey == Keys.Enter || InputManager.IsKeyDown(Keys.LeftControl)) {
+                        
                     } else if (KeyMappings.TryGetValue(lastKey, out var mappedValue)) {
                         if (InputManager.IsKeyDown(Keys.LeftShift) || InputManager.IsKeyDown(Keys.RightShift)) {
                             Text += mappedValue.Item2;
@@ -115,7 +117,12 @@ namespace Somniloquy {
 
         public override void Draw() {
             base.Draw();
-            SQ.SB.DrawString(SQ.Misaki, Text, Boundaries.TopLeft() + Padding.TopLeft(), DefaultColor);
+            SQ.SB.DrawString(SQ.Misaki, Text, Boundaries.TopLeft() + Padding.TopLeft(), DefaultColor);    
+        }   
+
+        public override void Draw(Vector2 displacement) {
+            base.Draw(displacement);
+            SQ.SB.DrawString(SQ.Misaki, Text, Boundaries.TopLeft() + Padding.TopLeft() + displacement, DefaultColor);    
         }
     }
 }

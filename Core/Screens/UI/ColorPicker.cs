@@ -63,7 +63,6 @@ namespace Somniloquy {
             base.Update();
             if (!Active) return;
 
-            Debug.Assert(false);
             HuePicker.Update();
 
             bool updateChart = false;
@@ -96,8 +95,6 @@ namespace Somniloquy {
 
         public override void Draw() {
             if (Active && Screen.EditorMode == EditorMode.PaintMode) {
-                HuePicker.Draw();
-
                 // int borderLength = (Focused) ? 8 : 6;
                 int borderLength = 4;
                 SQ.SB.DrawFilledRectangle(new RectangleF(Boundaries.X - borderLength, Boundaries.Y - borderLength, Boundaries.Width + borderLength * 2, Boundaries.Height + borderLength * 2), Screen.SelectedColor);
@@ -125,7 +122,7 @@ namespace Somniloquy {
         }
 
         public override void Update() {
-            if (Focused) {
+            if (ColorPicker.Active && Focused) {
                 if (InputManager.IsMouseButtonDown(MouseButtons.LeftButton)) {
                     var positionOnBar = Vector2.Transform(InputManager.GetMousePosition(), Transform).X;
                     positionOnBar = Util.PosMod(positionOnBar, 1);
@@ -137,7 +134,7 @@ namespace Somniloquy {
         }
 
         public override void Draw() {
-            if (ColorPicker.Screen.EditorMode == EditorMode.PaintMode) {
+            if (ColorPicker.Active && ColorPicker.Screen.EditorMode == EditorMode.PaintMode) {
                 int borderLength = 4;
                 SQ.SB.DrawFilledRectangle(new RectangleF(Boundaries.X - borderLength, Boundaries.Y - borderLength, Boundaries.Width + borderLength * 2, Boundaries.Height + borderLength * 2), ColorPicker.Screen.SelectedColor);
                 SQ.SB.Draw(BarTexture, (Rectangle)Boundaries, Color.White);

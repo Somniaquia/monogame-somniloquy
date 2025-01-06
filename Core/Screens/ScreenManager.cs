@@ -45,6 +45,13 @@ namespace Somniloquy {
             }
         }
 
+        public static void RepositionChildren() {
+            List<BoxUI> boxUIs = Screens.OfType<BoxUI>().Where(screen => screen.Children.Count > 0).ToList();
+            foreach (var ui in boxUIs) {
+                ui.PositionChildren();
+            }
+        }
+
         public static void Draw() {
             foreach (var screen in Screens) {
                 screen.Draw();

@@ -12,6 +12,7 @@ namespace Somniloquy {
     /// Boxy Screen elements
     /// </summary>
     public class BoxUI : Screen {
+        public BoxUI Root; public bool RepositioningNeeded = false;
         public BoxUI Parent;
         public RectangleF Boundaries;
         public Matrix Transform;
@@ -34,10 +35,16 @@ namespace Somniloquy {
         public bool MainAxisFill = false;
         public bool PerpendicularAxisFill = true;
 
+        public bool MainAxisShrink = false;
+        public bool PerpendicularAxisShrink = false;
+
+        public bool Highlighted = false;
+
         public BoxUI() {}
 
         public BoxUI(BoxUI parent, float margin = 0, float padding = 0) : this(parent, new Sides(margin), new Sides(padding), Axis.Horizontal, Align.Begin, Align.Center) { }
         public BoxUI(BoxUI parent, Sides margin, Sides padding, Axis axis, Align mainAxisAlign, Align perpendicularAxisAlign) {
+            Root = parent.Root;
             Parent = parent;
             Margin = margin;
             Padding = padding;
@@ -48,6 +55,7 @@ namespace Somniloquy {
 
         public BoxUI(RectangleF boundaries) : this(boundaries, Sides.None, Axis.Vertical, Align.Begin, Align.Center) { }
         public BoxUI(RectangleF boundaries, Sides padding, Axis axis, Align mainAxisAlign, Align perpendicularAxisAlign) {
+            Root = this;
             Boundaries = boundaries;
             Transform = Matrix.CreateTranslation(-boundaries.X, -boundaries.Y, 0f) * 
                         Matrix.CreateScale(1f / boundaries.Width, 1f / boundaries.Height, 1f);
@@ -67,7 +75,6 @@ namespace Somniloquy {
         public BoxUI AddChild(BoxUI child) => InsertChild(Children.Count, child);
         public BoxUI InsertChild(int index, BoxUI child) {
             Children.Insert(index, child);
-            PositionChildren();
             return child;
         }
 
@@ -77,13 +84,14 @@ namespace Somniloquy {
             if (MainAxisAlign == Align.Custom) {
 
             } else {
-                float contentLength = GetContentLength(MainAxis);
+                float contentLength = GetContentLength(MainAxis, this);
                 float maxLength = GetMaxLength(MainAxis);
+                bool overflow = contentLength > maxLength;
 
-                if (contentLength > maxLength) {
+                if (overflow) {
                     ScrollValue = Math.Clamp(ScrollValue, 0, contentLength - maxLength);
-                    if (ContentRenderTarget == null || ContentRenderTarget.Width != (int)maxLength) {
-                        ContentRenderTarget = new RenderTarget2D(SQ.GD, (int)maxLength, (int)Boundaries.Height);
+                    if (ContentRenderTarget == null || ContentRenderTarget.Bounds.GetAxisLength(MainAxis) != (int)maxLength) {
+                        ContentRenderTarget = MainAxis == Axis.Horizontal ? new RenderTarget2D(SQ.GD, (int)maxLength, (int)Boundaries.Height) : new RenderTarget2D(SQ.GD, (int)Boundaries.Width, (int)maxLength);
                     }
                 } else {
                     ScrollValue = 0;
@@ -91,7 +99,7 @@ namespace Somniloquy {
                     ContentRenderTarget = null;
                 }
 
-                var alignMode = contentLength > maxLength ? MainAxisAlignOverflow : MainAxisAlign;
+                var alignMode = overflow ? MainAxisAlignOverflow : MainAxisAlign;
 
                 if (alignMode == Align.Begin) {
                     float position = MainAxis == Axis.Horizontal ? Boundaries.X : Boundaries.Y;
@@ -99,8 +107,8 @@ namespace Somniloquy {
 
                     for (int i = 0; i < children.Count; i++) {
                         position += GetSeperationByIndex(MainAxis, i);
-                        var thisLength = children[i].GetContentLength(MainAxis);
-                        thisLength = children[i].MainAxisFill ? maxLength - contentLength + thisLength : thisLength;
+                        var thisLength = children[i].GetContentLength(MainAxis, this);
+                        if (children[i].MainAxisFill) thisLength = maxLength - (contentLength - thisLength);
                         children[i].SetBoundariesAxis(MainAxis, position, position += thisLength);
                     }
                 } else if (alignMode == Align.End) {
@@ -110,33 +118,30 @@ namespace Somniloquy {
                 } else if (alignMode == Align.Even) {
 
                 }
+            }
 
-                // Perpendicular positioning
-                maxLength = GetMaxLength(PerpendicularAxis);
-                
-                foreach (var child in children) {
-                    contentLength = child.GetContentLength(PerpendicularAxis);
+            float perpendicularMaxLength = GetMaxLength(PerpendicularAxis);
+            
+            foreach (var child in children) {
+                var contentLength = child.GetContentLength(PerpendicularAxis, this);
 
-                    if (contentLength < maxLength) {
-                        if (PerpendicularAxisAlign == Align.Begin) {
+                if (PerpendicularAxisAlign == Align.Begin) {
 
-                        } else if (PerpendicularAxisAlign == Align.End) {
+                } else if (PerpendicularAxisAlign == Align.End) {
 
-                        } else if (PerpendicularAxisAlign is Align.Center or Align.Even) {
-                            var begin = Boundaries.GetSide(PerpendicularAxis, true)
-                                + Util.Max(Padding.GetSide(PerpendicularAxis, true), child.Margin.GetSide(PerpendicularAxis, true));
-                            var end = Boundaries.GetSide(PerpendicularAxis, false) 
-                                - Util.Max(Padding.GetSide(PerpendicularAxis, false), child.Margin.GetSide(PerpendicularAxis, false));
-                            
-                            child.SetBoundariesAxis(PerpendicularAxis, begin, end);
-                        }
-                    } else {
-                        throw new Exception("AAAAAAAA Unimplemented!!");
-                    }
+                } else if (PerpendicularAxisAlign is Align.Center or Align.Even) {
+                    var begin = Boundaries.GetSide(PerpendicularAxis, true)
+                        + Util.Max(Padding.GetSide(PerpendicularAxis, true), child.Margin.GetSide(PerpendicularAxis, true));
+                    var end = Boundaries.GetSide(PerpendicularAxis, false) 
+                        - Util.Max(Padding.GetSide(PerpendicularAxis, false), child.Margin.GetSide(PerpendicularAxis, false));
+                    
+                    child.SetBoundariesAxis(PerpendicularAxis, begin, end);
                 }
             }
 
-            Parent?.PositionChildren();
+            foreach (var child in children) {
+                child.PositionChildren();
+            }
         }
 
         public float GetSeperationByIndex(Axis axis, int i) {
@@ -146,20 +151,18 @@ namespace Somniloquy {
             return Util.Max(start, end);
         }
 
-        // An element cannot be expanded if it is the Root element, a child of a divisionPositioner
         public float GetMaxLength(Axis axis) {
-            if (Parent is null || Parent.GetAxisAlign(axis) is Align.Custom) {
-                return axis == Axis.Horizontal ? Boundaries.Width : Boundaries.Height;
-            } else {
-                return float.PositiveInfinity;
-            }
+            return axis == Axis.Horizontal ? Boundaries.Width : Boundaries.Height;
         }
 
         public Align GetAxisAlign(Axis axis) {
             return axis == MainAxis ? MainAxisAlign : PerpendicularAxisAlign;
         }
 
-        public virtual float GetContentLength(Axis axis) {
+        public virtual float GetContentLength(Axis axis, BoxUI caller) {
+            if (caller != this && axis == MainAxis && MainAxisShrink) return 0;
+            if (caller != this && axis == PerpendicularAxis && PerpendicularAxisShrink) return 0;
+
             var children = Children.OfType<BoxUI>().ToList();
             if (children.Count == 0) return Padding.GetSideSum(axis);
 
@@ -168,13 +171,13 @@ namespace Somniloquy {
 
                 for (int i = 0; i < children.Count; i++) {
                     length += GetSeperationByIndex(axis, i);
-                    length += children[i].GetContentLength(axis);
+                    length += children[i].GetContentLength(axis, this);
                 }
                 length += GetSeperationByIndex(axis, children.Count);
 
                 return length;
             } else {
-                return children.Max(child => Util.Max(child.Margin.GetSide(axis, true), Padding.GetSide(axis, true)) + child.GetContentLength(axis) + Util.Max(child.Margin.GetSide(axis, false), Padding.GetSide(axis, false)));
+                return children.Max(child => Util.Max(child.Margin.GetSide(axis, true), Padding.GetSide(axis, true)) + child.GetContentLength(axis, this) + Util.Max(child.Margin.GetSide(axis, false), Padding.GetSide(axis, false)));
             }
         }
 
@@ -190,11 +193,29 @@ namespace Somniloquy {
             base.Update();
         }
 
-        public override void Draw() {
-            if (Renderer is not null) {
-                Renderer.Draw(Boundaries);
+        public override void Draw() => Draw(Vector2.Zero);
+        public virtual void Draw(Vector2 displacement) {
+            Renderer?.Draw(Boundaries.Displace(displacement));
+
+            if (ContentRenderTarget is null) {
+                Children.ForEach(child => child.Draw());
+            } else {
+                SQ.SB.End();
+                SQ.GD.SetRenderTarget(ContentRenderTarget);
+                SQ.GD.Clear(Color.Transparent);
+                SQ.SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
+
+                foreach (var child in Children.OfType<BoxUI>().Where(child => Util.IntersectsOrAdjacent(child.Boundaries, Boundaries))) {
+                    child.Draw(-Boundaries.TopLeft());
+                }
+
+                SQ.SB.End();
+                SQ.GD.SetRenderTarget(null);
+                SQ.SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
+                SQ.SB.Draw(ContentRenderTarget, (Rectangle)Boundaries, Color.White);
             }
-            base.Draw();
+
+            if (Highlighted) new BoxUIDebugRenderer().Draw(Boundaries);
         }
     }
 }

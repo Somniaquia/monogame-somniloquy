@@ -77,6 +77,8 @@ namespace Somniloquy {
         protected override void LoadContent() {
             base.LoadContent();
             GD = GraphicsDevice;
+            GD.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
+
             SB = new SQSpriteBatch(GD);
             CM = Content;
 
@@ -117,6 +119,7 @@ namespace Somniloquy {
             }
 
             SQTexture2D.ApplyTextureChanges();
+            ScreenManager.RepositionChildren();
             SoundManager.Update();
             base.Update(gameTime);
         }

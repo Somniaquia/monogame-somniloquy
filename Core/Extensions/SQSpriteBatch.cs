@@ -5,7 +5,7 @@ namespace Somniloquy {
 
     public class SQSpriteBatch : SpriteBatch {
         public Texture2D Pixel;
-        
+
         public SQSpriteBatch(GraphicsDevice graphicsDevice) : base(graphicsDevice) {
             Pixel = new(SQ.GD, 1, 1);
             Pixel.SetData(new[] { Color.White });

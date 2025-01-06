@@ -178,21 +178,23 @@ namespace Somniloquy {
         }
 
         private static void UpdateTabletState() {
-            float maxPressure = CWintabInfo.GetMaxPressure();
-            uint count = 10; float currentPressure = 0f;
-            WintabPacket[] packets = wintabData.GetDataPackets(count, true, ref count);
-            for (int i = 0; i < count; i++) {
-                currentPressure = MathF.Max(currentPressure, packets[i].pkNormalPressure / maxPressure);
-            }
+            // uint count = 10; float currentPressure = 0f;
 
-            PenPressureSamples.Enqueue(currentPressure);
+            // float maxPressure = CWintabInfo.GetMaxPressure();
+            // WintabPacket[] packets = wintabData.GetDataPackets(count, true, ref count);
+            
+            // for (int i = 0; i < count; i++) {
+            //     currentPressure = MathF.Max(currentPressure, packets[i].pkNormalPressure / maxPressure);
+            // }
 
-            if (PenPressureSamples.Count > 10) {
-                PenPressureSamples.Dequeue();
-                AveragePenPressure = PenPressureSamples.Average(i => i);
-            } else {
-                AveragePenPressure = currentPressure;
-            }
+            // PenPressureSamples.Enqueue(currentPressure);
+
+            // if (PenPressureSamples.Count > 10) {
+            //     PenPressureSamples.Dequeue();
+            //     AveragePenPressure = PenPressureSamples.Average(i => i);
+            // } else {
+            //     AveragePenPressure = currentPressure;
+            // }
         }
 
         public static Keybind RegisterKeybind(object button, Action action, TriggerOnce triggerOnce) {

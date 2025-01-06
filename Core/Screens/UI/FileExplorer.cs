@@ -41,7 +41,7 @@ namespace Somniloquy {
             
             RootUI.AddChild(new TextLabel(RootUI, 20, 5) { Identifier = "path" });
             var mainBox = RootUI.AddChild(new BoxUI(RootUI, 20, 0) { MainAxis = Axis.Horizontal, Identifier = "mainBox", MainAxisFill = true, });
-                ContentsBox = mainBox.AddChild(new BoxUI(mainBox) { MainAxis = Axis.Vertical, Identifier = "contents" });
+                ContentsBox = mainBox.AddChild(new BoxUI(mainBox) { MainAxis = Axis.Vertical, Identifier = "contents", MainAxisShrink = true, Highlighted = true });
                 var previewBox = mainBox.AddChild(new BoxUI(mainBox) { Identifier = "previewBox" });
             var bottomBox = RootUI.AddChild(new BoxUI(RootUI, 20, 0) { Identifier = "bottomBox" });
                 SaveNameBox = (TextLabel)bottomBox.AddChild(new TextLabel(bottomBox, 0, 20) { Identifier = "saveNameBox", Editable = true, } );
@@ -105,9 +105,9 @@ namespace Somniloquy {
         }
 
         public static void MoveHighlightedLine(int amount) {
+            if (DirectoryContents.Count == 0) return;
             ((TextLabel)ContentsBox.Children[HighlightedLine]).DefaultColor = Color.White;
-            HighlightedLine += amount;
-            HighlightedLine = Util.PosMod(HighlightedLine, DirectoryContents.Count);
+            HighlightedLine = Util.PosMod(HighlightedLine + amount, DirectoryContents.Count);
             ((TextLabel)ContentsBox.Children[HighlightedLine]).DefaultColor = Color.Yellow;
         }
 

@@ -204,7 +204,6 @@ namespace Somniloquy {
                 }
             }
 
-            ColorPicker.Draw();
             LayerTable.Draw();
         }
     }

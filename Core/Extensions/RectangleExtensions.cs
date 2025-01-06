@@ -28,6 +28,16 @@ namespace Somniloquy {
             return new(rectangle.Right, rectangle.Bottom);
         }
 
+        public static Rectangle Displace(this Rectangle rectangle, Vector2I displacement) {
+            if (displacement == Vector2.Zero) return rectangle;
+            return new Rectangle(rectangle.X + displacement.X, rectangle.Y + displacement.Y, rectangle.Width, rectangle.Height);
+        }
+        
+        public static RectangleF Displace(this RectangleF rectangle, Vector2 displacement) {
+            if (displacement == Vector2.Zero) return rectangle;
+            return new RectangleF(rectangle.Location + displacement, rectangle.Size);
+        }
+
         public static Rectangle ExpandSouthEast(this Rectangle rectangle, int amount) {
             return new(rectangle.X, rectangle.Y, rectangle.Width + amount, rectangle.Height + amount);
         }
@@ -35,9 +45,21 @@ namespace Somniloquy {
         public static RectangleF ExpandSouthEast(this RectangleF rectangle, float amount) {
             return new(rectangle.X, rectangle.Y, rectangle.Width + amount, rectangle.Height + amount);
         }
+        
+        public static int GetAxisLength(this Rectangle rectangle, Axis axis) {
+            return (axis == Axis.Horizontal) ? rectangle.Width : rectangle.Height;
+        }
 
         public static float GetAxisLength(this RectangleF rectangle, Axis axis) {
             return (axis == Axis.Horizontal) ? rectangle.Width : rectangle.Height;
+        }
+        
+        public static int GetSide(this Rectangle rectangle, Axis axis, bool start) {
+            if (axis == Axis.Horizontal) {
+                return start ? rectangle.X : rectangle.X + rectangle.Width;
+            } else {
+                return start ? rectangle.Y : rectangle.Y + rectangle.Height;
+            }
         }
 
         public static float GetSide(this RectangleF rectangle, Axis axis, bool start) {
