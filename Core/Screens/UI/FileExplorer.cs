@@ -26,7 +26,7 @@ namespace Somniloquy {
             InputManager.RegisterKeybind(new object[] { Keys.LeftControl, Keys.O }, (parameters) => { ToggleFileExplorer(); }, TriggerOnce.True, true);
             InputManager.RegisterKeybind(Keys.Tab, Keys.LeftShift, (parameters) => { if (Active) MoveHighlightedLine(1); }, TriggerOnce.Block);
             InputManager.RegisterKeybind(new object[] {Keys.LeftShift, Keys.Tab}, (parameters) => { if (Active) MoveHighlightedLine(-1); }, TriggerOnce.Block, true);
-            InputManager.RegisterKeybind(new object[] { Keys.LeftControl, Keys.S }, (parameters) => { if (Active) Save(); }, TriggerOnce.True);
+            InputManager.RegisterKeybind(new object[] { Keys.LeftControl, Keys.S }, (parameters) => { if (Active) Save(SaveNameBox?.Text.Split(".")[0]); }, TriggerOnce.True);
             InputManager.RegisterKeybind(new object[] { Keys.LeftControl, Keys.L }, (parameters) => { if (Active) Load(); }, TriggerOnce.True);
             InputManager.RegisterKeybind(new object[] { Keys.LeftControl, Keys.E }, (parameters) => { if (Active) Export(); }, TriggerOnce.True);
             InputManager.RegisterKeybind(Keys.Enter, Keys.LeftShift, (parameters) => { if (Active) EnterDirectory(); }, TriggerOnce.True);
@@ -53,13 +53,13 @@ namespace Somniloquy {
             DebugInfo.Active = true;
             ScreenManager.GetFirstScreenOfType<Section2DScreen>().Editor.ColorPicker.Active = true;
 
-            RootUI.Destroy();
+            RootUI?.Destroy();
             RootUI = null;
         }
 
         public static void ToggleFileExplorer() {
             if (!Active) {
-                BuildUI(); 
+                BuildUI();
                 OpenDirectory("c:\\Somnia\\Projects\\monogame-somniloquy\\Assets");
             } else {
                 DestroyUI();
@@ -134,31 +134,35 @@ namespace Somniloquy {
             }
         }
 
-        public static void Save() {
+        public static void Save(string saveName) {
+            if (saveName == "") return;
+
             var section = ScreenManager.GetFirstScreenOfType<Section2DScreen>().Section;
             if (section == null) {
                 DebugInfo.AddTempLine(() => "No section to save.", 5);
                 return;
             }
 
+            section.Identifier = $"{saveName}.sqSection2D";
             string json = section.Serialize();
 
             if (!Directory.Exists(CurrentDirectory)) {
                 DebugInfo.AddTempLine(() => "Current directory is invalid.", 5);
-                return;
+                return; // TODO: Create folders duh I am lazy
             }
 
             // var sectionIdentifier = section.Identifier == "" ? section.Identifier : "temp"; 
-            string filePath = Path.Combine(CurrentDirectory, $"{SaveNameBox.Text.Split(".")[0]}.sqSection2D");
+            string filePath = Path.Combine(CurrentDirectory, $"{saveName}.sqSection2D");
 
             try {
                 File.WriteAllText(filePath, json);
                 DebugInfo.AddTempLine(() => $"Section saved to {filePath}", 5);
+                DestroyUI();
             } catch (Exception e) {
                 DebugInfo.AddTempLine(() => $"Error saving section: {e.Message}", 5);
             }
 
-            OpenDirectory(CurrentDirectory);
+            // OpenDirectory(CurrentDirectory);
         }
 
         public static void Load() {
@@ -187,6 +191,7 @@ namespace Somniloquy {
                         } catch (Exception e) {
                             DebugInfo.AddTempLine(() => $"Error reading {Path.GetFileName(path)}: {e.Message}", 5);
                         }
+                        DestroyUI();
                     } else if (path.EndsWith(".sqSection2D")) {
                         var sectionScreen = ScreenManager.GetFirstScreenOfType<Section2DScreen>();
                         if (sectionScreen is null) {
@@ -201,14 +206,13 @@ namespace Somniloquy {
                         // } catch (Exception e) {
                         //     DebugInfo.AddTempLine(() => $"Error reading {Path.GetFileName(path)}: {e.Message}", 5);
                         // }
+                        DestroyUI();
                     } else {
                         DebugInfo.AddTempLine(() => $"{Path.GetFileName(path)} is an unsupported file type.", 5);
                     }
                 } else {
                     DebugInfo.AddTempLine(() => $"{Path.GetFileName(path)} does not exist.", 5);
                 }
-
-                DestroyUI();
             } catch (FileNotFoundException e) {
                 DebugInfo.AddTempLine(() => e.ToString(), 5);
             }

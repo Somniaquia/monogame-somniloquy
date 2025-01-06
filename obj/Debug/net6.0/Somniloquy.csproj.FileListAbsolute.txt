@@ -235,9 +235,8 @@ C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Loops\n3-tSP.wav
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Loops\n3-tWW.wav
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Loops\n3-WeR.wav
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Loops\本名_1_small.wav
-C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\oadwdawdAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaa.sqSection2D
-C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\temp.png
-C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\world1.sqSection2D
+C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Worlds\icon.png
+C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Worlds\icon.sqSection2D
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\bin\DesktopGL\Content\Fonts\Misaki.xnb
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\bin\DesktopGL\Content\Fonts\UDMinchoM.xnb
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\bin\DesktopGL\Content\Shaders\BloomCombine.xnb

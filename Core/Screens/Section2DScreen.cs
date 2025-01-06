@@ -86,6 +86,8 @@ namespace Somniloquy {
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.Z}, new object[] {Keys.LeftShift, MouseButtons.LeftButton}, (parameters) => CommandManager.Undo(), TriggerOnce.True, true));
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.LeftShift, Keys.Z}, new object[] {MouseButtons.LeftButton}, (parameters) => CommandManager.Redo(), TriggerOnce.True, true));
 
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.S}, (parameters) => Save(), TriggerOnce.True, true));
+
             ColorPicker = new ColorPicker(new Rectangle(SQ.WindowSize.X - 264, SQ.WindowSize.Y - 264, 256, 256), this);
             LayerTable = new LayerTable(Screen);
 
@@ -186,6 +188,16 @@ namespace Somniloquy {
         public void SelectNextBrush() {
             if (!Focused) return;
             currentBrushIndex = (currentBrushIndex + 1) % Brush.BrushTypes.Count;
+        }
+
+        public void Save() { // TODO resolve ScreenManager algorithm that determines focused screen
+            if (FileExplorer.Active) return;
+            if (!string.IsNullOrEmpty(Screen.Section.Identifier)) {
+                FileExplorer.Save(Screen.Section.Identifier.Split(".")[0]);
+            }  else {
+                FileExplorer.BuildUI();
+                FileExplorer.OpenDirectory("c:\\Somnia\\Projects\\monogame-somniloquy\\Assets");
+            }
         }
 
         public override void Draw() {
