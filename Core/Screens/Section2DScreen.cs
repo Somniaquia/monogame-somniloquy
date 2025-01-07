@@ -17,7 +17,7 @@ namespace Somniloquy {
             if (Section is null) { // temp
                 Section = new();
                 Section.LayerGroups.Add(0, new LayerGroup2D());
-                Section.LayerGroups[0].Layers.Add(0, new TileLayer2D());
+                Section.LayerGroups[0].Layers.Add(0, new TileLayer2D(16, 16));
             }
 
             Editor = new(this);
@@ -206,8 +206,8 @@ namespace Somniloquy {
             foreach (var layerGroup in Screen.Section.LayerGroups) {
                 foreach (var layer in layerGroup.Value.Layers) {
                     if (layer.Value == SelectedLayer) {
-                        // layer.Value.Draw(Screen.Camera, 1f, MathF.Min(Screen.Camera.Zoom, 1f));
-                        layer.Value.Draw(Screen.Camera, 1f, 1f);
+                        layer.Value.Draw(Screen.Camera, 1f, MathF.Min(Screen.Camera.Zoom, 1f));
+                        // layer.Value.Draw(Screen.Camera, 1f, 1f);
                     } else if (layerGroup.Value.Layers.ContainsValue(SelectedLayer)){
                         layer.Value.Draw(Screen.Camera, 0.8f);
                     } else {

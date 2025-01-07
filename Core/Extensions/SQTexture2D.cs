@@ -68,8 +68,8 @@ namespace Somniloquy {
             return canvasColor.BlendWith(paintingColor, opacity);
         }
 
-        public void Draw(Rectangle destination, Rectangle source, Color color, SpriteEffects effects = SpriteEffects.None) {
-            SQ.SB.Draw(this, destination, source, color, effects);
+        public void Draw(Camera2D camera, Rectangle destination, Rectangle source, Color color, SpriteEffects effects = SpriteEffects.None) {
+            camera.Draw(this, destination, source, color);
         }
 
         public static void ApplyTextureChanges() {

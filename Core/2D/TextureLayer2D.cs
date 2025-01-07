@@ -35,7 +35,6 @@ namespace Somniloquy {
                 Chunks.Add(chunkPosition, chunk);
                 chain?.AddCommand(new TextureChunkSetCommand(this, chunkPosition, null, chunk));
             }
-            
 
             if (chain.AffectedPixels.ContainsKey(position) && opacity != 1) {
                 if (chain.AffectedPixels[position].Item2 >= opacity) return;

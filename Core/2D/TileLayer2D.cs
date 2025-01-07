@@ -13,16 +13,24 @@
     /// different layouts or looks for the same world in every visit, sometimes connecting a different world or triggering events such as jumpscares
     /// </summary>
     public class TileLayer2D : Layer2D, IPaintableLayer2D {
-        [JsonInclude] public static int ChunkLength = 16;
-        [JsonInclude] public static int TileLength = 16;
+        [JsonInclude] public int ChunkLength = 16;
+        [JsonInclude] public int TileLength = 16;
         [JsonInclude] public Dictionary<Vector2I, TileChunk2D> Chunks = new();
-        [JsonInclude] public TileSpriteSheet SpriteSheet = new(TileLength, ChunkLength);
+        [JsonInclude] public TileSpriteSheet SpriteSheet;
 
         public Vector2I GetChunkPosition(Vector2I tilePosition) => tilePosition / ChunkLength;
         public Vector2I GetPositionInChunk(Vector2I worldPosition) => Util.PosMod(worldPosition, new Vector2I(TileLength * ChunkLength));
         public Vector2I GetTilePositionInChunk(Vector2I tilePosition) => Util.PosMod(tilePosition, new Vector2I(ChunkLength));
         public Vector2I GetTilePosition(Vector2I worldPosition) => worldPosition / TileLength;
         public Vector2I GetPositionInTile(Vector2I worldPosition) => Util.PosMod(worldPosition, new Vector2I(TileLength));
+
+        public TileLayer2D() { }
+
+        public TileLayer2D(int chunkLength = 16, int tileLength = 16) {
+            ChunkLength = chunkLength;
+            TileLength = tileLength;
+            SpriteSheet = new(tileLength, chunkLength);
+        }
 
         public void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain = null) {          
             var tilePosition = GetTilePosition(position);
@@ -67,7 +75,7 @@
         }
 
         private void AddChunk(Vector2I chunkPosition, CommandChain chain = null) {
-            var chunk = new TileChunk2D(this, ChunkLength, TileLength);
+            var chunk = new TileChunk2D(this);
             // Array.Fill(chunk, DefaultTile); TODO: Default tile
             Chunks.Add(chunkPosition, chunk);
             chain?.AddCommand(new TileChunkSetCommand(this, chunkPosition, null, chunk));
@@ -134,48 +142,45 @@
                         camera.DrawLine(chunkPos, (chunkIndex + new Vector2I(1, 0)) * chunkLengthInPixels, Color.Gray * (gridOpacity / 2), scale: false);
                         camera.DrawLine(chunkPos, (chunkIndex + new Vector2I(0, 1)) * chunkLengthInPixels, Color.Gray * (gridOpacity / 2), scale: false);
 
-                        for (int tx = 0; tx < ChunkLength; tx++) {
-                            Vector2 verticalStart = chunkPos + new Vector2I(tx * TileLength, 0);
-                            Vector2 verticalEnd = verticalStart + new Vector2I(0, chunkLengthInPixels);
+                        // for (int tx = 0; tx < ChunkLength; tx++) {
+                        //     Vector2 verticalStart = chunkPos + new Vector2I(tx * TileLength, 0);
+                        //     Vector2 verticalEnd = verticalStart + new Vector2I(0, chunkLengthInPixels);
 
-                            verticalStart = new Vector2(verticalStart.X, MathF.Max(verticalStart.Y, yTop));
-                            verticalEnd = new Vector2(verticalEnd.X, MathF.Min(verticalEnd.Y, yBottom));
-                            camera.DrawLine((Vector2I)verticalStart, (Vector2I)verticalEnd, Color.Gray * (gridOpacity / 4), scale: false);
-                        }
+                        //     verticalStart = new Vector2(verticalStart.X, MathF.Max(verticalStart.Y, yTop));
+                        //     verticalEnd = new Vector2(verticalEnd.X, MathF.Min(verticalEnd.Y, yBottom));
+                        //     camera.DrawLine((Vector2I)verticalStart, (Vector2I)verticalEnd, Color.Gray * (gridOpacity / 4), scale: false);
+                        // }
 
-                        for (int ty = 0; ty < ChunkLength; ty++) {
-                            Vector2 horizontalStart = chunkPos + new Vector2I(0, ty * TileLength);
-                            Vector2 horizontalEnd = horizontalStart + new Vector2I(chunkLengthInPixels, 0);
+                        // for (int ty = 0; ty < ChunkLength; ty++) {
+                        //     Vector2 horizontalStart = chunkPos + new Vector2I(0, ty * TileLength);
+                        //     Vector2 horizontalEnd = horizontalStart + new Vector2I(chunkLengthInPixels, 0);
 
-                            horizontalStart = new Vector2(MathF.Max(horizontalStart.X, xLeft), horizontalStart.Y);
-                            horizontalEnd = new Vector2(MathF.Min(horizontalEnd.X, xRight), horizontalEnd.Y);
-                            camera.DrawLine((Vector2I)horizontalStart, (Vector2I)horizontalEnd, Color.Gray * (gridOpacity / 4), scale: false);
-                        }
+                        //     horizontalStart = new Vector2(MathF.Max(horizontalStart.X, xLeft), horizontalStart.Y);
+                        //     horizontalEnd = new Vector2(MathF.Min(horizontalEnd.X, xRight), horizontalEnd.Y);
+                        //     camera.DrawLine((Vector2I)horizontalStart, (Vector2I)horizontalEnd, Color.Gray * (gridOpacity / 4), scale: false);
+                        // }
                     }
                     
                     if (!Chunks.ContainsKey(chunkIndex)) continue;
 
-                    Chunks[chunkIndex].Draw(camera, (Rectangle)new RectangleF(xLeft, yTop, xRight - xLeft, yBottom - yTop), (Rectangle)new RectangleF(xLeft - chunkPos.X, yTop - chunkPos.Y , xRight - xLeft, yBottom - yTop), 1f);
+                    // Chunks[chunkIndex].Draw(camera, (Rectangle)new RectangleF(xLeft, yTop, xRight - xLeft, yBottom - yTop), (Rectangle)new RectangleF(xLeft - chunkPos.X, yTop - chunkPos.Y , xRight - xLeft, yBottom - yTop), 1f);
+                    Chunks[chunkIndex].Draw(camera, new Rectangle(chunkPos, Vector2I.One * chunkLengthInPixels), Rectangle.Empty, opacity);
                 }
             }
         }
     }
 
     public class TileChunk2D {
-        [JsonIgnore] public TileLayer2D ParentLayer;
         [JsonInclude] public Tile2D[,] Tiles;
-        [JsonInclude] public int ChunkLength;
-        [JsonInclude] public int TileLength;
+        [JsonIgnore] public TileLayer2D Parent;
 
-        public Vector2I GetTilePositionInChunk(Vector2I positionInChunk) => Util.PosMod(positionInChunk, new Vector2I(ChunkLength));
-        public Vector2I GetPositionInTile(Vector2I positionInChunk) => Util.PosMod(positionInChunk, new Vector2I(TileLength));
+        public Vector2I GetTilePositionInChunk(Vector2I positionInChunk) => positionInChunk / new Vector2I(Parent.TileLength);
+        public Vector2I GetPositionInTile(Vector2I positionInChunk) => Util.PosMod(positionInChunk, new Vector2I(Parent.TileLength));
         
-        public TileChunk2D (TileLayer2D parentLayer, int chunkLength, int tileLength) {
-            ParentLayer = parentLayer;
-            ChunkLength = chunkLength;
-            TileLength = tileLength;
+        public TileChunk2D (TileLayer2D parent) {
+            Parent = parent;
 
-            Tiles = new Tile2D[ChunkLength, ChunkLength];
+            Tiles = new Tile2D[parent.ChunkLength, parent.ChunkLength];
         }
 
         public void SetTile(Vector2I positionInChunk, Tile2D tile) {
@@ -187,7 +192,7 @@
             var tile = GetTile(tilePosInChunk);
             if (tile is null) {
                 var animation = new Animation2D()
-                    .AddFrame(ParentLayer.SpriteSheet, ParentLayer.SpriteSheet.AllocateSpace());
+                    .AddFrame(Parent.SpriteSheet, Parent.SpriteSheet.AllocateSpace());
 
                 var sprite = new Sprite2D()
                     .AddAnimation("0", animation)
@@ -218,6 +223,11 @@
 
         public void Draw(Camera2D camera, Rectangle destination, Rectangle source, float opacity = 1f) {
             
+            for (int y = 0; y < Parent.ChunkLength; y++) {
+                for (int x = 0; x < Parent.ChunkLength; x++) {
+                    Tiles[x, y]?.Draw(camera, new Rectangle(new Vector2I(destination.X + x * Parent.TileLength, destination.Y + y * Parent.TileLength), new Vector2I(Parent.TileLength)), opacity);
+                }
+            }
         }
     }
 }

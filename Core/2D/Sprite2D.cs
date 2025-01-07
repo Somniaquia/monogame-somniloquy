@@ -11,7 +11,7 @@ namespace Somniloquy {
         public Color GetColor(Vector2I position);
         public void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain);
         public void SetPixel(Vector2I position, Color color, CommandChain chain);
-        public void Draw(Rectangle destination, Rectangle source, Color color, SpriteEffects effects = SpriteEffects.None);
+        public void Draw(Camera2D camera, Rectangle destination, Rectangle source, Color color, SpriteEffects effects = SpriteEffects.None);
     }
 
     public class TileSpriteSheet : ISpriteSheet {
@@ -23,13 +23,16 @@ namespace Somniloquy {
         public TileSpriteSheet(int tileLength, int sheetChunkLength) {
             SheetChunkLength = sheetChunkLength;
             TileLength = tileLength;
-            AddSheetChunk();
+        
+            DebugInfo.Subscribe(() => $"Tiles count: {TileLength * TileLength * SheetChunks.Count - UnoccupiedTileSlots.Count}");
         }
 
         public void AddSheetChunk() {
+            SheetChunks.Add(new SQTexture2D(SQ.GD, TileLength * SheetChunkLength, TileLength * SheetChunkLength));
+
             for (int y  = 0; y < SheetChunkLength; y++) {
                 for (int x = 0; x < SheetChunkLength; x++) {
-                    UnoccupiedTileSlots.Add(new Vector2I(x, y));
+                    UnoccupiedTileSlots.Add(new Vector2I(x, y + SheetChunkLength * (SheetChunks.Count - 1)));
                 }
             }
         }
@@ -48,17 +51,19 @@ namespace Somniloquy {
         }
 
         public Color GetColor(Vector2I position) {
-            return Color.Purple;
+            return SheetChunks[position.Y / (SheetChunkLength * TileLength)].GetColor(new Vector2I(position.X, position.Y % (SheetChunkLength * TileLength)));
         }
 
         public void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain) {
+            SheetChunks[position.Y / (SheetChunkLength * TileLength)].SetPixel(new Vector2I(position.X, position.Y % (SheetChunkLength * TileLength)), color);
         }
 
         public void SetPixel(Vector2I position, Color color, CommandChain chain) {
+            SheetChunks[position.Y / (SheetChunkLength * TileLength)].SetPixel(new Vector2I(position.X, position.Y % (SheetChunkLength * TileLength)), color);
         }
 
-        public void Draw(Rectangle destination, Rectangle source, Color color, SpriteEffects effects = SpriteEffects.None) {
-            
+        public void Draw(Camera2D camera, Rectangle destination, Rectangle source, Color color, SpriteEffects effects = SpriteEffects.None) {
+            camera.Draw(SheetChunks[source.Y / (SheetChunkLength * TileLength)], destination, new Rectangle(source.X, source.Y % (SheetChunkLength * TileLength), source.Width, source.Height), color);
         }
     }
 
@@ -71,34 +76,26 @@ namespace Somniloquy {
         public Color GetColor(Vector2I position);
         public void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain);
         public void SetPixel(Vector2I position, Color color, CommandChain chain);
-        public void Draw(Rectangle destination, Color color, SpriteEffects effects = SpriteEffects.None);
+        public void Draw(Camera2D camera, Rectangle destination, Color color, SpriteEffects effects = SpriteEffects.None);
     }
 
     public class SheetAnimationFrame2D : IAnimationFrame2D {
         [JsonInclude] public ISpriteSheet SpriteSheet;
         [JsonInclude] public Rectangle SourceRect;
 
-        public Color GetColor(Vector2I position) {
-            return SpriteSheet.GetColor(GetSheetPosition(position));
-        }
-
-        public void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain) {
-            SpriteSheet.PaintPixel(GetSheetPosition(position), color, opacity, chain);
-        }
-
-        public void SetPixel(Vector2I position, Color color, CommandChain chain) {
-            SpriteSheet.SetPixel(GetSheetPosition(position), color, chain);
-        }
+        public Color GetColor(Vector2I position) => SpriteSheet.GetColor(GetSheetPosition(position));
+        public void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain) => SpriteSheet.PaintPixel(GetSheetPosition(position), color, opacity, chain);
+        public void SetPixel(Vector2I position, Color color, CommandChain chain) => SpriteSheet.SetPixel(GetSheetPosition(position), color, chain);
 
         private Vector2I GetSheetPosition(Vector2I position) {
             var dimensions = SourceRect.Size;
             if (position.X < 0 || position.Y < 0 || position.X > dimensions.X || position.Y > dimensions.Y) throw new Exception("Queried Position outside of frame bounds ");
 
-            return position + (Vector2I)dimensions;
+            return position + SourceRect.TopLeft();
         }
 
-        public void Draw(Rectangle destination, Color color, SpriteEffects effects) {
-            SpriteSheet.Draw(destination, SourceRect, color, effects);
+        public void Draw(Camera2D camera, Rectangle destination, Color color, SpriteEffects effects) {
+            SpriteSheet.Draw(camera, destination, SourceRect, color, effects);
         }
     }
 
@@ -131,8 +128,8 @@ namespace Somniloquy {
 
         }
 
-        public void Draw(Rectangle destination, Color color, SpriteEffects effects = SpriteEffects.None) {
-            CurrentFrame.Draw(destination, color, effects);
+        public void Draw(Camera2D camera, Rectangle destination, Color color, SpriteEffects effects = SpriteEffects.None) {
+            CurrentFrame.Draw(camera, destination, color, effects);
         }
     }
 
@@ -160,8 +157,8 @@ namespace Somniloquy {
             CurrentAnimation?.Update();
         }
 
-        public void Draw(Rectangle destination, Color color, SpriteEffects effects = SpriteEffects.None) {
-            CurrentAnimation?.Draw(destination, color, effects);
+        public void Draw(Camera2D camera, Rectangle destination, Color color, SpriteEffects effects = SpriteEffects.None) {
+            CurrentAnimation?.Draw(camera, destination, color, effects);
         }
 
         public string Serialize() {

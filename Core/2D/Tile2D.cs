@@ -23,11 +23,11 @@ namespace Somniloquy {
             Sprite.Update();
         }
 
-        public void Draw(Rectangle destination, float opacity = 1f) {
+        public void Draw(Camera2D camera, Rectangle destination, float opacity = 1f) {
             if (Sprite is null || Sprite.Animations.Count == 0)
-                SQ.SB.DrawFilledRectangle(destination, Color.Magenta * 0.5f);
+                camera.DrawFilledRectangle(destination, Color.Magenta * 0.5f);
             else {
-                Sprite.Draw(destination, Color.White * opacity);
+                Sprite.Draw(camera, destination, Color.White * opacity);
             }
         }
     }
