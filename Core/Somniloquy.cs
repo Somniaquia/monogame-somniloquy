@@ -77,8 +77,11 @@ namespace Somniloquy {
         protected override void LoadContent() {
             base.LoadContent();
             GD = GraphicsDevice;
+            GD.RasterizerState = new RasterizerState { CullMode = CullMode.None };
+            GD.BlendState = BlendState.AlphaBlend;
+            GD.DepthStencilState = DepthStencilState.None;
+            
             GD.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
-
             SB = new SQSpriteBatch(GD);
             CM = Content;
 

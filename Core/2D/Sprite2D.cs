@@ -55,11 +55,11 @@ namespace Somniloquy {
         }
 
         public void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain) {
-            SheetChunks[position.Y / (SheetChunkLength * TileLength)].SetPixel(new Vector2I(position.X, position.Y % (SheetChunkLength * TileLength)), color);
+            SheetChunks[position.Y / (SheetChunkLength * TileLength)].PaintPixel(new Vector2I(position.X, position.Y % (SheetChunkLength * TileLength)), color, opacity, chain);
         }
 
         public void SetPixel(Vector2I position, Color color, CommandChain chain) {
-            SheetChunks[position.Y / (SheetChunkLength * TileLength)].SetPixel(new Vector2I(position.X, position.Y % (SheetChunkLength * TileLength)), color);
+            SheetChunks[position.Y / (SheetChunkLength * TileLength)].SetPixel(new Vector2I(position.X, position.Y % (SheetChunkLength * TileLength)), color, chain);
         }
 
         public void Draw(Camera2D camera, Rectangle destination, Rectangle source, Color color, SpriteEffects effects = SpriteEffects.None) {

@@ -17,7 +17,8 @@ namespace Somniloquy {
             if (Section is null) { // temp
                 Section = new();
                 Section.LayerGroups.Add(0, new LayerGroup2D());
-                Section.LayerGroups[0].Layers.Add(0, new TileLayer2D(16, 16));
+                // Section.LayerGroups[0].Layers.Add(0, new TileLayer2D(16, 16));
+                Section.LayerGroups[0].Layers.Add(0, new TextureLayer2D());
             }
 
             Editor = new(this);
@@ -96,7 +97,7 @@ namespace Somniloquy {
             DebugInfo.Subscribe(() => $"Undo History: {CommandManager.UndoHistory.Count}");
             DebugInfo.Subscribe(() => $"Redo History: {CommandManager.RedoHistory.Count}");
             DebugInfo.Subscribe(() => $"Selected Color: {SelectedColor}");
-            SelectedLayer = Screen.Section.LayerGroups.First().Value.Layers.Values.OfType<TileLayer2D>().FirstOrDefault();
+            SelectedLayer = Screen.Section.LayerGroups.First().Value.Layers.Values.OfType<TextureLayer2D>().FirstOrDefault();
         }
 
         public override void LoadContent() {
@@ -237,28 +238,21 @@ namespace Somniloquy {
                 vertices.Add(new VertexPositionColor(new Vector3(start, 0), color));
                 vertices.Add(new VertexPositionColor(new Vector3(end, 0), color));
             }
-
-            vertices.Add(new VertexPositionColor(new Vector3(-1, 0, 0), Color.Red)); // Left
-            vertices.Add(new VertexPositionColor(new Vector3(1, 0, 0), Color.Red));  // Right
-
-            vertices.Add(new VertexPositionColor(new Vector3(0, -1, 0), Color.Green)); // Bottom
-            vertices.Add(new VertexPositionColor(new Vector3(0, 1, 0), Color.Green));  // Top
         }
 
         public void DrawGridLines() {
             var vertices = new List<VertexPositionColor>();
+            var gridOpacity = MathF.Min(Screen.Camera.Zoom / 16.0f, 0.25f);
+            if (gridOpacity < 0.01f) return;
 
             if (SelectedLayer is TileLayer2D tileLayer) {
-                AddGridVertices(ref vertices, tileLayer.TileLength, Color.White * 0.5f);
-                AddGridVertices(ref vertices, tileLayer.ChunkLength, Color.White * 0.5f);
+                AddGridVertices(ref vertices, tileLayer.TileLength, Color.White * gridOpacity);
+                AddGridVertices(ref vertices, tileLayer.ChunkLength, Color.White * gridOpacity);
             } else if (SelectedLayer is TextureLayer2D textureLayer) {
-                AddGridVertices(ref vertices, textureLayer.ChunkLength, Color.White * 0.5f);
+                AddGridVertices(ref vertices, textureLayer.ChunkLength, Color.White * gridOpacity);
             }
 
             var verticesArray = vertices.ToArray();
-            var rasterizerState = new RasterizerState { CullMode = CullMode.None };
-            SQ.GD.RasterizerState = rasterizerState;
-            SQ.GD.BlendState = BlendState.AlphaBlend;
 
             VertexBuffer vertexBuffer = new(SQ.GD, typeof(VertexPositionColor), verticesArray.Length, BufferUsage.WriteOnly);
             vertexBuffer.SetData(verticesArray);
@@ -270,6 +264,7 @@ namespace Somniloquy {
                 View = Matrix.Identity,
                 World = Matrix.Identity
             };
+
             foreach (var pass in basicEffect.CurrentTechnique.Passes) {
                 pass.Apply();
                 SQ.GD.DrawPrimitives(PrimitiveType.LineList, 0, verticesArray.Length / 2);
