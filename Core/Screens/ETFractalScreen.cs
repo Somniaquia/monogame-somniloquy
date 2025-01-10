@@ -109,6 +109,7 @@ namespace Somniloquy {
             // Begin the effect and draw a full-screen quad
             FractalEffect.CurrentTechnique.Passes[0].Apply();
 
+            SQ.SB.End();
             // Render a full-screen quad
             SQ.SB.Begin(SpriteSortMode.Immediate, BlendState.Opaque, SamplerState.LinearClamp, null, null, FractalEffect);
             SQ.SB.Draw(RenderTarget, new Rectangle(0, 0, RenderTarget.Width, RenderTarget.Height), Color.White);

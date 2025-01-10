@@ -19,7 +19,7 @@ namespace Somniloquy {
         public float MinZoom = 0;
         public float Rotation = 0.0f;
         public Matrix Transform;
-        public RectangleF VisibleRectangleInWorld = RectangleF.Empty;
+        public RectangleF VisibleBounds = RectangleF.Empty;
 
         public Vector2? GlobalMousePos;
         public Vector2? PreviousGlobalMousePos;
@@ -73,7 +73,7 @@ namespace Somniloquy {
             var up = Util.Min(topLeft.Y, topRight.Y, bottomLeft.Y, bottomRight.Y);
             var down = Util.Max(topLeft.Y, topRight.Y, bottomLeft.Y, bottomRight.Y);
 
-            VisibleRectangleInWorld = new RectangleF(left, up, right - left, down - up);
+            VisibleBounds = new RectangleF(left, up, right - left, down - up);
 
             PreviousGlobalMousePos = GlobalMousePos == null ? ToWorldPos(InputManager.GetMousePosition()) : GlobalMousePos;
             GlobalMousePos = ToWorldPos(InputManager.GetMousePosition());

@@ -119,49 +119,26 @@
             // }
         }
 
-        public override void Draw(Camera2D camera, float opacity = 1f, float gridOpacity = 0f) {
+        public override void Draw(Camera2D camera, float opacity = 1f) {
             var chunkLengthInPixels = ChunkLength * TileLength;
 
-            Vector2 topLeft = camera.VisibleRectangleInWorld.TopLeft() - new Vector2(1);
-            Vector2 bottomRight = camera.VisibleRectangleInWorld.BottomRight() + new Vector2(1);
+            Vector2 topLeft = camera.VisibleBounds.TopLeft() - new Vector2(1);
+            Vector2 bottomRight = camera.VisibleBounds.BottomRight() + new Vector2(1);
             Vector2I topLeftChunk = new((int)(topLeft.X / chunkLengthInPixels) - 1, (int)(topLeft.Y / chunkLengthInPixels) - 1);
             Vector2I bottomRightChunk = new((int)(bottomRight.X / chunkLengthInPixels) + 1, (int)(bottomRight.Y / chunkLengthInPixels) + 1);
 
             for (int y = topLeftChunk.Y; y < bottomRightChunk.Y; y++) {
                 for (int x = topLeftChunk.X; x < bottomRightChunk.X; x++) {
                     var chunkIndex = new Vector2I(x, y);
+                    if (!Chunks.ContainsKey(chunkIndex)) continue;
+                    
                     var chunkPos = chunkIndex * chunkLengthInPixels;
                     var nextChunkPos = (chunkIndex + new Vector2I(1, 1)) * chunkLengthInPixels;
 
-                    float xLeft = MathF.Min(MathF.Max(topLeft.X, chunkPos.X), bottomRight.X);
-                    float xRight = MathF.Max(MathF.Min(bottomRight.X, nextChunkPos.X), topLeft.X);
-                    float yTop = MathF.Min(MathF.Max(topLeft.Y, chunkPos.Y), bottomRight.Y);
-                    float yBottom = MathF.Max(MathF.Min(bottomRight.Y, nextChunkPos.Y), topLeft.Y);
-
-                    if (gridOpacity > 0.1f) {
-                        camera.DrawLine(chunkPos, (chunkIndex + new Vector2I(1, 0)) * chunkLengthInPixels, Color.Gray * (gridOpacity / 2), scale: false);
-                        camera.DrawLine(chunkPos, (chunkIndex + new Vector2I(0, 1)) * chunkLengthInPixels, Color.Gray * (gridOpacity / 2), scale: false);
-
-                        // for (int tx = 0; tx < ChunkLength; tx++) {
-                        //     Vector2 verticalStart = chunkPos + new Vector2I(tx * TileLength, 0);
-                        //     Vector2 verticalEnd = verticalStart + new Vector2I(0, chunkLengthInPixels);
-
-                        //     verticalStart = new Vector2(verticalStart.X, MathF.Max(verticalStart.Y, yTop));
-                        //     verticalEnd = new Vector2(verticalEnd.X, MathF.Min(verticalEnd.Y, yBottom));
-                        //     camera.DrawLine((Vector2I)verticalStart, (Vector2I)verticalEnd, Color.Gray * (gridOpacity / 4), scale: false);
-                        // }
-
-                        // for (int ty = 0; ty < ChunkLength; ty++) {
-                        //     Vector2 horizontalStart = chunkPos + new Vector2I(0, ty * TileLength);
-                        //     Vector2 horizontalEnd = horizontalStart + new Vector2I(chunkLengthInPixels, 0);
-
-                        //     horizontalStart = new Vector2(MathF.Max(horizontalStart.X, xLeft), horizontalStart.Y);
-                        //     horizontalEnd = new Vector2(MathF.Min(horizontalEnd.X, xRight), horizontalEnd.Y);
-                        //     camera.DrawLine((Vector2I)horizontalStart, (Vector2I)horizontalEnd, Color.Gray * (gridOpacity / 4), scale: false);
-                        // }
-                    }
-                    
-                    if (!Chunks.ContainsKey(chunkIndex)) continue;
+                    // float xLeft = MathF.Min(MathF.Max(topLeft.X, chunkPos.X), bottomRight.X);
+                    // float xRight = MathF.Max(MathF.Min(bottomRight.X, nextChunkPos.X), topLeft.X);
+                    // float yTop = MathF.Min(MathF.Max(topLeft.Y, chunkPos.Y), bottomRight.Y);
+                    // float yBottom = MathF.Max(MathF.Min(bottomRight.Y, nextChunkPos.Y), topLeft.Y);
 
                     // Chunks[chunkIndex].Draw(camera, (Rectangle)new RectangleF(xLeft, yTop, xRight - xLeft, yBottom - yTop), (Rectangle)new RectangleF(xLeft - chunkPos.X, yTop - chunkPos.Y , xRight - xLeft, yBottom - yTop), 1f);
                     Chunks[chunkIndex].Draw(camera, new Rectangle(chunkPos, Vector2I.One * chunkLengthInPixels), Rectangle.Empty, opacity);

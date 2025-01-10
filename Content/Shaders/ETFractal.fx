@@ -178,7 +178,6 @@ float4 PixelShaderFunction(float2 uv : TEXCOORD0) : COLOR {
     float x0 = (uv.x - 0.5) * Zoom;
     float y0 = (uv.y - 0.5) * Zoom;
 
-    // Apply rotation
     float cosAngle = cos(Rotation);
     float sinAngle = sin(Rotation);
     float xRotated = cosAngle * x0 - sinAngle * y0;

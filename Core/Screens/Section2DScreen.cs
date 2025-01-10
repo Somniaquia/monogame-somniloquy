@@ -206,7 +206,7 @@ namespace Somniloquy {
             foreach (var layerGroup in Screen.Section.LayerGroups) {
                 foreach (var layer in layerGroup.Value.Layers) {
                     if (layer.Value == SelectedLayer) {
-                        layer.Value.Draw(Screen.Camera, 1f, MathF.Min(Screen.Camera.Zoom, 1f));
+                        layer.Value.Draw(Screen.Camera, 1f);
                         // layer.Value.Draw(Screen.Camera, 1f, 1f);
                     } else if (layerGroup.Value.Layers.ContainsValue(SelectedLayer)){
                         layer.Value.Draw(Screen.Camera, 0.8f);
@@ -216,7 +216,64 @@ namespace Somniloquy {
                 }
             }
 
+            DrawGridLines();
+
             LayerTable.Draw();
+        }
+
+        private void AddGridVertices(ref List<VertexPositionColor> vertices, int spacing, Color color) {
+            var bounds = Screen.Camera.VisibleBounds;
+
+            for (float y = MathF.Floor(bounds.Top / spacing) * spacing; y <= bounds.Bottom; y += spacing) {
+                Vector2 start = Screen.Camera.ToScreenPos(new Vector2(bounds.Left, y));
+                Vector2 end = Screen.Camera.ToScreenPos(new Vector2(bounds.Right, y));
+                vertices.Add(new VertexPositionColor(new Vector3(start, 0), color));
+                vertices.Add(new VertexPositionColor(new Vector3(end, 0), color));
+            }
+
+            for (float x = MathF.Floor(bounds.Left / spacing) * spacing; x <= bounds.Right; x += spacing) {
+                Vector2 start = Screen.Camera.ToScreenPos(new Vector2(x, bounds.Top));
+                Vector2 end = Screen.Camera.ToScreenPos(new Vector2(x, bounds.Bottom));
+                vertices.Add(new VertexPositionColor(new Vector3(start, 0), color));
+                vertices.Add(new VertexPositionColor(new Vector3(end, 0), color));
+            }
+
+            vertices.Add(new VertexPositionColor(new Vector3(-1, 0, 0), Color.Red)); // Left
+            vertices.Add(new VertexPositionColor(new Vector3(1, 0, 0), Color.Red));  // Right
+
+            vertices.Add(new VertexPositionColor(new Vector3(0, -1, 0), Color.Green)); // Bottom
+            vertices.Add(new VertexPositionColor(new Vector3(0, 1, 0), Color.Green));  // Top
+        }
+
+        public void DrawGridLines() {
+            var vertices = new List<VertexPositionColor>();
+
+            if (SelectedLayer is TileLayer2D tileLayer) {
+                AddGridVertices(ref vertices, tileLayer.TileLength, Color.White * 0.5f);
+                AddGridVertices(ref vertices, tileLayer.ChunkLength, Color.White * 0.5f);
+            } else if (SelectedLayer is TextureLayer2D textureLayer) {
+                AddGridVertices(ref vertices, textureLayer.ChunkLength, Color.White * 0.5f);
+            }
+
+            var verticesArray = vertices.ToArray();
+            var rasterizerState = new RasterizerState { CullMode = CullMode.None };
+            SQ.GD.RasterizerState = rasterizerState;
+            SQ.GD.BlendState = BlendState.AlphaBlend;
+
+            VertexBuffer vertexBuffer = new(SQ.GD, typeof(VertexPositionColor), verticesArray.Length, BufferUsage.WriteOnly);
+            vertexBuffer.SetData(verticesArray);
+            SQ.GD.SetVertexBuffer(vertexBuffer);
+
+            var basicEffect = new BasicEffect(SQ.GD) {
+                VertexColorEnabled = true,
+                Projection = Matrix.CreateOrthographicOffCenter(0, SQ.WindowSize.X, SQ.WindowSize.Y, 0, 0, 1),
+                View = Matrix.Identity,
+                World = Matrix.Identity
+            };
+            foreach (var pass in basicEffect.CurrentTechnique.Passes) {
+                pass.Apply();
+                SQ.GD.DrawPrimitives(PrimitiveType.LineList, 0, verticesArray.Length / 2);
+            }
         }
     }
 }

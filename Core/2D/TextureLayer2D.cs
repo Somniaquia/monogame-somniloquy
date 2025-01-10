@@ -84,6 +84,7 @@ namespace Somniloquy {
             // TODO: ensure that empty chunks are removed
         }
 
+        // For image saving
         public void Draw(Vector2I topLeft, Vector2I bottomRight, float opacity = 1f) {
             Vector2I topLeftChunk = new((int)((float)topLeft.X / ChunkLength) - 1, (int)((float)topLeft.Y / ChunkLength) - 1);
             Vector2I bottomRightChunk = new((int)((float)bottomRight.X / ChunkLength) + 1, (int)((float)bottomRight.Y / ChunkLength) + 1);
@@ -106,9 +107,9 @@ namespace Somniloquy {
             }
         }
 
-        public override void Draw(Camera2D camera, float opacity = 1f, float gridOpacity = 0f) {
-            Vector2 topLeft = camera.VisibleRectangleInWorld.TopLeft() - new Vector2(1);
-            Vector2 bottomRight = camera.VisibleRectangleInWorld.BottomRight() + new Vector2(1);
+        public override void Draw(Camera2D camera, float opacity = 1f) {
+            Vector2 topLeft = camera.VisibleBounds.TopLeft() - new Vector2(1);
+            Vector2 bottomRight = camera.VisibleBounds.BottomRight() + new Vector2(1);
             Vector2I topLeftChunk = new((int)(topLeft.X / ChunkLength) - 1, (int)(topLeft.Y / ChunkLength) - 1);
             Vector2I bottomRightChunk = new((int)(bottomRight.X / ChunkLength) + 1, (int)(bottomRight.Y / ChunkLength) + 1);
 
@@ -122,11 +123,6 @@ namespace Somniloquy {
                     float xRight = MathF.Max(MathF.Min(bottomRight.X, nextChunkPos.X), topLeft.X);
                     float yTop = MathF.Min(MathF.Max(topLeft.Y, chunkPos.Y), bottomRight.Y);
                     float yBottom = MathF.Max(MathF.Min(bottomRight.Y, nextChunkPos.Y), topLeft.Y);
-
-                    if (gridOpacity > 0.1f) {
-                        camera.DrawLine(chunkPos, (chunkIndex + new Vector2I(1, 0)) * ChunkLength, Color.Gray * (gridOpacity / 2), scale: false);
-                        camera.DrawLine(chunkPos, (chunkIndex + new Vector2I(0, 1)) * ChunkLength, Color.Gray * (gridOpacity / 2), scale: false);
-                    }
                     
                     if (!Chunks.ContainsKey(chunkIndex)) continue;
 
