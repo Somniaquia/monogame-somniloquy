@@ -9,7 +9,7 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework.Graphics;
 
     public partial class TextureLayer2D : Layer2D, IPaintableLayer2D {
-        [JsonInclude] public int ChunkLength = 128;
+        [JsonInclude] public int ChunkLength = 256;
         [JsonInclude] public Dictionary<Vector2I, TextureChunk2D> Chunks = new();
 
         public Vector2I GetChunkPosition(Vector2I canvasPosition) => canvasPosition / ChunkLength;

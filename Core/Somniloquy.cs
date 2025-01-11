@@ -17,6 +17,7 @@ namespace Somniloquy {
     public class SQ : Game {
         public static GraphicsDeviceManager GDM;
         public static GraphicsDevice GD;
+        public static BasicEffect BasicEffect;
         public static ContentManager CM;
         public static SQSpriteBatch SB;
         public static GameTime GameTime;
@@ -80,8 +81,15 @@ namespace Somniloquy {
             GD.RasterizerState = new RasterizerState { CullMode = CullMode.None };
             GD.BlendState = BlendState.AlphaBlend;
             GD.DepthStencilState = DepthStencilState.None;
-            
             GD.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
+            
+            BasicEffect = new BasicEffect(SQ.GD) {
+                VertexColorEnabled = true,
+                Projection = Matrix.CreateOrthographicOffCenter(0, WindowSize.X, WindowSize.Y, 0, 0, 1),
+                View = Matrix.Identity,
+                World = Matrix.Identity
+            };
+
             SB = new SQSpriteBatch(GD);
             CM = Content;
 

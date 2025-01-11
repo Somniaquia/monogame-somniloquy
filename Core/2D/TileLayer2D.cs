@@ -33,14 +33,32 @@
         }
 
         public void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain = null) {          
-            var tilePosition = GetTilePosition(position);
-            var chunkPosition = GetChunkPosition(tilePosition);
-
+            var (chunkPosition, positionInChunk) = (GetChunkPosition(GetTilePosition(position)), GetPositionInChunk(position));
+            
             if (!Chunks.ContainsKey(chunkPosition)) {
-                AddChunk(chunkPosition, chain);
+                var chunk = new TileChunk2D(this);
+                Chunks.Add(chunkPosition, chunk);
+                chain?.AddCommand(new TileChunkSetCommand(this, chunkPosition, null, chunk));
             }
 
-            Chunks[chunkPosition].PaintPixel(GetPositionInChunk(position), color, opacity, chain);
+            if (chain.AffectedPixels.ContainsKey(position) && opacity != 1) {
+                if (chain.AffectedPixels[position].Item2 >= opacity) return;
+                Chunks[chunkPosition].SetPixel(positionInChunk, chain.AffectedPixels[position].Item1.BlendWith(color, opacity), chain);
+                chain.AffectedPixels[position] = (chain.AffectedPixels[position].Item1, opacity);
+            } else {
+                var originalColor = Chunks[chunkPosition].GetColor(positionInChunk);
+                originalColor ??= Color.Transparent;
+                chain.AffectedPixels[position] = (originalColor.Value, opacity);
+                Chunks[chunkPosition].PaintPixel(positionInChunk, color, opacity, chain);
+            }
+        }
+
+        public Color? GetColor(Vector2I position) {
+            var (chunkPosition, positionInChunk) = (GetChunkPosition(position), GetPositionInChunk(position));
+            if (!Chunks.ContainsKey(chunkPosition)) return null;
+            var color = Chunks[chunkPosition].GetColor(positionInChunk);
+            if (color == Color.Transparent) return null;
+            return color;
         }
 
         #region Tile Methods
@@ -162,6 +180,24 @@
 
         public void SetTile(Vector2I positionInChunk, Tile2D tile) {
             Tiles[positionInChunk.X, positionInChunk.Y] = tile;
+        }
+
+        public void SetPixel(Vector2I positionInChunk, Color color, CommandChain chain) {
+            var (tilePosInChunk, posInTile) = (GetTilePositionInChunk(positionInChunk), GetPositionInTile(positionInChunk));
+            var tile = GetTile(tilePosInChunk);
+            if (tile is null) {
+                var animation = new Animation2D()
+                    .AddFrame(Parent.SpriteSheet, Parent.SpriteSheet.AllocateSpace());
+
+                var sprite = new Sprite2D()
+                    .AddAnimation("0", animation)
+                    .SetCurrentAnimation("0");
+
+                tile = new Tile2D().SetSprite(sprite);
+
+                SetTile(GetTilePositionInChunk(positionInChunk), tile);
+            }
+            tile.SetPixel(posInTile, color, chain);
         }
 
         public void PaintPixel(Vector2I positionInChunk, Color color, float opacity, CommandChain chain) {
