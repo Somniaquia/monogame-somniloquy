@@ -2,6 +2,7 @@ namespace Somniloquy {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Linq;
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
 
@@ -23,6 +24,9 @@ namespace Somniloquy {
 
         public Vector2? GlobalMousePos;
         public Vector2? PreviousGlobalMousePos;
+
+        public static Queue<float> MouseSpeedSamples = new();
+        public float AverageMouseSpeed;
 
         public void MoveCamera(Vector2 displacement) {
             float theta = MathF.Atan2(displacement.Y, displacement.X) - Rotation;
@@ -77,6 +81,17 @@ namespace Somniloquy {
 
             PreviousGlobalMousePos = GlobalMousePos == null ? ToWorldPos(InputManager.GetMousePosition()) : GlobalMousePos;
             GlobalMousePos = ToWorldPos(InputManager.GetMousePosition());
+            
+            if (PreviousGlobalMousePos is null || GlobalMousePos is null) return;
+            float currentMouseSpeed = (GlobalMousePos.Value - PreviousGlobalMousePos.Value).Length() / (float)SQ.GameTime.ElapsedGameTime.TotalSeconds;
+            MouseSpeedSamples.Enqueue(currentMouseSpeed);
+
+            if (MouseSpeedSamples.Count > 20) {
+                MouseSpeedSamples.Dequeue();
+                AverageMouseSpeed = MouseSpeedSamples.Average(i => i);
+            } else {
+                AverageMouseSpeed = currentMouseSpeed;
+            }
         }
 
         public Vector2 ToWorldPos(Vector2 screenPos) {

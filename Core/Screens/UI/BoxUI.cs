@@ -213,8 +213,12 @@ namespace Somniloquy {
                 SQ.SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
 
                 var scrollDisplacement = MainAxis == Axis.Horizontal ? new Vector2(SmoothScrollValue, 0) : new Vector2(0, SmoothScrollValue);
-                foreach (var child in Children.OfType<BoxUI>()) { // .Where(child => Util.IntersectsOrAdjacent(child.Boundaries.Displace(scrollDisplacement), Boundaries))
-                    child.Draw(-Boundaries.TopLeft());
+                
+                // TODO: Optimize performance in directory with tons of files inside
+                foreach (var child in Children.OfType<BoxUI>()) {
+                    if (Util.IntersectsOrAdjacent(child.Boundaries.Displace(scrollDisplacement), Boundaries)) {
+                        child.Draw(-Boundaries.TopLeft());
+                    }
                 }
 
                 SQ.SB.End();

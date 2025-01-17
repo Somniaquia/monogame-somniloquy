@@ -320,3 +320,4 @@ C:\Somnia\Projects\monogame-somniloquy\obj\Debug\net6.0\refint\Somniloquy.dll
 C:\Somnia\Projects\monogame-somniloquy\obj\Debug\net6.0\Somniloquy.pdb
 C:\Somnia\Projects\monogame-somniloquy\obj\Debug\net6.0\Somniloquy.genruntimeconfig.cache
 C:\Somnia\Projects\monogame-somniloquy\obj\Debug\net6.0\ref\Somniloquy.dll
+C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Worlds\Yume Nikki Reference.sqSection2D

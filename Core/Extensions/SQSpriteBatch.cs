@@ -5,6 +5,7 @@ namespace Somniloquy {
 
     public class SQSpriteBatch : SpriteBatch {
         public Texture2D Pixel;
+        public bool Active;
 
         public SQSpriteBatch(GraphicsDevice graphicsDevice) : base(graphicsDevice) {
             Pixel = new(SQ.GD, 1, 1);
@@ -41,5 +42,19 @@ namespace Somniloquy {
         public void DrawPoint(Vector2I position, Color color) {
             Draw(Pixel, position, color);
         }
+
+        // public void Begin(SpriteSortMode spriteSortMode, BlendState blendState, SamplerState samplerState) {
+        //     if (!Active) {
+        //         base.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
+        //         Active = true;
+        //     }
+        // }
+
+        // public new void End() {
+        //     if (Active) {
+        //         base.End();
+        //         Active = false;
+        //     }
+        // }
     }
 }

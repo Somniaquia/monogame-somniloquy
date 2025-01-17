@@ -41,7 +41,7 @@ namespace Somniloquy {
         public override void Draw() {
             Camera.SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, transformMatrix: Camera.Transform);
             Editor?.Draw();
-            Camera.SB.End();
+            // Camera.SB.End();
         }
     }
     
@@ -202,8 +202,6 @@ namespace Somniloquy {
         }
 
         public override void Draw() {
-            Screen.Camera.DrawPoint((Vector2I)Screen.Camera.GlobalMousePos, SelectedColor * 0.5f);
-            
             foreach (var layerGroup in Screen.Section.LayerGroups) {
                 foreach (var layer in layerGroup.Value.Layers) {
                     if (layer.Value == SelectedLayer) {
@@ -217,6 +215,9 @@ namespace Somniloquy {
                 }
             }
 
+            Screen.Camera.DrawPoint((Vector2I)Screen.Camera.GlobalMousePos, SelectedColor * 0.5f);
+            Screen.Camera.SB.End();
+            
             if (SelectedLayer is TileLayer2D tileLayer) {
                 DrawGrids(tileLayer.TileLength, Color.White * MathF.Min(Screen.Camera.Zoom / 16.0f, 0.25f));
                 DrawGrids(tileLayer.ChunkLength * tileLayer.TileLength, Color.White * MathF.Min(Screen.Camera.Zoom / 4.0f, 0.5f));

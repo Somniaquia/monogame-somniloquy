@@ -36,7 +36,8 @@ namespace Somniloquy {
     public static class InputManager {
         private static CWintabData wintabData;
 
-        private static MouseState CurrentMouseState;
+        public static MouseState PreviousMouseState;
+        public static MouseState CurrentMouseState;
         public static int ScrollWheelDelta;
         public static Queue<float> MouseSpeedSamples = new();
         public static float AverageMouseSpeed;
@@ -137,11 +138,11 @@ namespace Somniloquy {
         }
 
         private static void UpdateMouseState() {
-            var previousMouseState = CurrentMouseState;
+            PreviousMouseState = CurrentMouseState;
             CurrentMouseState = Mouse.GetState();
 
-            ScrollWheelDelta = CurrentMouseState.ScrollWheelValue - previousMouseState.ScrollWheelValue;
-            float currentMouseSpeed = (float)((CurrentMouseState.Position - previousMouseState.Position).ToVector2().Length() / (float)SQ.GameTime.ElapsedGameTime.TotalSeconds);
+            ScrollWheelDelta = CurrentMouseState.ScrollWheelValue - PreviousMouseState.ScrollWheelValue;
+            float currentMouseSpeed = (float)((CurrentMouseState.Position - PreviousMouseState.Position).ToVector2().Length() / (float)SQ.GameTime.ElapsedGameTime.TotalSeconds);
             MouseSpeedSamples.Enqueue(currentMouseSpeed);
 
             if (MouseSpeedSamples.Count > 20) {

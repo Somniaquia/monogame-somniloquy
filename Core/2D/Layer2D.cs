@@ -64,6 +64,7 @@ namespace Somniloquy {
 
                 return type switch {
                     "TextureLayer2D" => JsonSerializer.Deserialize<TextureLayer2D>(root.GetRawText(), options),
+                    "TileLayer2D" => JsonSerializer.Deserialize<TileLayer2D>(root.GetRawText(), options),
                     _ => throw new JsonException($"Unsupported type: {type}")
                 };
             }
