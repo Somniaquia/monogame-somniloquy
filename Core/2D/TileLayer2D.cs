@@ -1,7 +1,9 @@
 ﻿namespace Somniloquy {
     using System;
     using System.Collections.Generic;
+    using System.Text.Json;
     using System.Text.Json.Serialization;
+    
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
 
@@ -16,7 +18,6 @@
         [JsonInclude] public int ChunkLength = 16;
         [JsonInclude] public int TileLength = 16;
         [JsonInclude] public Dictionary<Vector2I, TileChunk2D> Chunks = new();
-        [JsonInclude] public TileSpriteSheet SpriteSheet;
 
         public Vector2I GetChunkPosition(Vector2I tilePosition) => tilePosition / ChunkLength;
         public Vector2I GetPositionInChunk(Vector2I worldPosition) => Util.PosMod(worldPosition, new Vector2I(TileLength * ChunkLength));
@@ -25,14 +26,26 @@
         public Vector2I GetPositionInTile(Vector2I worldPosition) => Util.PosMod(worldPosition, new Vector2I(TileLength));
 
         public TileLayer2D() { }
-
         public TileLayer2D(int chunkLength = 16, int tileLength = 16) {
             ChunkLength = chunkLength;
             TileLength = tileLength;
-            SpriteSheet = new(tileLength, chunkLength);
+        }
+
+        public void PaintImage(Vector2I position, Texture2D texture, float opacity, CommandChain chain = null) {
+            Color[] data = new Color[texture.Width * texture.Height];
+            texture.GetData(data);
+
+            for (int y = 0; y < texture.Height; y++) {
+                for (int x = 0; x < texture.Width; x++) {
+                    var pos = new Vector2I(x, y);
+                    PaintPixel(position + pos, data[pos.Unwrap(texture.Width)], opacity, chain);
+                }
+            }
         }
 
         public void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain = null) {          
+            if (GetColor(position) is null && color == Color.Transparent || GetColor(position) == color) return;
+            
             var (chunkPosition, positionInChunk) = (GetChunkPosition(GetTilePosition(position)), GetPositionInChunk(position));
             
             if (!Chunks.ContainsKey(chunkPosition)) {
@@ -187,7 +200,7 @@
             var tile = GetTile(tilePosInChunk);
             if (tile is null) {
                 var animation = new Animation2D()
-                    .AddFrame(Parent.SpriteSheet, Parent.SpriteSheet.AllocateSpace());
+                    .AddFrame(Parent.Section.SpriteSheet, Parent.Section.SpriteSheet.AllocateSpace());
 
                 var sprite = new Sprite2D()
                     .AddAnimation("0", animation)
@@ -205,7 +218,7 @@
             var tile = GetTile(tilePosInChunk);
             if (tile is null) {
                 var animation = new Animation2D()
-                    .AddFrame(Parent.SpriteSheet, Parent.SpriteSheet.AllocateSpace());
+                    .AddFrame(Parent.Section.SpriteSheet, Parent.Section.SpriteSheet.AllocateSpace());
 
                 var sprite = new Sprite2D()
                     .AddAnimation("0", animation)
@@ -235,12 +248,21 @@
         }
 
         public void Draw(Camera2D camera, Rectangle destination, Rectangle source, float opacity = 1f) {
-            
             for (int y = 0; y < Parent.ChunkLength; y++) {
                 for (int x = 0; x < Parent.ChunkLength; x++) {
                     Tiles[x, y]?.Draw(camera, new Rectangle(new Vector2I(destination.X + x * Parent.TileLength, destination.Y + y * Parent.TileLength), new Vector2I(Parent.TileLength)), opacity);
                 }
             }
+        }
+    }
+
+    public class TileChunk2DConverter : JsonConverter<TileChunk2D> {
+        public override TileChunk2D Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
+            throw new NotImplementedException();
+        }
+
+        public override void Write(Utf8JsonWriter writer, TileChunk2D value, JsonSerializerOptions options) {
+            throw new NotImplementedException();
         }
     }
 }

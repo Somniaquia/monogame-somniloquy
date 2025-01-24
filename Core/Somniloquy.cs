@@ -99,6 +99,7 @@ namespace Somniloquy {
             DebugInfo.Subscribe(() => $"Focused Screen: {ScreenManager.FocusedScreen}");
             
             var sectionScreen = new Section2DScreen(new Rectangle(new(), WindowSize));
+            LayerTable.BuildUI();
             ScreenManager.LoadContent();
             ShaderManager.LoadContent(null);
         }

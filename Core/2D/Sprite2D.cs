@@ -17,16 +17,18 @@ namespace Somniloquy {
     public class TileSpriteSheet : ISpriteSheet {
         [JsonInclude] public int SheetChunkLength;
         [JsonInclude] public int TileLength;
+
+        [JsonInclude] public List<Tile2D> Tiles = new();
         [JsonInclude] public List<SQTexture2D> SheetChunks = new();
-        [JsonInclude] private HashSet<Vector2I> UnoccupiedTileSlots = new();
+        [JsonInclude] public HashSet<Vector2I> UnoccupiedTileSlots = new();
 
         public TileSpriteSheet(int tileLength, int sheetChunkLength) {
             SheetChunkLength = sheetChunkLength;
             TileLength = tileLength;
         
-            DebugInfo.Subscribe(() => $"Tiles count: {TileLength * TileLength * SheetChunks.Count - UnoccupiedTileSlots.Count}");
+            DebugInfo.Subscribe(() => $"Tiles count: {SheetChunkLength * SheetChunkLength * SheetChunks.Count - UnoccupiedTileSlots.Count}");
         }
-
+        
         public void AddSheetChunk() {
             SheetChunks.Add(new SQTexture2D(SQ.GD, TileLength * SheetChunkLength, TileLength * SheetChunkLength));
 

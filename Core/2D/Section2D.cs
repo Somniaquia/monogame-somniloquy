@@ -14,21 +14,24 @@ namespace Somniloquy {
 
         [JsonInclude] public string Identifier;
         [JsonInclude] public Vector2 CoordsInWorldMap;
-        [JsonInclude] public Dictionary<int, LayerGroup2D> LayerGroups = new();
+        [JsonInclude] public List<Layer2D> Layers = new();
+        [JsonInclude] public TileSpriteSheet SpriteSheet = new(16, 64);
 
-        public void LoadLayerGroup() { }
-        public void UnloadLayerGroup() { }
+        public Layer2D AddLayer(Layer2D layer) {
+            Layers.Add(layer);
+            layer.Section = this;
+            return layer;
+        }
 
         public void Update() {
-            foreach (var layerGroup in LayerGroups.Select(pair => pair.Value)) {
-                if (!layerGroup.Loaded) continue;
-                layerGroup.Update();
+            foreach (var layer in Layers) {
+                if (layer.Enabled) layer.Update();
             }
         }
 
         public void Draw(Camera2D camera) {
-            foreach (var layerGroup in LayerGroups) {
-                layerGroup.Value.Draw(camera);
+            foreach (var layer in Layers) {
+                if (layer.Enabled) layer.Draw(camera);
             }
         }
 
@@ -38,6 +41,8 @@ namespace Somniloquy {
                     new Layer2DConverter(),
                     new SQTexture2DConverter(),
                     new Vector2IKeyDictionaryConverter<TextureChunk2D>(),
+                    new Vector2IKeyDictionaryConverter<TileChunk2D>(),
+                    new TileChunk2DConverter(),
                     new Vector2IConverter(),
                 }
             };
@@ -51,6 +56,8 @@ namespace Somniloquy {
                     new Layer2DConverter(),
                     new SQTexture2DConverter(),
                     new Vector2IKeyDictionaryConverter<TextureChunk2D>(),
+                    new Vector2IKeyDictionaryConverter<TileChunk2D>(),
+                    new TileChunk2DConverter(),
                     new Vector2IConverter(),
                 }
             };

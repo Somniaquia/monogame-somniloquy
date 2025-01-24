@@ -8,6 +8,7 @@ namespace Somniloquy {
 
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
+    using SixLabors.ImageSharp.PixelFormats;
 
     public class SQTexture2D : Texture2D, ISpriteSheet {
         public static HashSet<SQTexture2D> ChangedTextures = new();
@@ -117,29 +118,11 @@ namespace Somniloquy {
             if (compressedTextureDataBytes == null)
                 throw new JsonException("Missing TextureData in JSON.");
 
-            byte[] textureDataBytes;
-            using (var compressedStream = new MemoryStream(compressedTextureDataBytes))
-            using (var decompressionStream = new GZipStream(compressedStream, CompressionMode.Decompress))
-            using (var resultStream = new MemoryStream()) {
-                decompressionStream.CopyTo(resultStream);
-                textureDataBytes = resultStream.ToArray();
-            }
+            byte[] textureDataBytes = DecompressPng(compressedTextureDataBytes, out int decodedWidth, out int decodedHeight);
 
-            var graphicsDevice = SQ.GD;
-            var texture = new SQTexture2D(graphicsDevice, width, height);
+            var texture = new SQTexture2D(SQ.GD, decodedWidth, decodedHeight);
+            texture.SetData(textureDataBytes);
 
-            var textureData = new Color[width * height];
-            for (int i = 0; i < textureData.Length; i++) {
-                textureData[i] = new Color(
-                    textureDataBytes[i * 4],
-                    textureDataBytes[i * 4 + 1],
-                    textureDataBytes[i * 4 + 2],
-                    textureDataBytes[i * 4 + 3]
-                );
-            }
-
-            texture.TextureData = textureData;
-            texture.SetData(textureData);
             return texture;
         }
 
@@ -149,25 +132,31 @@ namespace Somniloquy {
             writer.WriteNumber("Width", value.Width);
             writer.WriteNumber("Height", value.Height);
 
-            // Convert color data to a byte array
-            byte[] textureDataBytes = new byte[value.TextureData.Length * 4];
-            for (int i = 0; i < value.TextureData.Length; i++) {
-                textureDataBytes[i * 4] = value.TextureData[i].R;
-                textureDataBytes[i * 4 + 1] = value.TextureData[i].G;
-                textureDataBytes[i * 4 + 2] = value.TextureData[i].B;
-                textureDataBytes[i * 4 + 3] = value.TextureData[i].A;
-            }
+            byte[] rawData = new byte[value.Width * value.Height * 4];
+            value.GetData(rawData);
 
-            byte[] compressedTextureDataBytes;
-            using (var resultStream = new MemoryStream())
-            using (var compressionStream = new GZipStream(resultStream, CompressionMode.Compress)) {
-                compressionStream.Write(textureDataBytes, 0, textureDataBytes.Length);
-                compressionStream.Close();
-                compressedTextureDataBytes = resultStream.ToArray();
-            }
+            byte[] compressedTextureDataBytes = CompressToPng(rawData, value.Width, value.Height);
 
             writer.WriteBase64String("TextureData", compressedTextureDataBytes);
             writer.WriteEndObject();
+        }
+
+        private byte[] DecompressPng(byte[] compressedData, out int width, out int height) {
+            using var ms = new MemoryStream(compressedData);
+            using var image = SixLabors.ImageSharp.Image.Load<Rgba32>(ms);
+            width = image.Width;
+            height = image.Height;
+
+            byte[] rawData = new byte[width * height * 4];
+            image.CopyPixelDataTo(rawData);
+            return rawData;
+        }
+
+        private byte[] CompressToPng(byte[] rawData, int width, int height) {
+            using var ms = new MemoryStream();
+            using var image = SixLabors.ImageSharp.Image.LoadPixelData<Rgba32>(rawData, width, height);
+            SixLabors.ImageSharp.ImageExtensions.SaveAsPng(image, ms);
+            return ms.ToArray();
         }
     }
 

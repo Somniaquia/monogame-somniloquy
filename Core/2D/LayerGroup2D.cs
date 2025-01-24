@@ -8,18 +8,20 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
 
-    public class LayerGroup2D {
-        [JsonIgnore] public Section2D Section;
-        
-        [JsonInclude] public string Identifier;
-        [JsonInclude] public Dictionary<int, Layer2D> Layers = new();
-        [JsonIgnore] public bool Loaded;
+    public class LayerGroup2D : Layer2D {        
+        [JsonInclude] public List<Layer2D> Layers = new();
 
-        public LayerGroup2D() {
+        public LayerGroup2D() { }
+        public LayerGroup2D(string identifier) { Identifier = identifier; }
+
+        public Layer2D AddLayer(Layer2D layer) {
+            Layers.Add(layer);
+            layer.Section = Section;
+            return layer;
         }
 
         public Rectangle GetTextureBounds() {
-            List<Rectangle> bounds = (from layer in Layers where layer.Value is TextureLayer2D let textureLayer = (TextureLayer2D)layer.Value select textureLayer.GetTextureBounds()).ToList();
+            List<Rectangle> bounds = (from layer in Layers where layer is TextureLayer2D let textureLayer = (TextureLayer2D)layer select textureLayer.GetTextureBounds()).ToList();
 
             int xMin = bounds.Min(bound => bound.Left);
             int xMax = bounds.Max(bound => bound.Right);
@@ -44,7 +46,7 @@ namespace Somniloquy {
             SQ.GD.Clear(Color.Transparent);
             SQ.SB.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp);
             foreach (var layer in Layers) {
-                if (layer.Value is TextureLayer2D textureLayer) {
+                if (layer is TextureLayer2D textureLayer) {
                     textureLayer.Draw(bounds.TopLeft(), bounds.BottomRight());
                 }
             }
@@ -53,19 +55,15 @@ namespace Somniloquy {
             return target;
         }
 
-        public void Update() {
+        public override void Update() {
             foreach (var layer in Layers) {
-                layer.Value.Update();
+                layer.Update();
             }
         }
 
-        public void Draw() {
-
-        }
-
-        public void Draw(Camera2D camera) {
+        public override void Draw(Camera2D camera, float opacity = 1f) {
             foreach (var layer in Layers) {
-                layer.Value.Draw(camera);
+                layer.Draw(camera, opacity);
             }
         }
     }

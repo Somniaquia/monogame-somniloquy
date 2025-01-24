@@ -75,6 +75,7 @@ namespace Somniloquy {
         public BoxUI AddChild(BoxUI child) => InsertChild(Children.Count, child);
         public BoxUI InsertChild(int index, BoxUI child) {
             Children.Insert(index, child);
+            Root.RepositioningNeeded = true;
             return child;
         }
 
@@ -90,7 +91,7 @@ namespace Somniloquy {
 
                 if (Overflowed) {
                     ScrollValue = Math.Clamp(ScrollValue, 0, contentLength - maxLength);
-                    if (ContentRenderTarget == null || ContentRenderTarget.Bounds.GetAxisLength(MainAxis) != (int)maxLength) {
+                    if (ContentRenderTarget == null || ContentRenderTarget.Bounds.GetAxisLength(PerpendicularAxis) != (int)GetContentLength(PerpendicularAxis, this)) {
                         ContentRenderTarget = MainAxis == Axis.Horizontal ? new RenderTarget2D(SQ.GD, (int)maxLength, (int)Boundaries.Height) : new RenderTarget2D(SQ.GD, (int)Boundaries.Width, (int)maxLength);
                     }
                 } else {
@@ -103,7 +104,6 @@ namespace Somniloquy {
 
                 if (alignMode == Align.Begin) {
                     float position = MainAxis == Axis.Horizontal ? Boundaries.X : Boundaries.Y;
-                    position -= ScrollValue;
 
                     for (int i = 0; i < children.Count; i++) {
                         position += GetSeperationByIndex(MainAxis, i);
@@ -142,6 +142,8 @@ namespace Somniloquy {
             foreach (var child in children) {
                 child.PositionChildren();
             }
+
+            RepositioningNeeded = false;
         }
 
         public float GetSeperationByIndex(Axis axis, int i) {
@@ -192,8 +194,8 @@ namespace Somniloquy {
         public override void Update() { // TODO: Dynamic resizing
             base.Update();
 
-            if (Focused && Overflowed) {
-                ScrollValue = Math.Clamp(ScrollValue - InputManager.ScrollWheelDelta /10f, 0, GetContentLength(MainAxis, this) - Boundaries.GetAxisLength(MainAxis));
+            if (Overflowed) {
+                if (Focused) ScrollValue = Math.Clamp(ScrollValue - InputManager.ScrollWheelDelta /10f, 0, GetContentLength(MainAxis, this) - Boundaries.GetAxisLength(MainAxis));
                 SmoothScrollValue = Util.Lerp(SmoothScrollValue, ScrollValue, 0.075f);
             }
         }
@@ -212,12 +214,12 @@ namespace Somniloquy {
                 SQ.GD.Clear(Color.Transparent);
                 SQ.SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
 
-                var scrollDisplacement = MainAxis == Axis.Horizontal ? new Vector2(SmoothScrollValue, 0) : new Vector2(0, SmoothScrollValue);
+                var scrollDisplacement = MainAxis == Axis.Horizontal ? new Vector2(-SmoothScrollValue, 0) : new Vector2(0, -SmoothScrollValue);
                 
                 // TODO: Optimize performance in directory with tons of files inside
                 foreach (var child in Children.OfType<BoxUI>()) {
                     if (Util.IntersectsOrAdjacent(child.Boundaries.Displace(scrollDisplacement), Boundaries)) {
-                        child.Draw(-Boundaries.TopLeft());
+                        child.Draw(-Boundaries.TopLeft() + scrollDisplacement);
                     }
                 }
 

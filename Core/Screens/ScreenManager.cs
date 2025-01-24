@@ -19,7 +19,7 @@ namespace Somniloquy {
             return screen;
         }
 
-        public static T GetFirstScreenOfType<T>() where T : BoxUI {
+        public static T GetFirstOfType<T>() where T : BoxUI {
             return Screens.OfType<T>().FirstOrDefault();
         }
 
@@ -34,7 +34,7 @@ namespace Somniloquy {
         }
 
         public static void LoadContent() {
-            foreach (var screen in Screens) {
+            foreach (var screen in Screens.ToList()) {
                 screen.LoadContent();
             }
         }
@@ -48,7 +48,7 @@ namespace Somniloquy {
         public static void RepositionChildren() {
             List<BoxUI> boxUIs = Screens.OfType<BoxUI>().Where(screen => screen.Children.Count > 0).ToList();
             foreach (var ui in boxUIs) {
-                ui.PositionChildren();
+                if (ui.RepositioningNeeded) ui.PositionChildren();
             }
         }
 

@@ -28,6 +28,8 @@ namespace Somniloquy {
         }
 
         public void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain = null) {
+            if (GetColor(position) is null && color == Color.Transparent || GetColor(position) == color) return;
+            
             var (chunkPosition, positionInChunk) = (GetChunkPosition(position), GetPositionInChunk(position));
             
             if (!Chunks.ContainsKey(chunkPosition)) {
@@ -83,6 +85,8 @@ namespace Somniloquy {
         public void RemoveEmptyChunks() {
             // TODO: ensure that empty chunks are removed
         }
+
+        public override void Update() { }
 
         // For image saving
         public void Draw(Vector2I topLeft, Vector2I bottomRight, float opacity = 1f) {
