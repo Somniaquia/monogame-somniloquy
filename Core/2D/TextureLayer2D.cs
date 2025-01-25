@@ -111,7 +111,7 @@ namespace Somniloquy {
             }
         }
 
-        public override void Draw(Camera2D camera, float opacity = 1f) {
+        public override void Draw(Camera2D camera) {
             Vector2 topLeft = camera.VisibleBounds.TopLeft() - new Vector2(1);
             Vector2 bottomRight = camera.VisibleBounds.BottomRight() + new Vector2(1);
             Vector2I topLeftChunk = new((int)(topLeft.X / ChunkLength) - 1, (int)(topLeft.Y / ChunkLength) - 1);
@@ -130,7 +130,7 @@ namespace Somniloquy {
                     
                     if (!Chunks.ContainsKey(chunkIndex)) continue;
 
-                    camera.Draw(Chunks[chunkIndex].Texture, (Rectangle)new RectangleF(xLeft, yTop, xRight - xLeft, yBottom - yTop), (Rectangle)new RectangleF(xLeft - chunkPos.X, yTop - chunkPos.Y , xRight - xLeft, yBottom - yTop), Color.White * opacity);
+                    camera.Draw(Chunks[chunkIndex].Texture, (Rectangle)new RectangleF(xLeft, yTop, xRight - xLeft, yBottom - yTop), (Rectangle)new RectangleF(xLeft - chunkPos.X, yTop - chunkPos.Y , xRight - xLeft, yBottom - yTop), Color.White * Opacity);
                 }
             }
         }

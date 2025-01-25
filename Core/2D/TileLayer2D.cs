@@ -67,7 +67,7 @@
         }
 
         public Color? GetColor(Vector2I position) {
-            var (chunkPosition, positionInChunk) = (GetChunkPosition(position), GetPositionInChunk(position));
+            var (chunkPosition, positionInChunk) = (GetChunkPosition(GetTilePosition(position)), GetPositionInChunk(position));
             if (!Chunks.ContainsKey(chunkPosition)) return null;
             var color = Chunks[chunkPosition].GetColor(positionInChunk);
             if (color == Color.Transparent) return null;
@@ -150,7 +150,7 @@
             // }
         }
 
-        public override void Draw(Camera2D camera, float opacity = 1f) {
+        public override void Draw(Camera2D camera) {
             var chunkLengthInPixels = ChunkLength * TileLength;
 
             Vector2 topLeft = camera.VisibleBounds.TopLeft() - new Vector2(1);
@@ -172,7 +172,7 @@
                     // float yBottom = MathF.Max(MathF.Min(bottomRight.Y, nextChunkPos.Y), topLeft.Y);
 
                     // Chunks[chunkIndex].Draw(camera, (Rectangle)new RectangleF(xLeft, yTop, xRight - xLeft, yBottom - yTop), (Rectangle)new RectangleF(xLeft - chunkPos.X, yTop - chunkPos.Y , xRight - xLeft, yBottom - yTop), 1f);
-                    Chunks[chunkIndex].Draw(camera, new Rectangle(chunkPos, Vector2I.One * chunkLengthInPixels), Rectangle.Empty, opacity);
+                    Chunks[chunkIndex].Draw(camera, new Rectangle(chunkPos, Vector2I.One * chunkLengthInPixels), Rectangle.Empty, Opacity);
                 }
             }
         }

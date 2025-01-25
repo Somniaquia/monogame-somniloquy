@@ -22,7 +22,7 @@ namespace Somniloquy {
 
         public List<Keybind> GlobalKeybinds = new();
 
-        public Section2DEditor(Section2DScreen screen) : base(screen) {
+        public Section2DEditor(Section2DScreen screen) : base() {
             Screen = screen;
             Boundaries = screen.Boundaries;
 
@@ -45,8 +45,8 @@ namespace Somniloquy {
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.B }, new object[] { MouseButtons.LeftButton, MouseButtons.RightButton }, (parameters) => SelectNextBrush(), TriggerOnce.True, true));
             DebugInfo.Subscribe(() => $"Selected Brush: {Brush}");
 
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.Z}, new object[] {Keys.LeftShift, MouseButtons.LeftButton}, (parameters) => CommandManager.Undo(), TriggerOnce.True, true));
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.LeftShift, Keys.Z}, new object[] {MouseButtons.LeftButton}, (parameters) => CommandManager.Redo(), TriggerOnce.True, true));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.Z}, new object[] {Keys.LeftShift, MouseButtons.LeftButton}, (parameters) => CommandManager.Undo(), TriggerOnce.Block, true));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.LeftShift, Keys.Z}, new object[] {MouseButtons.LeftButton}, (parameters) => CommandManager.Redo(), TriggerOnce.Block, true));
 
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.S}, (parameters) => Save(), TriggerOnce.True, true));
 
@@ -129,17 +129,18 @@ namespace Somniloquy {
             }
         }
 
-        public void SelectLayerUnderMouse() {
+        public void SelectLayerUnderMouse(List<Layer2D> iter = null) {
             if (!Focused) return;
 
-            foreach (var layer in Screen.Section.Layers) {
-                if (layer is IPaintableLayer2D paintableLayer) {
+            if (iter == null) iter = Screen.Section.Layers;
+            foreach (var layer in iter) {
+                if (layer.Enabled && layer is IPaintableLayer2D paintableLayer) {
                     Color? color = paintableLayer.GetColor((Vector2I)Screen.Camera.GlobalMousePos.Value);
-                    if (color != null) {
-                        if (color.Value.A != 0) {
-                            SelectedLayer = layer;
-                        }
+                    if (color != null && color.Value.A != 0) {
+                        SelectedLayer = layer;
                     }
+                } else if (layer is LayerGroup2D group) {
+                    SelectLayerUnderMouse(group.Layers);
                 }
             }
         }
@@ -161,17 +162,10 @@ namespace Somniloquy {
 
         public override void Draw() {
             foreach (var layer in Screen.Section.Layers) {
-                if (layer == SelectedLayer) {
-                    layer.Draw(Screen.Camera, 1f);
-                    // layer.Draw(Screen.Camera, 1f, 1f);
-                // } else if (Layers.ContainsValue(SelectedLayer)){
-                //     layer.Draw(Screen.Camera, 0.8f);
-                } else {
-                    layer.Draw(Screen.Camera, 0.2f);
-                }
+                if (layer.Enabled) layer.Draw(Screen.Camera);
             }
 
-            Screen.Camera.DrawPoint((Vector2I)Screen.Camera.GlobalMousePos, SelectedColor * 0.5f);
+            if (Focused) Screen.Camera.DrawPoint((Vector2I)Screen.Camera.GlobalMousePos, SelectedColor * 0.5f);
             Screen.Camera.SB.End();
             
             if (SelectedLayer is TileLayer2D tileLayer) {

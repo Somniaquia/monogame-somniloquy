@@ -39,14 +39,14 @@ namespace Somniloquy {
             Active = true;
             DebugInfo.Active = false;
             ScreenManager.GetFirstOfType<Section2DScreen>().Editor.ColorPicker.Active = false;
-            
-            RootUI.AddChild(new TextLabel(RootUI, 20, 5) { Identifier = "path" });
-            var mainBox = RootUI.AddChild(new BoxUI(RootUI, 20, 0) { MainAxis = Axis.Horizontal, Identifier = "mainBox", MainAxisFill = true, });
-                ContentsBox = mainBox.AddChild(new BoxUI(mainBox) { MainAxis = Axis.Vertical, Identifier = "contents", MainAxisShrink = true, });
-                var previewBox = mainBox.AddChild(new BoxUI(mainBox) { Identifier = "previewBox" });
-            var bottomBox = RootUI.AddChild(new BoxUI(RootUI, 20, 0) { Identifier = "bottomBox" });
-                SaveNameBox = (TextLabel)bottomBox.AddChild(new TextLabel(bottomBox, 0, 20) { Identifier = "saveNameBox", Editable = true, } );
-                var Button = bottomBox.AddChild(new BoxUI(bottomBox, 0, 20) { Identifier = "saveButton" });
+
+            var directoryLabel = new TextLabel(RootUI, 20, 5) { Identifier = "path", PerpendicularAxisFill = true };
+            var mainBox = new BoxUI(RootUI, 20, 0) { MainAxis = Axis.Horizontal, Identifier = "mainBox", MainAxisFill = true, PerpendicularAxisFill = true };
+                ContentsBox = new BoxUI(mainBox) { MainAxis = Axis.Vertical, Identifier = "contents", MainAxisShrink = true, PerpendicularAxisFill = true };
+                var previewBox = new BoxUI(mainBox) { Identifier = "previewBox" };
+            var bottomBox = new BoxUI(RootUI, 20, 0) { Identifier = "bottomBox" };
+                SaveNameBox = new TextLabel(bottomBox, 0, 20) { Identifier = "saveNameBox", Editable = true, MainAxisFill = true };
+                var Button = new BoxUI(bottomBox, 0, 20) { Identifier = "saveButton", PerpendicularAxisFill = true };
         }
 
         public static void DestroyUI() {
@@ -77,11 +77,11 @@ namespace Somniloquy {
 
             foreach (var folder in folders) {
                 DirectoryContents.Add(folder);
-                ContentsBox.AddChild(new TextLabel(ContentsBox, 0, 10, folder.Split('\\')[^1]) { Focusable = false });
+                _ = new TextLabel(ContentsBox, 0, 10, folder.Split('\\')[^1]) { Focusable = false, PerpendicularAxisFill = true };
             }
             foreach (var file in files) {
                 DirectoryContents.Add(file);
-                ContentsBox.AddChild(new TextLabel(ContentsBox, 0, 10, file.Split('\\')[^1]) { Focusable = false });
+                _ = new TextLabel(ContentsBox, 0, 10, file.Split('\\')[^1]) { Focusable = false, PerpendicularAxisFill = true };
             }
             ((TextLabel)RootUI.GetChildByID("path")).Text = CurrentDirectory;
             if (DirectoryContents.Count > 0) ((TextLabel)ContentsBox.Children[HighlightedLine]).DefaultColor = Color.Yellow;
@@ -171,7 +171,7 @@ namespace Somniloquy {
         }
 
         public static void LoadImage(string path, LayerGroup2D layerGroup = null) {
-            var layer = new TileLayer2D();
+            var layer = new TileLayer2D() { Identifier = Path.GetFileName(path) };
 
             if (layerGroup is null) ScreenManager.GetFirstOfType<Section2DScreen>().Section.AddLayer(layer);
             else layerGroup.AddLayer(layer);
@@ -179,7 +179,7 @@ namespace Somniloquy {
                 Texture2D texture = Texture2D.FromFile(SQ.GD, path);
                 layer.PaintImage(Vector2I.Zero, texture, 1f, CommandManager.AddCommandChain(new CommandChain()));
             try {
-                DebugInfo.AddTempLine(() => $"Imported image - {Path.GetFileName(path)}.", 5);
+                // DebugInfo.AddTempLine(() => $"Imported image - {Path.GetFileName(path)}.", 5);
             } catch (Exception e) {
                 DebugInfo.AddTempLine(() => $"Error reading {Path.GetFileName(path)}: {e.Message}", 5);
             }
@@ -189,8 +189,10 @@ namespace Somniloquy {
             if (DirectoryContents.Count == 0) return;
             var (folders, files) = ListDirectoryContents(path);
             if (layerGroup is null) {
-                layerGroup = new LayerGroup2D(Path.GetDirectoryName(path));
+                layerGroup = new LayerGroup2D(path.Split('\\')[^1].Split('.')[0]);
                 ScreenManager.GetFirstOfType<Section2DScreen>().Section.AddLayer(layerGroup);
+            } else {
+                layerGroup = (LayerGroup2D)layerGroup.AddLayer(new LayerGroup2D(path.Split('\\')[^1].Split('.')[0]));
             }
             
             foreach (var folder in folders) {

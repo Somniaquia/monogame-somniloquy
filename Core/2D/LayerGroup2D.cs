@@ -61,9 +61,9 @@ namespace Somniloquy {
             }
         }
 
-        public override void Draw(Camera2D camera, float opacity = 1f) {
+        public override void Draw(Camera2D camera) {
             foreach (var layer in Layers) {
-                layer.Draw(camera, opacity);
+                if (layer.Enabled) layer.Draw(camera);
             }
         }
     }

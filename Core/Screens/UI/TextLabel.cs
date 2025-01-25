@@ -51,21 +51,23 @@ namespace Somniloquy {
         };
 
 
-        public TextLabel(BoxUI parent, float margin = 0, float padding = 0, string text = "", Axis letterAxis = Axis.Horizontal, bool editable = false) : base(parent, margin, padding) {
+        public TextLabel(BoxUI parent, float margin = 0, float padding = 0, string text = null, Axis letterAxis = Axis.Horizontal, bool editable = false) : base(parent, margin, padding) {
             Text = text;
             Editable = editable;
             LetterAxis = letterAxis;
         }
 
-        public TextLabel(Rectangle boundaries, string text = "", Axis letterAxis = Axis.Horizontal, bool editable = false) : base(boundaries) {
+        public TextLabel(Rectangle boundaries, string text = null, Axis letterAxis = Axis.Horizontal, bool editable = false) : base(boundaries) {
             Text = text;
             Editable = editable;
             LetterAxis = letterAxis;
         }
-            
+
         public override float GetContentLength(Axis axis, BoxUI caller) {
             // TODO: Flexible indentation (wrapping text inside max axisLength)
             float length = base.GetContentLength(axis, caller);
+            if (Text is null) return length;
+
             if (LetterAxis == axis) {
                 Vector2 dimensions = SQ.Misaki.MeasureString(Text);
                 length += axis == MainAxis ? dimensions.X : dimensions.Y;
@@ -122,7 +124,7 @@ namespace Somniloquy {
 
         public override void Draw(Vector2 displacement) {
             base.Draw(displacement);
-            SQ.SB.DrawString(SQ.Misaki, Text, Boundaries.TopLeft() + Padding.TopLeft() + displacement, DefaultColor);    
+            if (Text is not null) SQ.SB.DrawString(SQ.Misaki, Text, Boundaries.TopLeft() + Padding.TopLeft() + displacement, DefaultColor);    
         }
     }
 }

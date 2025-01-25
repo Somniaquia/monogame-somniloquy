@@ -3,6 +3,7 @@ namespace Somniloquy {
     using System.Collections.Generic;
     using System.Linq;
     using Microsoft.Xna.Framework;
+    using Microsoft.Xna.Framework.Input;
 
     public static class LayerTable {
         public static bool Active;
@@ -15,7 +16,8 @@ namespace Somniloquy {
         public static BoxUI RootUI;
 
         public static void BuildUI() {
-            RootUI = new BoxUI(Util.ShrinkRectangle(new Rectangle(0, 0, SQ.WindowSize.X, SQ.WindowSize.Y), new(20))) { Identifier = "root", Focusable = false, Renderer = null, MainAxis = Axis.Horizontal, MainAxisAlign = Align.Begin };
+            DestroyUI();
+            RootUI = new BoxUI(Util.ShrinkRectangle(new Rectangle(0, 0, SQ.WindowSize.X, SQ.WindowSize.Y - 254), new(20))) { Identifier = "root", Focusable = false, Renderer = null, MainAxis = Axis.Horizontal, MainAxisAlign = Align.End, PerpendicularAxisAlign = Align.Begin,  };
             Active = true;
 
             Screen = ScreenManager.GetFirstOfType<Section2DScreen>();
@@ -36,13 +38,16 @@ namespace Somniloquy {
             }
             
             foreach (var innerGroup in iter.OfType<LayerGroup2D>()) {
-                var innerGroupLabel = groupLabel.AddChild(new BoxUI(groupLabel, 5, 5) { MainAxis = Axis.Vertical });
+                var innerGroupLabel = new LayerGroupLabel(groupLabel, Screen, innerGroup, 5, 5) { PerpendicularAxisShrink = true };
+                // innerGroupLabel.AddChild(new TextLabel(5, 5, innerGroup.Identifier) { Renderer = null });
                 AddLayerLables(innerGroup, innerGroupLabel);
             }
 
-            var leftoverLabel = groupLabel.AddChild(new BoxUI(groupLabel, 5, 5) { Renderer = null, MainAxis = Axis.Vertical });
-            foreach (var layer in iter.OfType<IPaintableLayer2D>()) {
-                var childLabel = groupLabel.AddChild(new BoxUI(leftoverLabel, 5, 5));
+            if (iter.OfType<IPaintableLayer2D>().Count() > 0) {
+                var leftoverLabel = new LayerGroupLabel(groupLabel, Screen, null, 5, 5) { Renderer = null, MainAxis = Axis.Vertical, MainAxisAlign = Align.Begin, Focusable = false };
+                foreach (var layer in iter.OfType<IPaintableLayer2D>()) {
+                    var childLabel = new LayerLabel(leftoverLabel, Screen, (Layer2D)layer, 5, 10);
+                }
             }
         }
 
@@ -50,6 +55,69 @@ namespace Somniloquy {
             Active = false;
             RootUI?.Destroy();
             RootUI = null;
+        }
+    }
+
+    public class LayerGroupLabel : BoxUI {
+        public Section2DScreen Screen;
+        public LayerGroup2D Group;
+
+        public LayerGroupLabel(BoxUI parent, Section2DScreen sectionScreen, LayerGroup2D group, float margin = 0, float padding = 0) : base(parent, margin, padding) {
+            Screen = sectionScreen;
+            Group = group;
+        }
+
+        public override void Update() {
+            base.Update();
+
+            if (Group is null) return;
+            // if (LayerGroup == Screen.Editor.SelectedLayer) {
+            //     ((BoxUIDefaultRenderer)Renderer).Color = Color.Cyan;
+            // } else 
+            if (Focused) {
+                ((BoxUIDefaultRenderer)Renderer).Color = Color.Yellow;
+
+                if (InputManager.IsMouseButtonPressed(MouseButtons.LeftButton)) {
+                    Group.Enabled = !Group.Enabled;
+                }
+            } else if (Group.Enabled) {
+                ((BoxUIDefaultRenderer)Renderer).Color = Color.White;
+            } else {
+                ((BoxUIDefaultRenderer)Renderer).Color = Color.Gray;
+            }
+        }
+    }
+
+    public class LayerLabel : TextLabel {
+        public Section2DScreen Screen;
+        public Layer2D Layer;
+
+        public LayerLabel(BoxUI parent, Section2DScreen sectionScreen, Layer2D layer, float margin = 0, float padding = 0) : base(parent, margin, padding) {
+            Screen = sectionScreen;
+            Layer = layer;
+            // Text = layer.Identifier;
+        }
+
+        public override void Update() {
+            base.Update();
+
+            if (Layer == Screen.Editor.SelectedLayer) {
+                ((BoxUIDefaultRenderer)Renderer).Color = Color.Cyan;
+            } else if (Focused) {
+                ((BoxUIDefaultRenderer)Renderer).Color = Color.Yellow;
+
+                if (InputManager.IsKeyDown(Keys.LeftAlt)) {
+                    Screen.Editor.SelectedLayer = Layer;
+                } else {
+                    if (InputManager.IsMouseButtonPressed(MouseButtons.LeftButton)) {
+                        Layer.Enabled = !Layer.Enabled;
+                    }
+                }
+            } else if (Layer.Enabled) {
+                ((BoxUIDefaultRenderer)Renderer).Color = Color.White;
+            } else {
+                ((BoxUIDefaultRenderer)Renderer).Color = Color.Gray;
+            }
         }
     }
 }

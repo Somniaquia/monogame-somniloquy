@@ -7,11 +7,12 @@ namespace Somniloquy {
 
     public abstract class Layer2D {
         [JsonIgnore] public Section2D Section;
-        [JsonInclude] public string Identifier;
-        [JsonIgnore] public bool Enabled;
+        [JsonInclude] public string Identifier = "";
+        [JsonIgnore] public bool Enabled = true;
+        [JsonIgnore] public float Opacity = 1f;
         
         public abstract void Update();
-        public abstract void Draw(Camera2D camera, float opacity = 1f);
+        public abstract void Draw(Camera2D camera);
     }
 
     public interface IPaintableLayer2D {
