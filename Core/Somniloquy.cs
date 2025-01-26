@@ -31,23 +31,23 @@ namespace Somniloquy {
         public static Dictionary<string, Texture2D> Textures;
         public static SpriteFont Misaki;
 
-        // [DllImport("user32.dll")] private static extern bool SetProcessDpiAwarenessContext(int dpiFlag);
-        // [DllImport("user32.dll")] private static extern bool SetProcessDPIAware();
-        // [DllImport("user32.dll")] private static extern int GetSystemMetrics(int nIndex);
+        [DllImport("user32.dll")] private static extern bool SetProcessDpiAwarenessContext(int dpiFlag);
+        [DllImport("user32.dll")] private static extern bool SetProcessDPIAware();
+        [DllImport("user32.dll")] private static extern int GetSystemMetrics(int nIndex);
         [DllImport("user32.dll")] private static extern bool SetForegroundWindow(IntPtr hWnd);
 
         public SQ() {
             base.Content.RootDirectory = "Content";
             IsMouseVisible = true;
 
-            // SetProcessDPIAware();
-            // SetProcessDpiAwarenessContext(-4); // DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2
+            SetProcessDPIAware();
+            SetProcessDpiAwarenessContext(-4); // DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2
 
             GDM = new GraphicsDeviceManager(this) {
-                // PreferredBackBufferWidth = GetSystemMetrics(0), // SM_CXSCREEN
-                // PreferredBackBufferHeight = GetSystemMetrics(1) - 60, // SM_CYSCREEN
-                PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width, // SM_CXSCREEN
-                PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height - 48, // SM_CYSCREEN
+                PreferredBackBufferWidth = GetSystemMetrics(0), // SM_CXSCREEN
+                PreferredBackBufferHeight = GetSystemMetrics(1) - 60, // SM_CYSCREEN
+                // PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width, // SM_CXSCREEN
+                // PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height - 48, // SM_CYSCREEN
 
                 HardwareModeSwitch = false,
                 IsFullScreen = false,
@@ -82,6 +82,8 @@ namespace Somniloquy {
             GD.BlendState = BlendState.AlphaBlend;
             GD.DepthStencilState = DepthStencilState.None;
             GD.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
+
+            InactiveSleepTime = TimeSpan.FromSeconds(1/30.0);
             
             BasicEffect = new BasicEffect(SQ.GD) {
                 VertexColorEnabled = true,
@@ -137,16 +139,14 @@ namespace Somniloquy {
         }
 
         protected override void Draw(GameTime gameTime) {
-            if (IsActive) {
-                UpdateFPS(gameTime);
+            GD.Clear(Color.Black);
+            UpdateFPS(gameTime);
 
-                GD.Clear(Color.Black);
-                SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
-                    ScreenManager.Draw();
-                    DebugInfo.Draw(Misaki);
-                SB.End();
-                base.Draw(gameTime);
-            }
+            SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
+                ScreenManager.Draw();
+                DebugInfo.Draw(Misaki);
+            SB.End();
+            base.Draw(gameTime);
         }
 
         private void UpdateFPS(GameTime gameTime) {

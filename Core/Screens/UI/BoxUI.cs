@@ -73,8 +73,8 @@ namespace Somniloquy {
         public override bool MouseWithinBoundaries() {
             Vector2 displacement = Vector2.Zero;
             if (Parent is not null) {
-                if (Parent.MainAxis == Axis.Horizontal) displacement = new(Parent.SmoothScrollValue, 0); 
-                if (Parent.MainAxis == Axis.Vertical) displacement = new(0, Parent.SmoothScrollValue); 
+                if (Parent.MainAxis == Axis.Horizontal) displacement = new(-Parent.SmoothScrollValue, 0);
+                if (Parent.MainAxis == Axis.Vertical) displacement = new(0, -Parent.SmoothScrollValue); 
             }
             return Util.IsWithinBoundaries(InputManager.GetMousePosition(), Boundaries.Displace(displacement));
         }

@@ -23,15 +23,15 @@ namespace Somniloquy {
         public static TextLabel SaveNameBox;
 
         public static void Initialize() {
-            InputManager.RegisterKeybind(new object[] { Keys.LeftControl, Keys.O }, (parameters) => { ToggleFileExplorer(); }, TriggerOnce.True, true);
-            InputManager.RegisterKeybind(Keys.Escape, (parameters) => { if (Active) DestroyUI(); }, TriggerOnce.True);
-            InputManager.RegisterKeybind(Keys.Tab, Keys.LeftShift, (parameters) => { if (Active) MoveHighlightedLine(1); }, TriggerOnce.Block);
-            InputManager.RegisterKeybind(new object[] {Keys.LeftShift, Keys.Tab}, (parameters) => { if (Active) MoveHighlightedLine(-1); }, TriggerOnce.Block, true);
-            InputManager.RegisterKeybind(new object[] { Keys.LeftControl, Keys.S }, (parameters) => { if (Active) SaveSection(SaveNameBox?.Text.Split(".")[0]); }, TriggerOnce.True);
-            InputManager.RegisterKeybind(new object[] { Keys.LeftControl, Keys.L }, (parameters) => { if (Active) Load(); }, TriggerOnce.True);
-            InputManager.RegisterKeybind(new object[] { Keys.LeftControl, Keys.E }, (parameters) => { if (Active) Export(); }, TriggerOnce.True);
-            InputManager.RegisterKeybind(Keys.Enter, Keys.LeftShift, (parameters) => { if (Active) EnterDirectory(); }, TriggerOnce.True);
-            InputManager.RegisterKeybind(new object[] {Keys.LeftShift, Keys.Enter}, (parameters) => { if (Active) LeaveDirectory(); }, TriggerOnce.True, true);
+            InputManager.RegisterKeybind(new object[] { Keys.LeftControl, Keys.O }, _ => { ToggleFileExplorer(); }, TriggerOnce.True, true);
+            InputManager.RegisterKeybind(Keys.Escape, _ => { if (Active) DestroyUI(); }, TriggerOnce.True);
+            InputManager.RegisterKeybind(Keys.Tab, Keys.LeftShift, _ => { if (Active) MoveHighlightedLine(1); }, TriggerOnce.Block);
+            InputManager.RegisterKeybind(new object[] {Keys.LeftShift, Keys.Tab}, _ => { if (Active) MoveHighlightedLine(-1); }, TriggerOnce.Block, true);
+            InputManager.RegisterKeybind(new object[] { Keys.LeftControl, Keys.S }, _ => { if (Active) SaveSection(SaveNameBox?.Text.Split(".")[0]); }, TriggerOnce.True);
+            InputManager.RegisterKeybind(new object[] { Keys.LeftControl, Keys.L }, _ => { if (Active) Load(); }, TriggerOnce.True);
+            InputManager.RegisterKeybind(new object[] { Keys.LeftControl, Keys.E }, _ => { if (Active) Export(); }, TriggerOnce.True);
+            InputManager.RegisterKeybind(Keys.Enter, Keys.LeftShift, _ => { if (Active) EnterDirectory(); }, TriggerOnce.True);
+            InputManager.RegisterKeybind(new object[] {Keys.LeftShift, Keys.Enter}, _ => { if (Active) LeaveDirectory(); }, TriggerOnce.True, true);
         }
 
         public static void BuildUI() {

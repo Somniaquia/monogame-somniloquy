@@ -11,7 +11,7 @@ namespace Somniloquy {
         public static bool Active = true;
 
         public static void Initialize() {
-            InputManager.RegisterKeybind(Keys.OemTilde, (parameters) => Active = !Active, TriggerOnce.True);
+            InputManager.RegisterKeybind(Keys.OemTilde, _ => Active = !Active, TriggerOnce.True);
         }
 
         public static void Subscribe(Func<string> lineGenerator) {

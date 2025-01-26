@@ -16,17 +16,19 @@ namespace Somniloquy {
 
         public static BoxUI RootUI;
 
-        public static void Initialize() {
-            InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.Up }, new object[] { Keys.Down, Keys.Left, Keys.Right }, (parameters) => { MoveLayer(Directions.Up); }, TriggerOnce.Block );
-            InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.Down }, new object[] { Keys.Up, Keys.Left, Keys.Right }, (parameters) => { MoveLayer(Directions.Down); }, TriggerOnce.Block );
-            InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.Delete }, new object[] {  }, (parameters) => { DeleteLayer(); }, TriggerOnce.Block );
+        private static bool createdLayer;
 
-            InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.N }, new object[] { Keys.Up, Keys.Down }, (parameters) => { CreateLayer(Directions.Center, typeof(TextureLayer2D)); }, TriggerOnce.Block );
-            InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.Up, Keys.N }, new object[] { Keys.Up }, (parameters) => { CreateLayer(Directions.Up, typeof(TextureLayer2D)); }, TriggerOnce.Block );
-            InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.Down, Keys.N }, new object[] { Keys.Down }, (parameters) => { CreateLayer(Directions.Down, typeof(TextureLayer2D)); }, TriggerOnce.Block );
-            InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.T }, new object[] { Keys.Up, Keys.Down }, (parameters) => { CreateLayer(Directions.Center, typeof(TileLayer2D)); }, TriggerOnce.Block );
-            InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.Up, Keys.T }, new object[] { Keys.Up }, (parameters) => { CreateLayer(Directions.Up, typeof(TileLayer2D)); }, TriggerOnce.Block );
-            InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.Down, Keys.T }, new object[] { Keys.Down }, (parameters) => { CreateLayer(Directions.Down, typeof(TileLayer2D)); }, TriggerOnce.Block );
+        public static void Initialize() {
+            InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.Up }, new object[] { Keys.N, Keys.Down, Keys.Left, Keys.Right }, _ => { MoveLayer(Directions.Up); }, TriggerOnce.Block );
+            InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.Down }, new object[] { Keys.N, Keys.Up, Keys.Left, Keys.Right }, _ => { MoveLayer(Directions.Down); }, TriggerOnce.Block );
+            InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.Delete }, new object[] {  }, _ => { DeleteLayer(); }, TriggerOnce.Block );
+
+            InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.N, Keys.Up }, new object[] { Keys.Down }, _ => { CreateLayer(Directions.Up, typeof(TextureLayer2D)); }, TriggerOnce.True );
+            InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.N, Keys.Down }, new object[] { Keys.Up }, _ => { CreateLayer(Directions.Down, typeof(TextureLayer2D)); }, TriggerOnce.True );
+            InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.N }, new object[] { }, null, _ => { PostCreateLayer(typeof(TextureLayer2D)); }, TriggerOnce.False );
+            InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.T, Keys.Up }, new object[] { Keys.Down }, _ => { CreateLayer(Directions.Up, typeof(TileLayer2D)); }, TriggerOnce.True );
+            InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.T, Keys.Down }, new object[] { Keys.Up }, _ => { CreateLayer(Directions.Down, typeof(TileLayer2D)); }, TriggerOnce.True );
+            InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.T }, new object[] { }, null, _ => { PostCreateLayer(typeof(TileLayer2D)); }, TriggerOnce.False );
         }
         
         public static void MoveLayer(Directions dir) {
@@ -65,7 +67,16 @@ namespace Somniloquy {
                 Editor.SelectedLayer.Parent.InsertLayer(index, layer);
             }
 
+            Editor.SelectedLayer = layer;
             BuildUI();
+            createdLayer = true;
+        }
+
+        public static void PostCreateLayer(Type type) {
+            if (!createdLayer) {
+                CreateLayer(Directions.Center, type);
+            }
+            createdLayer = false;
         }
 
         public static void DeleteLayer() {
@@ -109,14 +120,14 @@ namespace Somniloquy {
                 iter = ((LayerLabel)parentLabel).Layer.Layers;
             }
 
-            foreach (var innerParent in iter.FindAll(layer => layer.HasChildren())) {
-                var innerParentLabel = new LayerLabel(parentLabel, Screen, innerParent, 5, 5) {  };
+            foreach (var innerParent in iter.Where(layer => layer.HasChildren())) {
+                var innerParentLabel = new LayerLabel(parentLabel, Screen, innerParent, 5, 0) {  };
                 AddLayerLables(innerParentLabel);
             }
 
-            if (iter.FindAll(layer => !layer.HasChildren()).Count > 0) {
-                var leftoverLabel = new BoxUI(parentLabel, 5, 5) { Renderer = null, Focusable = false, MainAxis = Axis.Vertical, MainAxisAlign = Align.Begin, MainAxisShrink = true };
-                foreach (var layer in iter.OfType<PaintableLayer2D>()) {
+            if (iter.Any(layer => !layer.HasChildren())) {
+                var leftoverLabel = new BoxUI(parentLabel, 0, 5) { Renderer = null, Focusable = true, MainAxis = Axis.Vertical, MainAxisAlign = Align.Begin, MainAxisShrink = true };
+                foreach (var layer in iter.Where(layer => !layer.HasChildren())) {
                     var childLabel = new LayerLabel(leftoverLabel, Screen, layer, 5, 10);
                 }
             }
