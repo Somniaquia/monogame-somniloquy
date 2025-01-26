@@ -8,9 +8,12 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
 
-    public partial class TextureLayer2D : Layer2D, IPaintableLayer2D {
+    public partial class TextureLayer2D : PaintableLayer2D {
         [JsonInclude] public int ChunkLength = 256;
         [JsonInclude] public Dictionary<Vector2I, TextureChunk2D> Chunks = new();
+
+        public TextureLayer2D() { }
+        public TextureLayer2D(string identifier) { }
 
         public Vector2I GetChunkPosition(Vector2I canvasPosition) => canvasPosition / ChunkLength;
         public Vector2I GetPositionInChunk(Vector2I canvasPosition) => Util.PosMod(canvasPosition, new Vector2I(ChunkLength, ChunkLength));
@@ -27,7 +30,7 @@ namespace Somniloquy {
             }
         }
 
-        public void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain = null) {
+        public override void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain = null) {
             if (GetColor(position) is null && color == Color.Transparent || GetColor(position) == color) return;
             
             var (chunkPosition, positionInChunk) = (GetChunkPosition(position), GetPositionInChunk(position));
@@ -48,7 +51,7 @@ namespace Somniloquy {
             }
         }
         
-        public Color? GetColor(Vector2I position) {
+        public override Color? GetColor(Vector2I position) {
             var (chunkPosition, positionInChunk) = (GetChunkPosition(position), GetPositionInChunk(position));
             if (!Chunks.ContainsKey(chunkPosition)) return null;
             var color = Chunks[chunkPosition].GetColor(positionInChunk);
@@ -56,7 +59,7 @@ namespace Somniloquy {
             return color;
         }
 
-        public Rectangle GetTextureBounds() {
+        public override Rectangle GetTextureBounds() {
             RemoveEmptyChunks();
             
             int chunkXMin = Chunks.Min(chunk => chunk.Key.X);

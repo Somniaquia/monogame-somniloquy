@@ -83,7 +83,7 @@ namespace Somniloquy {
         }
 
         public override void Update() {
-            base.Update(); 
+            base.Update();
             
             if (Editable) {
                 Keys lastKey = Keys.None;
@@ -112,6 +112,10 @@ namespace Somniloquy {
                         } else {
                             Text += lastKey.ToString().ToLower();
                         }
+                    }
+
+                    if ((GetContentLength(MainAxis), GetContentLength(PerpendicularAxis)) != (Boundaries.GetAxisLength(MainAxis), Boundaries.GetAxisLength(PerpendicularAxis))) {
+                        Root.RepositioningNeeded = true;
                     }
                 }
             }

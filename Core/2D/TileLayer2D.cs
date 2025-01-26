@@ -14,7 +14,7 @@
     /// The dynamic modification of layers in a same world will help form the overall expected nature of the game, triggering
     /// different layouts or looks for the same world in every visit, sometimes connecting a different world or triggering events such as jumpscares
     /// </summary>
-    public class TileLayer2D : Layer2D, IPaintableLayer2D {
+    public class TileLayer2D : PaintableLayer2D {
         [JsonInclude] public int ChunkLength = 16;
         [JsonInclude] public int TileLength = 16;
         [JsonInclude] public Dictionary<Vector2I, TileChunk2D> Chunks = new();
@@ -25,7 +25,8 @@
         public Vector2I GetTilePosition(Vector2I worldPosition) => worldPosition / TileLength;
         public Vector2I GetPositionInTile(Vector2I worldPosition) => Util.PosMod(worldPosition, new Vector2I(TileLength));
 
-        public TileLayer2D() { }
+        public TileLayer2D() : base() { }
+        public TileLayer2D(string identifier) : base(identifier) { }
         public TileLayer2D(int chunkLength = 16, int tileLength = 16) {
             ChunkLength = chunkLength;
             TileLength = tileLength;
@@ -43,7 +44,7 @@
             }
         }
 
-        public void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain = null) {          
+        public override void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain = null) {          
             if (GetColor(position) is null && color == Color.Transparent || GetColor(position) == color) return;
             
             var (chunkPosition, positionInChunk) = (GetChunkPosition(GetTilePosition(position)), GetPositionInChunk(position));
@@ -66,7 +67,7 @@
             }
         }
 
-        public Color? GetColor(Vector2I position) {
+        public override Color? GetColor(Vector2I position) {
             var (chunkPosition, positionInChunk) = (GetChunkPosition(GetTilePosition(position)), GetPositionInChunk(position));
             if (!Chunks.ContainsKey(chunkPosition)) return null;
             var color = Chunks[chunkPosition].GetColor(positionInChunk);

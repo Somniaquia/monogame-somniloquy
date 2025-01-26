@@ -32,7 +32,7 @@ namespace Somniloquy {
             }
         }
 
-        public void Blur(IPaintableLayer2D layer, int radius, int kernelRadius, Camera2D camera) {
+        public void Blur(PaintableLayer2D layer, int radius, int kernelRadius, Camera2D camera) {
             if (radius == 0 || kernelRadius == 0) return;
             float[,] kernel = Util.GetGaussianKernel(kernelRadius);
             Vector2I mousePos = (Vector2I)camera.GlobalMousePos.Value;
@@ -71,11 +71,11 @@ namespace Somniloquy {
             }
         }
 
-        public abstract void Paint(IPaintableLayer2D layer, bool initializingPress, Color color, Camera2D camera);
+        public abstract void Paint(PaintableLayer2D layer, bool initializingPress, Color color, Camera2D camera);
     }
 
     public class WaterPaint : Brush {
-        public override void Paint(IPaintableLayer2D paintableLayer, bool initializingPress, Color color, Camera2D camera) {
+        public override void Paint(PaintableLayer2D paintableLayer, bool initializingPress, Color color, Camera2D camera) {
             int penWidth = InputManager.GetPenPressure() != 0 ? (int)(InputManager.GetPenPressure() * 32 / camera.Zoom) : (int)(camera.AverageMouseSpeed * camera.Zoom / 800);
             // float penOpacity = 1;
             float penOpacity = InputManager.GetPenPressure() != 0 ? InputManager.GetPenPressure() / 2 : MathF.Min(1, camera.AverageMouseSpeed * camera.Zoom / 3200);
@@ -94,7 +94,7 @@ namespace Somniloquy {
     }
 
     public class OilPaint : Brush {
-        public override void Paint(IPaintableLayer2D paintableLayer, bool initializingPress, Color color, Camera2D camera) {
+        public override void Paint(PaintableLayer2D paintableLayer, bool initializingPress, Color color, Camera2D camera) {
             int penWidth = InputManager.GetPenPressure() != 0 ? (int)(InputManager.GetPenPressure() * 16 / camera.Zoom) : (int)(camera.AverageMouseSpeed * camera.Zoom / 1600);
             float penOpacity = 1;
 
@@ -111,33 +111,33 @@ namespace Somniloquy {
         }
     }
 
-    public class PixelArtBrush : Brush {
-        public override void Paint(IPaintableLayer2D paintableLayer, bool initializingPress, Color color, Camera2D camera) {
-            int penWidth = 0;
-            float penOpacity = 1;
+    // public class PixelArtBrush : Brush {
+    //     public override void Paint(IPaintableLayer2D paintableLayer, bool initializingPress, Color color, Camera2D camera) {
+    //         int penWidth = 0;
+    //         float penOpacity = 1;
 
-            if (initializingPress) {
-                if (CurrentCommandChain is not null) CurrentCommandChain.AffectedPixels = null;
-                CurrentCommandChain = CommandManager.AddCommandChain(new CommandChain());
-                paintableLayer.PaintCircle((Vector2I)camera.GlobalMousePos.Value, penWidth, color, penOpacity, true, CurrentCommandChain);
-            } else {
-                paintableLayer.PaintLine((Vector2I)camera.PreviousGlobalMousePos.Value, (Vector2I)camera.GlobalMousePos.Value, color, penOpacity, penWidth, CurrentCommandChain);
-            }
-        }
-    }
+    //         if (initializingPress) {
+    //             if (CurrentCommandChain is not null) CurrentCommandChain.AffectedPixels = null;
+    //             CurrentCommandChain = CommandManager.AddCommandChain(new CommandChain());
+    //             paintableLayer.PaintCircle((Vector2I)camera.GlobalMousePos.Value, penWidth, color, penOpacity, true, CurrentCommandChain);
+    //         } else {
+    //             paintableLayer.PaintLine((Vector2I)camera.PreviousGlobalMousePos.Value, (Vector2I)camera.GlobalMousePos.Value, color, penOpacity, penWidth, CurrentCommandChain);
+    //         }
+    //     }
+    // }
 
-    public class BlurBrush : Brush {
-        public override void Paint(IPaintableLayer2D layer, bool initializingPress, Color color, Camera2D camera) {
-            if (initializingPress) {   
-                if (CurrentCommandChain is not null) CurrentCommandChain.AffectedPixels = null;
-                CurrentCommandChain = CommandManager.AddCommandChain(new CommandChain());
-            }
+    // public class BlurBrush : Brush {
+    //     public override void Paint(IPaintableLayer2D layer, bool initializingPress, Color color, Camera2D camera) {
+    //         if (initializingPress) {   
+    //             if (CurrentCommandChain is not null) CurrentCommandChain.AffectedPixels = null;
+    //             CurrentCommandChain = CommandManager.AddCommandChain(new CommandChain());
+    //         }
 
-            int radius = (int)(InputManager.GetPenPressure() * 32 / camera.Zoom) + 1;
-            int kernelRadius = (int)(InputManager.GetPenPressure() * 32 / camera.Zoom) + 1;
-            Blur(layer, radius, kernelRadius, camera);
-        }
-    }
+    //         int radius = (int)(InputManager.GetPenPressure() * 32 / camera.Zoom) + 1;
+    //         int kernelRadius = (int)(InputManager.GetPenPressure() * 32 / camera.Zoom) + 1;
+    //         Blur(layer, radius, kernelRadius, camera);
+    //     }
+    // }
 
     // public class PatternBrush : Brush {
     //     public override void Paint(IPaintableLayer2D paintableLayer, bool initializingPress, Color color, Camera2D camera) {

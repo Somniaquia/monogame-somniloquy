@@ -71,12 +71,17 @@ namespace Somniloquy {
         }
 
         public override bool MouseWithinBoundaries() {
-            return Util.IsWithinBoundaries(InputManager.GetMousePosition(), Boundaries);
+            Vector2 displacement = Vector2.Zero;
+            if (Parent is not null) {
+                if (Parent.MainAxis == Axis.Horizontal) displacement = new(Parent.SmoothScrollValue, 0); 
+                if (Parent.MainAxis == Axis.Vertical) displacement = new(0, Parent.SmoothScrollValue); 
+            }
+            return Util.IsWithinBoundaries(InputManager.GetMousePosition(), Boundaries.Displace(displacement));
         }
 
         public void PositionChildren() {
             var children = Children.OfType<BoxUI>().ToList();
-            
+            if (children.Count == 0) return;
             PositionMain(children);
             PositionPerpendicular(children);
 
@@ -146,6 +151,7 @@ namespace Somniloquy {
                 if (Overflowed) {
                     ScrollValue = Math.Clamp(ScrollValue, 0, fixedSpace - availableSpace);
                     if (ContentRenderTarget == null || ContentRenderTarget.Bounds != (Rectangle)Boundaries) {
+                        ContentRenderTarget?.Dispose();
                         ContentRenderTarget = MainAxis == Axis.Horizontal ? new RenderTarget2D(SQ.GD, (int)availableSpace, (int)Boundaries.Height) : new RenderTarget2D(SQ.GD, (int)Boundaries.Width, (int)availableSpace);
                     }
                 } else {
@@ -224,7 +230,7 @@ namespace Somniloquy {
             base.Update();
 
             if (Overflowed) {
-                if (Focused) ScrollValue = Math.Clamp(ScrollValue - InputManager.ScrollWheelDelta /10f, 0, GetContentLength(MainAxis) - Boundaries.GetAxisLength(MainAxis));
+                if (MouseWithinBoundaries()) ScrollValue = Math.Clamp(ScrollValue - InputManager.ScrollWheelDelta /10f, 0, GetContentLength(MainAxis) - Boundaries.GetAxisLength(MainAxis));
                 SmoothScrollValue = Util.Lerp(SmoothScrollValue, ScrollValue, 0.075f);
             }
         }

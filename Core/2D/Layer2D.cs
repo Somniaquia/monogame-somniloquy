@@ -1,22 +1,50 @@
 namespace Somniloquy {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Text.Json;
     using System.Text.Json.Serialization;
     using Microsoft.Xna.Framework;
+    using Microsoft.Xna.Framework.Graphics;
 
-    public abstract class Layer2D {
+    public class Layer2D {
         [JsonIgnore] public Section2D Section;
-        [JsonIgnore] public LayerGroup2D Parent;
+        [JsonIgnore] public Layer2D Parent;
+        [JsonInclude] public List<Layer2D> Layers;
         [JsonInclude] public string Identifier = "";
         [JsonIgnore] public bool Enabled = true;
         [JsonIgnore] public float Opacity = 1f;
         
-        public abstract void Update();
-        public abstract void Draw(Camera2D camera);
+        public Layer2D() { }
+        public Layer2D(string identifier) { Identifier = identifier; }
+
+        public Layer2D AddLayer(Layer2D layer) {
+            Layers ??= new();
+            Layers.Add(layer);
+            layer.Section = Section;
+            layer.Parent = this;
+            return layer;
+        }
+
+        public bool HasChildren() => Layers is not null && Layers.Count > 0;
+
+        public virtual void Update() {
+            foreach (var layer in Layers) {
+                if (layer.Enabled) layer.Update();
+            }
+        }
+
+        public virtual void Draw(Camera2D camera) {
+            foreach (var layer in Layers) {
+                if (layer.Enabled) layer.Draw(camera);
+            }
+        }
     }
 
-    public interface IPaintableLayer2D {
+    public class PaintableLayer2D : Layer2D {
+        public PaintableLayer2D() : base() { }
+        public PaintableLayer2D(string identifier) : base(identifier) { }
+
         public void PaintRectangle(Vector2I startPosition, Vector2I endPosition, Color color, float opacity, bool filled, CommandChain chain = null) {
             PixelActions.ApplyRectangleAction(startPosition, endPosition, filled, (Vector2I position) => {
                 PaintPixel(position, color, opacity, chain);
@@ -39,7 +67,51 @@ namespace Somniloquy {
 
         public virtual Color? GetColor(Vector2I position) { return null; }
 
-        public abstract void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain = null);
+        public virtual void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain = null) { }
+
+        /// <summary>
+        /// TODOO:::: Complete re-write of image export function
+        /// </summary>
+        public virtual Rectangle GetTextureBounds() {
+            List<Rectangle> bounds = (from layer in Layers where layer is TextureLayer2D let textureLayer = (TextureLayer2D)layer select textureLayer.GetTextureBounds()).ToList();
+
+            int xMin = bounds.Min(bound => bound.Left);
+            int xMax = bounds.Max(bound => bound.Right);
+            int yMin = bounds.Min(bound => bound.Top);
+            int yMax = bounds.Max(bound => bound.Bottom);
+
+            return new Rectangle(xMin, yMin, xMax - xMin, yMax - yMin);
+        }
+
+        /// <summary>
+        /// TODOO:::: Complete re-write of image export function
+        /// </summary>
+        public void SaveTexture(string path) {
+            Texture2D texture = GetTexture();
+            // using var fileStream = new FileStream(path, FileMode.Create);
+            // texture.SaveAsPng(fileStream, texture.Width, texture.Height);
+            IOManager.SaveTextureDataAsPngAsync(texture, path);
+        }
+
+        /// <summary>
+        /// TODOO:::: Complete re-write of image export function
+        /// </summary>
+        public Texture2D GetTexture() {
+            var bounds = GetTextureBounds();
+            RenderTarget2D target = new(SQ.GD, bounds.Width, bounds.Height);
+
+            SQ.GD.SetRenderTarget(target);
+            SQ.GD.Clear(Color.Transparent);
+            SQ.SB.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp);
+            foreach (var layer in Layers) {
+                if (layer is TextureLayer2D textureLayer) {
+                    textureLayer.Draw(bounds.TopLeft(), bounds.BottomRight());
+                }
+            }
+            SQ.SB.End();
+            SQ.GD.SetRenderTarget(null);
+            return target;
+        }
     }
 
     public class Layer2DConverter : JsonConverter<Layer2D> {

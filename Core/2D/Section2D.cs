@@ -14,11 +14,11 @@ namespace Somniloquy {
 
         [JsonInclude] public string Identifier;
         [JsonInclude] public Vector2 CoordsInWorldMap;
-        [JsonInclude] public LayerGroup2D Root;
+        [JsonInclude] public Layer2D Root;
         [JsonInclude] public TileSpriteSheet SpriteSheet = new(16, 64);
 
         public Section2D() {
-            Root = new LayerGroup2D("Root") { Section = this };
+            Root = new Layer2D("Root") { Section = this };
         }
 
         public void Update() {

@@ -45,25 +45,24 @@ namespace Somniloquy {
             AddLayerLables();
         }
 
-        public static void AddLayerLables(BoxUI groupLabel = null) {
+        public static void AddLayerLables(BoxUI parentLabel = null) {
             List<Layer2D> iter;
-            if (groupLabel is null) {
-                groupLabel = RootUI;
+            if (parentLabel is null) {
+                parentLabel = RootUI;
                 iter = Section.Root.Layers;
             } else {
-                iter = ((LayerGroupLabel)groupLabel).Group.Layers;
+                iter = ((LayerLabel)parentLabel).Layer.Layers;
             }
 
-            foreach (var innerGroup in iter.OfType<LayerGroup2D>()) {
-                var innerGroupLabel = new LayerGroupLabel(groupLabel, Screen, innerGroup, 5, 5) {  };
-                // innerGroupLabel.AddChild(new TextLabel(5, 5, innerGroup.Identifier) { Renderer = null });
-                AddLayerLables(innerGroupLabel);
+            foreach (var innerParent in iter.FindAll(layer => layer.HasChildren())) {
+                var innerParentLabel = new LayerLabel(parentLabel, Screen, innerParent, 5, 5) {  };
+                AddLayerLables(innerParentLabel);
             }
 
-            if (iter.OfType<IPaintableLayer2D>().Count() > 0) {
-                var leftoverLabel = new LayerGroupLabel(groupLabel, Screen, null, 5, 5) { Renderer = null, MainAxis = Axis.Vertical, MainAxisAlign = Align.Begin, MainAxisShrink = true };
-                foreach (var layer in iter.OfType<IPaintableLayer2D>()) {
-                    var childLabel = new LayerLabel(leftoverLabel, Screen, (Layer2D)layer, 5, 10);
+            if (iter.FindAll(layer => !layer.HasChildren()).Count > 0) {
+                var leftoverLabel = new BoxUI(parentLabel, 5, 5) { Renderer = null, Focusable = false, MainAxis = Axis.Vertical, MainAxisAlign = Align.Begin, MainAxisShrink = true };
+                foreach (var layer in iter.OfType<PaintableLayer2D>()) {
+                    var childLabel = new LayerLabel(leftoverLabel, Screen, layer, 5, 10);
                 }
             }
         }
@@ -72,39 +71,6 @@ namespace Somniloquy {
             Active = false;
             RootUI?.Destroy();
             RootUI = null;
-        }
-    }
-
-    public class LayerGroupLabel : BoxUI {
-        public Section2DScreen Screen;
-        public LayerGroup2D Group;
-
-        public LayerGroupLabel(BoxUI parent, Section2DScreen sectionScreen, LayerGroup2D group, float margin = 0, float padding = 0) : base(parent, margin, padding) {
-            Screen = sectionScreen;
-            Group = group;
-        }
-
-        public override void Update() {
-            base.Update();
-
-            if (Group is null) return;
-            // if (LayerGroup == Screen.Editor.Editor.SelectedLayer) {
-            //     ((BoxUIDefaultRenderer)Renderer).Color = Color.Cyan;
-            // } else 
-            if (Focused) {
-                ((BoxUIDefaultRenderer)Renderer).Color = Color.Yellow;
-
-                if (InputManager.IsMouseButtonPressed(MouseButtons.LeftButton)) {
-                    Group.Enabled = !Group.Enabled;
-                    foreach (var layer in Group.Layers) {
-                        layer.Enabled = Group.Enabled;
-                    }
-                }
-            } else if (Group.Enabled) {
-                ((BoxUIDefaultRenderer)Renderer).Color = Color.White;
-            } else {
-                ((BoxUIDefaultRenderer)Renderer).Color = Color.Gray;
-            }
         }
     }
 

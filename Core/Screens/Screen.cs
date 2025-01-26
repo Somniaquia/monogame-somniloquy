@@ -63,16 +63,13 @@ namespace Somniloquy {
 
         public virtual void LoadContent() { }
 
-        /// <summary>
-        /// The base update function focuses the screen if the mouse is inside it. Call base.Update() at top!
-        /// </summary>
         public virtual void Update() {
             if (Focusable) {
                 if (MouseWithinBoundaries() && !InputManager.IsMouseButtonDown(MouseButtons.LeftButton)) {
                     ScreenManager.FocusedScreen = this;
                 }
             }
-
+            
             foreach (var child in Children) {
                 child.Update();
             }

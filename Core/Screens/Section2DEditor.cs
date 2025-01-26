@@ -103,7 +103,7 @@ namespace Somniloquy {
             if (!Focused) return;
             
             if (InputManager.IsKeyDown(Keys.LeftAlt)) {
-                if (SelectedLayer is IPaintableLayer2D paintableLayer) {
+                if (SelectedLayer is PaintableLayer2D paintableLayer) {
                     var color = paintableLayer.GetColor((Vector2I)Screen.Camera.GlobalMousePos.Value);
                     if (color != null) {
                         SelectedColor = color.Value;
@@ -111,7 +111,7 @@ namespace Somniloquy {
                     }
                 }
             } else {
-                if (SelectedLayer is IPaintableLayer2D paintableLayer) {
+                if (SelectedLayer is PaintableLayer2D paintableLayer) {
                     Brush.Paint(paintableLayer, InputManager.IsMouseButtonPressed(MouseButtons.LeftButton), SelectedColor, Screen.Camera);
                 }
             }
@@ -123,7 +123,7 @@ namespace Somniloquy {
             if (InputManager.IsKeyDown(Keys.LeftAlt)) {
 
             } else {
-                if (SelectedLayer is IPaintableLayer2D paintableLayer) {
+                if (SelectedLayer is PaintableLayer2D paintableLayer) {
                     Brush.Paint(paintableLayer, InputManager.IsMouseButtonPressed(MouseButtons.RightButton), Color.Transparent, Screen.Camera);
                 }
             }
@@ -134,13 +134,14 @@ namespace Somniloquy {
 
             iter ??= Screen.Section.Root.Layers;
             foreach (var layer in iter) {
-                if (layer.Enabled && layer is IPaintableLayer2D paintableLayer) {
+                if (layer.Enabled && layer is PaintableLayer2D paintableLayer) {
                     Color? color = paintableLayer.GetColor((Vector2I)Screen.Camera.GlobalMousePos.Value);
                     if (color != null && color.Value.A != 0) {
                         SelectedLayer = layer;
                     }
-                } else if (layer is LayerGroup2D group) {
-                    SelectLayerUnderMouse(group.Layers);
+                }
+                if (layer.HasChildren()) {
+                    SelectLayerUnderMouse(layer.Layers);
                 }
             }
         }
