@@ -11,40 +11,57 @@ namespace Somniloquy {
         public static Section2DScreen Screen;
         public static Section2D Section;
         public static Section2DEditor Editor;
-        public static Layer2D SelectedLayer;
 
         public static BoxUI RootUI;
 
+        public static void Initialize() {
+            InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.Up }, new object[] { Keys.Down, Keys.Left, Keys.Right }, (parameters) => { MoveLayer(false); }, TriggerOnce.Block );
+            InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.Down }, new object[] { Keys.Up, Keys.Left, Keys.Right }, (parameters) => { MoveLayer(true); }, TriggerOnce.Block );
+        }
+        
+        public static void MoveLayer(bool next) {
+            if (Editor.SelectedLayer.Parent.Layers.Count == 1) return;
+            var index = Editor.SelectedLayer.Parent.Layers.FindIndex(layer => layer == Editor.SelectedLayer);
+            if (next) {
+                if (index + 1 < Editor.SelectedLayer.Parent.Layers.Count) Editor.SelectedLayer = Editor.SelectedLayer.Parent.Layers[index + 1];
+            } else {
+                if (index > 0) Editor.SelectedLayer = Editor.SelectedLayer.Parent.Layers[index - 1];
+            }
+        }
+
+        public static void AddLayer() {
+
+        }
+
         public static void BuildUI() {
             DestroyUI();
-            RootUI = new BoxUI(Util.ShrinkRectangle(new Rectangle(0, 0, SQ.WindowSize.X, SQ.WindowSize.Y - 254), new(20))) { Identifier = "root", Focusable = false, Renderer = null, MainAxis = Axis.Horizontal, MainAxisAlign = Align.End, PerpendicularAxisAlign = Align.Begin,  };
+            RootUI = new BoxUI(Util.ShrinkRectangle(new Rectangle(0, 0, SQ.WindowSize.X, SQ.WindowSize.Y - 300), new(20))) { Identifier = "root", Renderer = null, Focusable = false, MainAxis = Axis.Horizontal, MainAxisAlign = Align.End, PerpendicularAxisAlign = Align.Begin };
             Active = true;
 
             Screen = ScreenManager.GetFirstOfType<Section2DScreen>();
             Section = Screen.Section;
             Editor = Screen.Editor;
-            SelectedLayer = Editor.SelectedLayer;
 
             AddLayerLables();
         }
 
-        public static void AddLayerLables(LayerGroup2D group = null, BoxUI groupLabel = null) {
+        public static void AddLayerLables(BoxUI groupLabel = null) {
             List<Layer2D> iter;
-            if (group is null) {
+            if (groupLabel is null) {
                 groupLabel = RootUI;
-                iter = Section.Layers;
+                iter = Section.Root.Layers;
             } else {
-                iter = group.Layers;
+                iter = ((LayerGroupLabel)groupLabel).Group.Layers;
             }
-            
+
             foreach (var innerGroup in iter.OfType<LayerGroup2D>()) {
-                var innerGroupLabel = new LayerGroupLabel(groupLabel, Screen, innerGroup, 5, 5) { PerpendicularAxisShrink = true };
+                var innerGroupLabel = new LayerGroupLabel(groupLabel, Screen, innerGroup, 5, 5) {  };
                 // innerGroupLabel.AddChild(new TextLabel(5, 5, innerGroup.Identifier) { Renderer = null });
-                AddLayerLables(innerGroup, innerGroupLabel);
+                AddLayerLables(innerGroupLabel);
             }
 
             if (iter.OfType<IPaintableLayer2D>().Count() > 0) {
-                var leftoverLabel = new LayerGroupLabel(groupLabel, Screen, null, 5, 5) { Renderer = null, MainAxis = Axis.Vertical, MainAxisAlign = Align.Begin, Focusable = false };
+                var leftoverLabel = new LayerGroupLabel(groupLabel, Screen, null, 5, 5) { Renderer = null, MainAxis = Axis.Vertical, MainAxisAlign = Align.Begin, MainAxisShrink = true };
                 foreach (var layer in iter.OfType<IPaintableLayer2D>()) {
                     var childLabel = new LayerLabel(leftoverLabel, Screen, (Layer2D)layer, 5, 10);
                 }
@@ -71,7 +88,7 @@ namespace Somniloquy {
             base.Update();
 
             if (Group is null) return;
-            // if (LayerGroup == Screen.Editor.SelectedLayer) {
+            // if (LayerGroup == Screen.Editor.Editor.SelectedLayer) {
             //     ((BoxUIDefaultRenderer)Renderer).Color = Color.Cyan;
             // } else 
             if (Focused) {
@@ -79,6 +96,9 @@ namespace Somniloquy {
 
                 if (InputManager.IsMouseButtonPressed(MouseButtons.LeftButton)) {
                     Group.Enabled = !Group.Enabled;
+                    foreach (var layer in Group.Layers) {
+                        layer.Enabled = Group.Enabled;
+                    }
                 }
             } else if (Group.Enabled) {
                 ((BoxUIDefaultRenderer)Renderer).Color = Color.White;
@@ -103,8 +123,11 @@ namespace Somniloquy {
 
             if (Layer == Screen.Editor.SelectedLayer) {
                 ((BoxUIDefaultRenderer)Renderer).Color = Color.Cyan;
+                Layer.Opacity = 1f;
             } else if (Focused) {
                 ((BoxUIDefaultRenderer)Renderer).Color = Color.Yellow;
+                // Layer.Opacity = 0.5f;
+                // Layer.Draw(Layer.Section.Screen.Camera);
 
                 if (InputManager.IsKeyDown(Keys.LeftAlt)) {
                     Screen.Editor.SelectedLayer = Layer;
@@ -115,8 +138,10 @@ namespace Somniloquy {
                 }
             } else if (Layer.Enabled) {
                 ((BoxUIDefaultRenderer)Renderer).Color = Color.White;
+                Layer.Opacity = 0.2f;
             } else {
                 ((BoxUIDefaultRenderer)Renderer).Color = Color.Gray;
+                Layer.Opacity = 0f;
             }
         }
     }

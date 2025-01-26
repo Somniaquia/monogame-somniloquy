@@ -43,7 +43,6 @@ namespace Somniloquy {
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { MouseButtons.RightButton }, (parameters) => HandleRightClick(), TriggerOnce.False));
 
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.B }, new object[] { MouseButtons.LeftButton, MouseButtons.RightButton }, (parameters) => SelectNextBrush(), TriggerOnce.True, true));
-            DebugInfo.Subscribe(() => $"Selected Brush: {Brush}");
 
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.Z}, new object[] {Keys.LeftShift, MouseButtons.LeftButton}, (parameters) => CommandManager.Undo(), TriggerOnce.Block, true));
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.LeftShift, Keys.Z}, new object[] {MouseButtons.LeftButton}, (parameters) => CommandManager.Redo(), TriggerOnce.Block, true));
@@ -51,13 +50,14 @@ namespace Somniloquy {
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.S}, (parameters) => Save(), TriggerOnce.True, true));
 
             ColorPicker = new ColorPicker(new Rectangle(SQ.WindowSize.X - 264, SQ.WindowSize.Y - 264, 256, 256), this);
+            LayerTable.Initialize();
 
-            DebugInfo.Subscribe(() => $"Pen Pressure: {InputManager.AveragePenPressure}");
-            DebugInfo.Subscribe(() => $"Pen Tilt: {InputManager.PenTilt}");
-            DebugInfo.Subscribe(() => $"Undo History: {CommandManager.UndoHistory.Count}");
-            DebugInfo.Subscribe(() => $"Redo History: {CommandManager.RedoHistory.Count}");
+            DebugInfo.Subscribe(() => $"Selected Layer: {SelectedLayer} - {SelectedLayer.Identifier}");
+            DebugInfo.Subscribe(() => $"Undo: {CommandManager.UndoHistory.Count} Redo: {CommandManager.RedoHistory.Count}");
+            DebugInfo.Subscribe(() => $"Selected Brush: {Brush}");
             DebugInfo.Subscribe(() => $"Selected Color: {SelectedColor}");
-            SelectedLayer = Screen.Section.Layers.OfType<LayerGroup2D>().First().Layers[0];
+            DebugInfo.Subscribe(() => $"Pen Pressure: {InputManager.AveragePenPressure} Tilt: {InputManager.PenTilt}");
+            SelectedLayer = Screen.Section.Root.Layers[0];
         }
 
         public override void LoadContent() {
@@ -132,7 +132,7 @@ namespace Somniloquy {
         public void SelectLayerUnderMouse(List<Layer2D> iter = null) {
             if (!Focused) return;
 
-            if (iter == null) iter = Screen.Section.Layers;
+            iter ??= Screen.Section.Root.Layers;
             foreach (var layer in iter) {
                 if (layer.Enabled && layer is IPaintableLayer2D paintableLayer) {
                     Color? color = paintableLayer.GetColor((Vector2I)Screen.Camera.GlobalMousePos.Value);
@@ -161,7 +161,7 @@ namespace Somniloquy {
         }
 
         public override void Draw() {
-            foreach (var layer in Screen.Section.Layers) {
+            foreach (var layer in Screen.Section.Root.Layers) {
                 if (layer.Enabled) layer.Draw(Screen.Camera);
             }
 

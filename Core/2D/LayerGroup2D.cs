@@ -17,6 +17,7 @@ namespace Somniloquy {
         public Layer2D AddLayer(Layer2D layer) {
             Layers.Add(layer);
             layer.Section = Section;
+            layer.Parent = this;
             return layer;
         }
 
@@ -57,7 +58,7 @@ namespace Somniloquy {
 
         public override void Update() {
             foreach (var layer in Layers) {
-                layer.Update();
+                if (layer.Enabled) layer.Update();
             }
         }
 

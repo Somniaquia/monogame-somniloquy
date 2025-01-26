@@ -14,25 +14,19 @@ namespace Somniloquy {
 
         [JsonInclude] public string Identifier;
         [JsonInclude] public Vector2 CoordsInWorldMap;
-        [JsonInclude] public List<Layer2D> Layers = new();
+        [JsonInclude] public LayerGroup2D Root;
         [JsonInclude] public TileSpriteSheet SpriteSheet = new(16, 64);
 
-        public Layer2D AddLayer(Layer2D layer) {
-            Layers.Add(layer);
-            layer.Section = this;
-            return layer;
+        public Section2D() {
+            Root = new LayerGroup2D("Root") { Section = this };
         }
 
         public void Update() {
-            foreach (var layer in Layers) {
-                if (layer.Enabled) layer.Update();
-            }
+            Root.Update();
         }
 
         public void Draw(Camera2D camera) {
-            foreach (var layer in Layers) {
-                if (layer.Enabled) layer.Draw(camera);
-            }
+            Root.Draw(camera);
         }
 
         public string Serialize() {

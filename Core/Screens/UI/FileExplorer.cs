@@ -115,8 +115,8 @@ namespace Somniloquy {
             ((TextLabel)ContentsBox.Children[HighlightedLine]).DefaultColor = Color.Yellow;
 
             if (ContentsBox.Overflowed) {
-                var boxLength = ContentsBox.GetMaxLength(ContentsBox.MainAxis);
-                var entryLength = ((BoxUI)ContentsBox.Children[HighlightedLine]).GetContentLength(ContentsBox.MainAxis, null);
+                var boxLength = ContentsBox.GetAvailableSpace(ContentsBox.MainAxis);
+                var entryLength = ((BoxUI)ContentsBox.Children[HighlightedLine]).GetContentLength(ContentsBox.MainAxis);
                 
                 if (entryLength * HighlightedLine < ContentsBox.ScrollValue) ContentsBox.ScrollValue = entryLength * HighlightedLine;
                 if (entryLength * HighlightedLine < ContentsBox.SmoothScrollValue) ContentsBox.SmoothScrollValue = entryLength * HighlightedLine;
@@ -173,7 +173,7 @@ namespace Somniloquy {
         public static void LoadImage(string path, LayerGroup2D layerGroup = null) {
             var layer = new TileLayer2D() { Identifier = Path.GetFileName(path) };
 
-            if (layerGroup is null) ScreenManager.GetFirstOfType<Section2DScreen>().Section.AddLayer(layer);
+            if (layerGroup is null) ScreenManager.GetFirstOfType<Section2DScreen>().Section.Root.AddLayer(layer);
             else layerGroup.AddLayer(layer);
 
                 Texture2D texture = Texture2D.FromFile(SQ.GD, path);
@@ -190,7 +190,7 @@ namespace Somniloquy {
             var (folders, files) = ListDirectoryContents(path);
             if (layerGroup is null) {
                 layerGroup = new LayerGroup2D(path.Split('\\')[^1].Split('.')[0]);
-                ScreenManager.GetFirstOfType<Section2DScreen>().Section.AddLayer(layerGroup);
+                ScreenManager.GetFirstOfType<Section2DScreen>().Section.Root.AddLayer(layerGroup);
             } else {
                 layerGroup = (LayerGroup2D)layerGroup.AddLayer(new LayerGroup2D(path.Split('\\')[^1].Split('.')[0]));
             }
@@ -204,6 +204,8 @@ namespace Somniloquy {
                     LoadImage(file, layerGroup);
                 }
             }
+
+            DestroyUI();
         }
 
         public static void Load() {
@@ -231,7 +233,7 @@ namespace Somniloquy {
                         // try {
                             string json = File.ReadAllText(path);
                             sectionScreen.Section = Section2D.Deserialize(json);
-                            sectionScreen.Editor.SelectedLayer = sectionScreen.Section.Layers.OfType<TextureLayer2D>().FirstOrDefault();
+                            sectionScreen.Editor.SelectedLayer = sectionScreen.Section.Root.Layers.OfType<TextureLayer2D>().FirstOrDefault();
                             DebugInfo.AddTempLine(() => $"Loaded section from {Path.GetFileName(path)}", 5);
                         // } catch (Exception e) {
                         //     DebugInfo.AddTempLine(() => $"Error reading {Path.GetFileName(path)}: {e.Message}", 5);

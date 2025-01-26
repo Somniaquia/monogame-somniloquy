@@ -26,7 +26,7 @@ namespace Somniloquy {
             SheetChunkLength = sheetChunkLength;
             TileLength = tileLength;
         
-            DebugInfo.Subscribe(() => $"Tiles count: {SheetChunkLength * SheetChunkLength * SheetChunks.Count - UnoccupiedTileSlots.Count}");
+            DebugInfo.Subscribe(() => $"Section Tiles count: {SheetChunkLength * SheetChunkLength * SheetChunks.Count - UnoccupiedTileSlots.Count}");
         }
         
         public void AddSheetChunk() {

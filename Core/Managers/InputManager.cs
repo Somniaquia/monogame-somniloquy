@@ -81,8 +81,8 @@ namespace Somniloquy {
             logContext.Open(systemInfo.info.win.window, true);
             wintabData = new CWintabData(logContext);
 
-            DebugInfo.Subscribe(() => $"Pressed Keys: {string.Join(" ", PressedKeys.Select(key => key.ToString()))}");
-            DebugInfo.Subscribe(() => $"Mouse Speed / 100: {AverageMouseSpeed / 100}");
+            // DebugInfo.Subscribe(() => $"Pressed Keys: {string.Join(" ", PressedKeys.Select(key => key.ToString()))}");
+            // DebugInfo.Subscribe(() => $"Mouse Speed / 100: {AverageMouseSpeed / 100}");
         }
 
         public static void Update() {

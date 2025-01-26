@@ -7,6 +7,7 @@ namespace Somniloquy {
 
     public abstract class Layer2D {
         [JsonIgnore] public Section2D Section;
+        [JsonIgnore] public LayerGroup2D Parent;
         [JsonInclude] public string Identifier = "";
         [JsonIgnore] public bool Enabled = true;
         [JsonIgnore] public float Opacity = 1f;

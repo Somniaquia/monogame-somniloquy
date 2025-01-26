@@ -16,10 +16,11 @@ namespace Somniloquy {
 
             if (Section is null) { // temp
                 Section = new();
-                var group = Section.AddLayer(new LayerGroup2D());
-                ((LayerGroup2D)group).AddLayer(new TileLayer2D(16, 16));
-                ((LayerGroup2D)group).AddLayer(new TextureLayer2D());
+                Section.Root.AddLayer(new TileLayer2D(16, 16));
+                Section.Root.AddLayer(new TextureLayer2D());
             }
+
+            Section.Screen = this;
 
             Editor = new(this);
             Camera.MaxZoom = 16f;

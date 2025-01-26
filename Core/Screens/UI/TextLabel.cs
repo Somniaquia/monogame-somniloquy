@@ -63,9 +63,9 @@ namespace Somniloquy {
             LetterAxis = letterAxis;
         }
 
-        public override float GetContentLength(Axis axis, BoxUI caller) {
+        public override float GetContentLength(Axis axis) {
             // TODO: Flexible indentation (wrapping text inside max axisLength)
-            float length = base.GetContentLength(axis, caller);
+            float length = base.GetContentLength(axis);
             if (Text is null) return length;
 
             if (LetterAxis == axis) {
