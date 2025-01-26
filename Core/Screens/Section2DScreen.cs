@@ -16,7 +16,6 @@ namespace Somniloquy {
 
             if (Section is null) { // temp
                 Section = new();
-                Section.Root.AddLayer(new TileLayer2D(16, 16));
                 Section.Root.AddLayer(new TextureLayer2D());
             }
 

@@ -5,6 +5,8 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Input;
 
+    public enum Directions { Left, Right, Up, Down, Center }
+
     public static class LayerTable {
         public static bool Active;
 
@@ -15,22 +17,75 @@ namespace Somniloquy {
         public static BoxUI RootUI;
 
         public static void Initialize() {
-            InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.Up }, new object[] { Keys.Down, Keys.Left, Keys.Right }, (parameters) => { MoveLayer(false); }, TriggerOnce.Block );
-            InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.Down }, new object[] { Keys.Up, Keys.Left, Keys.Right }, (parameters) => { MoveLayer(true); }, TriggerOnce.Block );
+            InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.Up }, new object[] { Keys.Down, Keys.Left, Keys.Right }, (parameters) => { MoveLayer(Directions.Up); }, TriggerOnce.Block );
+            InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.Down }, new object[] { Keys.Up, Keys.Left, Keys.Right }, (parameters) => { MoveLayer(Directions.Down); }, TriggerOnce.Block );
+            InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.Delete }, new object[] {  }, (parameters) => { DeleteLayer(); }, TriggerOnce.Block );
+
+            InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.N }, new object[] { Keys.Up, Keys.Down }, (parameters) => { CreateLayer(Directions.Center, typeof(TextureLayer2D)); }, TriggerOnce.Block );
+            InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.Up, Keys.N }, new object[] { Keys.Up }, (parameters) => { CreateLayer(Directions.Up, typeof(TextureLayer2D)); }, TriggerOnce.Block );
+            InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.Down, Keys.N }, new object[] { Keys.Down }, (parameters) => { CreateLayer(Directions.Down, typeof(TextureLayer2D)); }, TriggerOnce.Block );
+            InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.T }, new object[] { Keys.Up, Keys.Down }, (parameters) => { CreateLayer(Directions.Center, typeof(TileLayer2D)); }, TriggerOnce.Block );
+            InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.Up, Keys.T }, new object[] { Keys.Up }, (parameters) => { CreateLayer(Directions.Up, typeof(TileLayer2D)); }, TriggerOnce.Block );
+            InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.Down, Keys.T }, new object[] { Keys.Down }, (parameters) => { CreateLayer(Directions.Down, typeof(TileLayer2D)); }, TriggerOnce.Block );
         }
         
-        public static void MoveLayer(bool next) {
-            if (Editor.SelectedLayer.Parent.Layers.Count == 1) return;
+        public static void MoveLayer(Directions dir) {
             var index = Editor.SelectedLayer.Parent.Layers.FindIndex(layer => layer == Editor.SelectedLayer);
-            if (next) {
-                if (index + 1 < Editor.SelectedLayer.Parent.Layers.Count) Editor.SelectedLayer = Editor.SelectedLayer.Parent.Layers[index + 1];
+            if (dir == Directions.Down) {
+                if (Editor.SelectedLayer.HasChildren()) {
+                    Editor.SelectedLayer = Editor.SelectedLayer.Layers[0];
+                } else if (index + 1 < Editor.SelectedLayer.Parent.Layers.Count) { 
+                    Editor.SelectedLayer = Editor.SelectedLayer.Parent.Layers[index + 1]; 
+                }
             } else {
-                if (index > 0) Editor.SelectedLayer = Editor.SelectedLayer.Parent.Layers[index - 1];
+                if (index > 0) {
+                    Editor.SelectedLayer = Editor.SelectedLayer.Parent.Layers[index - 1];
+                } else {
+                    if (Editor.SelectedLayer.Parent.Parent is null) return;
+                    Editor.SelectedLayer = Editor.SelectedLayer.Parent;
+                }
+            }
+        }
+
+        public static void CreateLayer(Directions dir, Type type) {
+            Layer2D layer = null;
+            if (type == typeof(TextureLayer2D)) {
+                layer = new TextureLayer2D();
+            } else if (type == typeof(TileLayer2D)) {
+                layer = new TileLayer2D();
+            }
+
+            if (dir == Directions.Center) {
+                Editor.SelectedLayer.AddLayer(layer);
+            } else if (dir == Directions.Down) {
+                var index = Editor.SelectedLayer.Parent.Layers.IndexOf(Editor.SelectedLayer);
+                Editor.SelectedLayer.Parent.InsertLayer(index + 1, layer);
+            } else if (dir == Directions.Up) {
+                var index = Editor.SelectedLayer.Parent.Layers.IndexOf(Editor.SelectedLayer);
+                Editor.SelectedLayer.Parent.InsertLayer(index, layer);
+            }
+
+            BuildUI();
+        }
+
+        public static void DeleteLayer() {
+            var previous = Editor.SelectedLayer;
+            MoveLayer(Directions.Down);
+            if (previous != Editor.SelectedLayer) {
+                previous.Parent.Layers.Remove(previous);
+                BuildUI();
+            } else {
+                MoveLayer(Directions.Up);
+                MoveLayer(Directions.Up);
+                if (previous != Editor.SelectedLayer) {
+                    previous.Parent.Layers.Remove(previous);
+                    BuildUI();
+                }
             }
         }
 
         public static void AddLayer() {
-
+            
         }
 
         public static void BuildUI() {

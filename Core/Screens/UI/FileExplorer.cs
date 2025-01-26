@@ -39,6 +39,7 @@ namespace Somniloquy {
             Active = true;
             DebugInfo.Active = false;
             ScreenManager.GetFirstOfType<Section2DScreen>().Editor.ColorPicker.Active = false;
+            LayerTable.DestroyUI();
 
             var directoryLabel = new TextLabel(RootUI, 20, 5) { Identifier = "path", PerpendicularAxisFill = true };
             var mainBox = new BoxUI(RootUI, 20, 0) { MainAxis = Axis.Horizontal, Identifier = "mainBox", MainAxisFill = true, PerpendicularAxisFill = true };
@@ -53,6 +54,7 @@ namespace Somniloquy {
             Active = false;
             DebugInfo.Active = true;
             ScreenManager.GetFirstOfType<Section2DScreen>().Editor.ColorPicker.Active = true;
+            LayerTable.BuildUI();
 
             RootUI?.Destroy();
             RootUI = null;

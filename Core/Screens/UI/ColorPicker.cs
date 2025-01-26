@@ -14,7 +14,7 @@ namespace Somniloquy {
         public Texture2D ChartTexture;
         public Vector2I ChartDimensions;
         public Vector2 PositionOnChart = Vector2.Zero;
-        public int Hue = 0;
+        public float Hue = 0;
 
         public bool Active = true;
 
@@ -66,10 +66,11 @@ namespace Somniloquy {
             HuePicker.Update();
 
             bool updateChart = false;
-            if (InputManager.IsKeyDown(Keys.U)) { Hue--; updateChart = true; }
-            if (InputManager.IsKeyDown(Keys.O)) { Hue++; updateChart = true; }
 
-            float updateSpeed = InputManager.IsMouseButtonDown(MouseButtons.LeftButton) ? 0.001f : 0.01f;
+            float updateSpeed = InputManager.IsMouseButtonDown(MouseButtons.LeftButton) ? 0.001f : 0.004f;
+            
+            if (InputManager.IsKeyDown(Keys.U)) { Hue -= updateSpeed * 255; updateChart = true; }
+            if (InputManager.IsKeyDown(Keys.O)) { Hue += updateSpeed * 255; updateChart = true; }
 
             if (InputManager.IsKeyDown(Keys.I)) { PositionOnChart += new Vector2(0, -updateSpeed); }
             if (InputManager.IsKeyDown(Keys.K)) { PositionOnChart += new Vector2(0, updateSpeed); }

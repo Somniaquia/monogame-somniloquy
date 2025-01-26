@@ -6,6 +6,7 @@ namespace Somniloquy {
     using System.Reflection;
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
+    using Microsoft.Xna.Framework.Input;
 
     public static class BrushPicker {
         public static void BuildUI() {
@@ -74,11 +75,10 @@ namespace Somniloquy {
         public abstract void Paint(PaintableLayer2D layer, bool initializingPress, Color color, Camera2D camera);
     }
 
-    public class WaterPaint : Brush {
+    public class OilPaint : Brush {
         public override void Paint(PaintableLayer2D paintableLayer, bool initializingPress, Color color, Camera2D camera) {
-            int penWidth = InputManager.GetPenPressure() != 0 ? (int)(InputManager.GetPenPressure() * 32 / camera.Zoom) : (int)(camera.AverageMouseSpeed * camera.Zoom / 800);
-            // float penOpacity = 1;
-            float penOpacity = InputManager.GetPenPressure() != 0 ? InputManager.GetPenPressure() / 2 : MathF.Min(1, camera.AverageMouseSpeed * camera.Zoom / 3200);
+            int penWidth = InputManager.GetPenPressure() != 0 ? (int)(InputManager.GetPenPressure() * 16 / camera.Zoom) : (int)(camera.AverageMouseSpeed * camera.Zoom / 1600);
+            float penOpacity = 1;
 
             if (initializingPress) {   
                 if (CurrentCommandChain is not null) CurrentCommandChain.AffectedPixels = null;
@@ -93,10 +93,11 @@ namespace Somniloquy {
         }
     }
 
-    public class OilPaint : Brush {
+    public class WaterPaint : Brush {
         public override void Paint(PaintableLayer2D paintableLayer, bool initializingPress, Color color, Camera2D camera) {
-            int penWidth = InputManager.GetPenPressure() != 0 ? (int)(InputManager.GetPenPressure() * 16 / camera.Zoom) : (int)(camera.AverageMouseSpeed * camera.Zoom / 1600);
-            float penOpacity = 1;
+            int penWidth = InputManager.GetPenPressure() != 0 ? (int)(InputManager.GetPenPressure() * 32 / camera.Zoom) : (int)(camera.AverageMouseSpeed * camera.Zoom / 800);
+            // float penOpacity = 1;
+            float penOpacity = InputManager.GetPenPressure() != 0 ? InputManager.GetPenPressure() / 2 : MathF.Min(1, camera.AverageMouseSpeed * camera.Zoom / 3200);
 
             if (initializingPress) {   
                 if (CurrentCommandChain is not null) CurrentCommandChain.AffectedPixels = null;

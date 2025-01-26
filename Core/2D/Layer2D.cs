@@ -26,6 +26,14 @@ namespace Somniloquy {
             return layer;
         }
 
+        public Layer2D InsertLayer(int index, Layer2D layer) {
+            Layers ??= new();
+            Layers.Insert(index, layer);
+            layer.Section = Section;
+            layer.Parent = this;
+            return layer;
+        }
+
         public bool HasChildren() => Layers is not null && Layers.Count > 0;
 
         public virtual void Update() {

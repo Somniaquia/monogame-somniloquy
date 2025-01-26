@@ -42,8 +42,6 @@ namespace Somniloquy {
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { MouseButtons.LeftButton }, (parameters) => HandleLeftClick(), TriggerOnce.False));
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { MouseButtons.RightButton }, (parameters) => HandleRightClick(), TriggerOnce.False));
 
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.B }, new object[] { MouseButtons.LeftButton, MouseButtons.RightButton }, (parameters) => SelectNextBrush(), TriggerOnce.True, true));
-
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.Z}, new object[] {Keys.LeftShift, MouseButtons.LeftButton}, (parameters) => CommandManager.Undo(), TriggerOnce.Block, true));
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.LeftShift, Keys.Z}, new object[] {MouseButtons.LeftButton}, (parameters) => CommandManager.Redo(), TriggerOnce.Block, true));
 
@@ -63,6 +61,13 @@ namespace Somniloquy {
         public override void LoadContent() {
             ColorPicker.LoadContent();
             LayerTable.BuildUI();
+
+            for (int i = 0; i < Brush.BrushTypes.Count; i++) {
+                int currentIndex = i;
+                InputManager.RegisterKeybind((Keys)(49 + currentIndex), (parameters) => {
+                    if (Focused) currentBrushIndex = currentIndex;
+                }, TriggerOnce.True);
+            }
         }
 
         public override void Update() {
@@ -144,11 +149,6 @@ namespace Somniloquy {
                     SelectLayerUnderMouse(layer.Layers);
                 }
             }
-        }
-
-        public void SelectNextBrush() {
-            if (!Focused) return;
-            currentBrushIndex = (currentBrushIndex + 1) % Brush.BrushTypes.Count;
         }
 
         public void Save() { // TODO resolve ScreenManager algorithm that determines focused screen
