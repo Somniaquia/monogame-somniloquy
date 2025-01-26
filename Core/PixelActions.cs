@@ -7,8 +7,8 @@ namespace Somniloquy {
     public class PixelActions {
         public static void ApplyRectangleAction(Vector2I start, Vector2I end, bool filled, PixelAction action) {
             if (filled) {
-                for (int y = start.Y; y < end.Y; y++) {
-                    for (int x = start.X; x < end.X; x++) {
+                for (int y = Util.Min(start.Y, end.Y); y < Util.Max(start.Y, end.Y); y++) {
+                    for (int x = Util.Min(start.X, end.X); x < Util.Max(start.X, end.X); x++) {
                         action(new Vector2I(x, y));
                     }
                 }
@@ -18,6 +18,57 @@ namespace Somniloquy {
                 ApplyLineAction(end, new(start.X, end.Y), 0, action);
                 ApplyLineAction(end, new(end.X, start.Y), 0, action);
             }
+        }
+
+        public static Vector2I ApplySnappedLineAction(Vector2I start, Vector2I end, int radius, PixelAction action) {
+            int dx = end.X - start.X;
+            int dy = end.Y - start.Y;
+
+            if (dx == 0 || dy == 0) {
+                ApplyLineAction(start, end, radius, action);
+                return end;
+            }
+
+            float m = dy / (float)dx;
+            var (interval, reciprocal) = GetSnappedSlope(m);
+            
+            float d = (start - end).Length();
+            
+            int ux = dx / Math.Abs(dx);
+            int uy = dy / Math.Abs(dy);
+            int steps = 0; dx = 0; dy = 0;
+            while (new Vector2(dx, dy).Length() <= d) {
+                action(start + new Vector2I(dx, dy));
+                steps++;
+                if (steps == interval) {
+                    steps = 0;
+                    if (reciprocal) dy += uy;
+                    else dx += ux;
+                }
+                if (reciprocal) dx += ux;
+                else dy += uy;
+            }
+            
+            if (steps == 0) {
+                if (reciprocal) dy -= uy;
+                else dx -= ux;
+            }
+            if (reciprocal) dx -= ux;
+            else dy -= uy;
+            return start + new Vector2I(dx, dy);
+        }
+
+        private static (int, bool) GetSnappedSlope(float m) {
+            int candidateInt = (int)MathF.Round(m);
+            
+            float reciprocal = 1f/m;
+            int reciprocalRounded = (int)MathF.Round(reciprocal);
+            float candidateRecip = reciprocalRounded != 0 ? 1f/reciprocalRounded : 0;
+            
+            float diffInt = MathF.Abs(MathF.Atan(m) - MathF.Atan(candidateInt));
+            float diffRecip = MathF.Abs(MathF.Atan(m) - MathF.Atan(candidateRecip));
+            int choice = diffRecip < diffInt ? reciprocalRounded : candidateInt;
+            return (Math.Abs(choice), diffRecip < diffInt);
         }
  
         public static void ApplyLineAction(Vector2I start, Vector2I end, int radius, PixelAction action) {

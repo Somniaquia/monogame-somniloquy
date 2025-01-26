@@ -64,6 +64,12 @@ namespace Somniloquy {
                 PaintPixel(position, color, opacity, chain);
             });
         }
+        
+        public void PaintSnappedLine(Vector2I start, Vector2I end, Color color, float opacity, int width = 0, CommandChain chain = null) {
+            PixelActions.ApplySnappedLineAction(start, end, width, (Vector2I position) => {
+                PaintPixel(position, color, opacity, chain);
+            });
+        }
 
         public void PaintCircle(Vector2I center, int radius, Color color, float opacity, bool filled = true, CommandChain chain = null) {
             PixelActions.ApplyCircleAction(center, radius, filled, (Vector2I position) => {

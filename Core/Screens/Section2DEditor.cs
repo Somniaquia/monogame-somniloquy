@@ -21,7 +21,8 @@ namespace Somniloquy {
         private int currentBrushIndex;
         public Brush Brush => Brush.BrushTypes[currentBrushIndex];
 
-        public Vector2? PreviousMouseLocation;
+        public PaintModeState PaintModeState = PaintModeState.Idle;
+        public Vector2? PreviousGlobalMousePos;
 
         public List<Keybind> GlobalKeybinds = new();
 
@@ -42,16 +43,13 @@ namespace Somniloquy {
             
             GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.LeftAlt, _ => SelectLayerUnderMouse(), TriggerOnce.False));
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.LeftShift }, new object[] { Keys.LeftControl }, _ => DrawRectangle(), _ => PostRectangle(), TriggerOnce.False));
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.LeftControl}, new object[] { Keys.LeftShift }, _ => DrawLine(), _ => PostLine(), TriggerOnce.False));
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.LeftShift, Keys.LeftControl }, new object[] { },  _ => DrawLine(true), _ => PostLine(), TriggerOnce.False));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.LeftControl}, new object[] { }, _ => DrawLine(), _ => PostLine(), TriggerOnce.False));
 
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { MouseButtons.LeftButton }, _ => HandleLeftClick(), TriggerOnce.False));
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { MouseButtons.RightButton }, _ => HandleRightClick(), TriggerOnce.False));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { MouseButtons.LeftButton }, new object[] { Keys.LeftShift, Keys.LeftControl }, _ => HandleLeftClick(), TriggerOnce.False));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { MouseButtons.RightButton }, new object[] { Keys.LeftShift, Keys.LeftControl }, _ => HandleRightClick(), TriggerOnce.False));
 
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.Z}, new object[] {Keys.LeftShift, MouseButtons.LeftButton}, _ => CommandManager.Undo(), TriggerOnce.Block, true));
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.LeftShift, Keys.Z}, new object[] {MouseButtons.LeftButton}, _ => CommandManager.Redo(), TriggerOnce.Block, true));
-
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.S}, _ => Save(), TriggerOnce.True, true));
 
             ColorPicker = new ColorPicker(new Rectangle(SQ.WindowSize.X - 264, SQ.WindowSize.Y - 264, 256, 256), this);
             LayerTable.Initialize();
@@ -111,23 +109,40 @@ namespace Somniloquy {
         }
 
         public void DrawRectangle() {
-            if (PreviousMouseLocation is null) PreviousMouseLocation = Screen.Camera.GlobalMousePos;
+            if (PreviousGlobalMousePos is null) PreviousGlobalMousePos = Screen.Camera.GlobalMousePos;
+            PaintModeState = PaintModeState.Rectangle;
 
+            if (InputManager.IsMouseButtonPressed(MouseButtons.LeftButton)) {
+                if (PreviousGlobalMousePos is null) return;
+                ((PaintableLayer2D)SelectedLayer).PaintRectangle((Vector2I)PreviousGlobalMousePos, (Vector2I)Screen.Camera.GlobalMousePos, SelectedColor, 1f, true, CommandManager.AddCommandChain(new CommandChain()));
+                PreviousGlobalMousePos = Screen.Camera.GlobalMousePos;
+            }
+        }
+
+        public void DrawLine() {
+            if (PreviousGlobalMousePos is null) PreviousGlobalMousePos = Screen.Camera.GlobalMousePos;
+            PaintModeState = PaintModeState.Line;
+
+            if (InputManager.IsMouseButtonPressed(MouseButtons.LeftButton)) {
+                if (PreviousGlobalMousePos is null) return;
+                if (InputManager.IsKeyDown(Keys.LeftShift)) {
+                    ((PaintableLayer2D)SelectedLayer).PaintSnappedLine((Vector2I)PreviousGlobalMousePos, (Vector2I)Screen.Camera.GlobalMousePos, SelectedColor, 1f, 0, CommandManager.AddCommandChain(new CommandChain()));
+                    PreviousGlobalMousePos = PixelActions.ApplySnappedLineAction((Vector2I)PreviousGlobalMousePos, (Vector2I)Screen.Camera.GlobalMousePos, 0, _ => { });
+                } else {
+                    ((PaintableLayer2D)SelectedLayer).PaintLine((Vector2I)PreviousGlobalMousePos, (Vector2I)Screen.Camera.GlobalMousePos, SelectedColor, 1f, 0, CommandManager.AddCommandChain(new CommandChain()));
+                    PreviousGlobalMousePos = Screen.Camera.GlobalMousePos;
+                }
+            }
         }
 
         public void PostRectangle() {
-            PreviousMouseLocation = null;
-            
-        }
-
-        public void DrawLine(bool snap = false) {
-            if (PreviousMouseLocation is null) PreviousMouseLocation = Screen.Camera.GlobalMousePos;
-
+            PreviousGlobalMousePos = null;
+            PaintModeState = PaintModeState.Idle;
         }
 
         public void PostLine() {
-            PreviousMouseLocation = null;
-
+            PreviousGlobalMousePos = null;
+            PaintModeState = PaintModeState.Idle;
         }
 
         public void HandleLeftClick() {
@@ -193,6 +208,19 @@ namespace Somniloquy {
             }
 
             if (Focused) Screen.Camera.DrawPoint((Vector2I)Screen.Camera.GlobalMousePos, SelectedColor * 0.5f);
+            
+            if (PreviousGlobalMousePos is not null) {
+                if (PaintModeState == PaintModeState.Line) {
+                    if (InputManager.IsKeyDown(Keys.LeftShift)) {
+                        PixelActions.ApplySnappedLineAction((Vector2I)PreviousGlobalMousePos, (Vector2I)Screen.Camera.GlobalMousePos, 0, (pos) => Screen.Camera.SB.Draw(SQ.SB.Pixel, pos, SelectedColor * 0.5f));
+                    } else {
+                        PixelActions.ApplyLineAction((Vector2I)PreviousGlobalMousePos, (Vector2I)Screen.Camera.GlobalMousePos, 0, (pos) => Screen.Camera.SB.Draw(SQ.SB.Pixel, pos, SelectedColor * 0.5f));
+                    }
+                } else if (PaintModeState == PaintModeState.Rectangle) {
+                    PixelActions.ApplyRectangleAction((Vector2I)PreviousGlobalMousePos, (Vector2I)Screen.Camera.GlobalMousePos, true, (pos) => Screen.Camera.SB.Draw(SQ.SB.Pixel, pos, SelectedColor * 0.5f));
+                }
+            }
+
             Screen.Camera.SB.End();
             
             if (SelectedLayer is TileLayer2D tileLayer) {
