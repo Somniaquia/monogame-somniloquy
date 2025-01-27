@@ -45,7 +45,7 @@ namespace Somniloquy {
 
             GDM = new GraphicsDeviceManager(this) {
                 PreferredBackBufferWidth = GetSystemMetrics(0), // SM_CXSCREEN
-                PreferredBackBufferHeight = GetSystemMetrics(1) - 60, // SM_CYSCREEN
+                PreferredBackBufferHeight = GetSystemMetrics(1) - 72, // SM_CYSCREEN
                 // PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width, // SM_CXSCREEN
                 // PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height - 48, // SM_CYSCREEN
 

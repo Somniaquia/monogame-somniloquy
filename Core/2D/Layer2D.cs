@@ -37,12 +37,14 @@ namespace Somniloquy {
         public bool HasChildren() => Layers is not null && Layers.Count > 0;
 
         public virtual void Update() {
+            if (Layers is null) return;
             foreach (var layer in Layers) {
                 if (layer.Enabled) layer.Update();
             }
         }
 
         public virtual void Draw(Camera2D camera) {
+            if (Layers is null) return;
             foreach (var layer in Layers) {
                 if (layer.Enabled) layer.Draw(camera);
             }

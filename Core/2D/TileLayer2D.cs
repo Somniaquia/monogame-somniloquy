@@ -176,6 +176,8 @@
                     Chunks[chunkIndex].Draw(camera, new Rectangle(chunkPos, Vector2I.One * chunkLengthInPixels), Rectangle.Empty, Opacity);
                 }
             }
+
+            base.Draw(camera);
         }
     }
 

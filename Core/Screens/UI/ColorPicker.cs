@@ -1,13 +1,13 @@
 namespace Somniloquy {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
+    
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
     using Microsoft.Xna.Framework.Input;
 
     public class ColorPicker : BoxUI {
-        public Section2DEditor Screen;
+        public PaintMode PaintMode;
         public ColorOkHSL ColorOkHSL;
 
         public HuePicker HuePicker;
@@ -18,9 +18,9 @@ namespace Somniloquy {
 
         public bool Active = true;
 
-        public ColorPicker(Rectangle boundaries, Section2DEditor screen) : base(boundaries) {
+        public ColorPicker(Rectangle boundaries, PaintMode paintMode) : base(boundaries) {
             ChartDimensions = (Vector2I)(boundaries.Size.ToVector2() / 2);
-            Screen = screen; 
+            PaintMode = paintMode;
 
             HuePicker = new(new Rectangle(boundaries.X, boundaries.Y - 24, boundaries.Width, 10), this);
         }
@@ -82,26 +82,23 @@ namespace Somniloquy {
             if (Focused) {
                 if (InputManager.IsMouseButtonDown(MouseButtons.LeftButton)) {
                     PositionOnChart = Vector2.Transform(InputManager.GetMousePosition(), Transform);
-                    Screen.SelectedColor = FetchColor(PositionOnChart);
-                    ColorOkHSL = Screen.SelectedColor.ToOkHSL();
+                    PaintMode.SelectedColor = FetchColor(PositionOnChart);
+                    ColorOkHSL = PaintMode.SelectedColor.ToOkHSL();
                     CreateChartTexture();
                 }
             }
 
             PositionOnChart = new Vector2(MathF.Max(MathF.Min(1, PositionOnChart.X), 0), MathF.Max(MathF.Min(1, PositionOnChart.Y), 0));
             Hue = Util.PosMod(Hue, 255);
-            Screen.SelectedColor = FetchColor(PositionOnChart);
-            ColorOkHSL = Screen.SelectedColor.ToOkHSL();
+            PaintMode.SelectedColor = FetchColor(PositionOnChart);
+            ColorOkHSL = PaintMode.SelectedColor.ToOkHSL();
         }
 
         public override void Draw() {
-            if (Active && Screen.EditorMode == EditorMode.PaintMode) {
-                // int borderLength = (Focused) ? 8 : 6;
-                int borderLength = 4;
-                SQ.SB.DrawFilledRectangle(new RectangleF(Boundaries.X - borderLength, Boundaries.Y - borderLength, Boundaries.Width + borderLength * 2, Boundaries.Height + borderLength * 2), Screen.SelectedColor);
-                SQ.SB.Draw(ChartTexture, (Rectangle)Boundaries, Color.White);
-                SQ.SB.DrawCircle((Vector2I)(new Vector2(Boundaries.X, Boundaries.Y) + new Vector2(PositionOnChart.X * Boundaries.Width, PositionOnChart.Y * Boundaries.Height)), 8, Util.InvertColor(Screen.SelectedColor), true);
-            }
+            int borderLength = 4;
+            SQ.SB.DrawFilledRectangle(new RectangleF(Boundaries.X - borderLength, Boundaries.Y - borderLength, Boundaries.Width + borderLength * 2, Boundaries.Height + borderLength * 2), PaintMode.SelectedColor);
+            SQ.SB.Draw(ChartTexture, (Rectangle)Boundaries, Color.White);
+            SQ.SB.DrawCircle((Vector2I)(new Vector2(Boundaries.X, Boundaries.Y) + new Vector2(PositionOnChart.X * Boundaries.Width, PositionOnChart.Y * Boundaries.Height)), 8, Util.InvertColor(PaintMode.SelectedColor), true);
         }
     }
 
@@ -135,12 +132,10 @@ namespace Somniloquy {
         }
 
         public override void Draw() {
-            if (ColorPicker.Active && ColorPicker.Screen.EditorMode == EditorMode.PaintMode) {
-                int borderLength = 4;
-                SQ.SB.DrawFilledRectangle(new RectangleF(Boundaries.X - borderLength, Boundaries.Y - borderLength, Boundaries.Width + borderLength * 2, Boundaries.Height + borderLength * 2), ColorPicker.Screen.SelectedColor);
-                SQ.SB.Draw(BarTexture, (Rectangle)Boundaries, Color.White);
-                SQ.SB.DrawCircle((Vector2I)(new Vector2(Boundaries.X, Boundaries.Y) + new Vector2(ColorPicker.Hue / 255f * Boundaries.Width, Boundaries.Height / 2)), 8, Util.InvertColor(new ColorOkHSL((byte)ColorPicker.Hue, 255, 255).ToRGB()), true);
-            }
+            int borderLength = 4;
+            SQ.SB.DrawFilledRectangle(new RectangleF(Boundaries.X - borderLength, Boundaries.Y - borderLength, Boundaries.Width + borderLength * 2, Boundaries.Height + borderLength * 2), ColorPicker.PaintMode.SelectedColor);
+            SQ.SB.Draw(BarTexture, (Rectangle)Boundaries, Color.White);
+            SQ.SB.DrawCircle((Vector2I)(new Vector2(Boundaries.X, Boundaries.Y) + new Vector2(ColorPicker.Hue / 255f * Boundaries.Width, Boundaries.Height / 2)), 8, Util.InvertColor(new ColorOkHSL((byte)ColorPicker.Hue, 255, 255).ToRGB()), true);
         }
     }
 }

@@ -22,7 +22,7 @@ namespace Somniloquy {
             Section.Screen = this;
 
             Editor = new(this);
-            Camera.MaxZoom = 16f;
+            Camera.MaxZoom = 32f;
             Camera.MinZoom = 1 / 4f;
         }
 

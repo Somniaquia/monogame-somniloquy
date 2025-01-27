@@ -7,8 +7,8 @@ namespace Somniloquy {
     public class PixelActions {
         public static void ApplyRectangleAction(Vector2I start, Vector2I end, bool filled, PixelAction action) {
             if (filled) {
-                for (int y = Util.Min(start.Y, end.Y); y < Util.Max(start.Y, end.Y); y++) {
-                    for (int x = Util.Min(start.X, end.X); x < Util.Max(start.X, end.X); x++) {
+                for (int y = Util.Min(start.Y, end.Y); y <= Util.Max(start.Y, end.Y); y++) {
+                    for (int x = Util.Min(start.X, end.X); x <= Util.Max(start.X, end.X); x++) {
                         action(new Vector2I(x, y));
                     }
                 }
@@ -48,7 +48,7 @@ namespace Somniloquy {
                 if (reciprocal) dx += ux;
                 else dy += uy;
             }
-            
+
             if (steps == 0) {
                 if (reciprocal) dy -= uy;
                 else dx -= ux;

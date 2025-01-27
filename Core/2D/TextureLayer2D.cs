@@ -136,6 +136,8 @@ namespace Somniloquy {
                     camera.Draw(Chunks[chunkIndex].Texture, (Rectangle)new RectangleF(xLeft, yTop, xRight - xLeft, yBottom - yTop), (Rectangle)new RectangleF(xLeft - chunkPos.X, yTop - chunkPos.Y , xRight - xLeft, yBottom - yTop), Color.White * Opacity);
                 }
             }
+
+            base.Draw(camera);
         }
     }
     
