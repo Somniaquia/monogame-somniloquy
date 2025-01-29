@@ -32,6 +32,8 @@ namespace Somniloquy {
             GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.OemCloseBrackets, _ => RotateScreen(0.05f), TriggerOnce.False));
             
             GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.LeftAlt, _ => SelectLayerUnderMouse(), TriggerOnce.False));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.H }, _ => SelectedLayer?.ToggleHide(), TriggerOnce.True));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.S }, _ => { Screen.Section.Root.ToggleHide(); SelectedLayer?.Show(); }, TriggerOnce.True));
 
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.Z}, new object[] {Keys.LeftShift, MouseButtons.LeftButton}, _ => CommandManager.Undo(), TriggerOnce.Block, true));
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] {Keys.LeftControl, Keys.LeftShift, Keys.Z}, new object[] {MouseButtons.LeftButton}, _ => CommandManager.Redo(), TriggerOnce.Block, true));
@@ -115,9 +117,7 @@ namespace Somniloquy {
         }
 
         public override void Draw() {
-            foreach (var layer in Screen.Section.Root.Layers) {
-                if (layer.Enabled) layer.Draw(Screen.Camera);
-            }
+            Screen.Section.Draw(Screen.Camera);
 
             EditorMode.Draw();
             Screen.Camera.SB.End();

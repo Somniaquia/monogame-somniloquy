@@ -20,7 +20,7 @@
 //             Vector2I startTilePosition = CurrentLayer.GetTilePosition(Util.ToVector2I(CollisionBounds.Center));
 //             Vector2I endTilePosition = CurrentLayer.GetTilePosition(potentialPosition.ToVector2I());
 
-//             var pair = Util.SortVector2Is(startTilePosition, endTilePosition);
+//             var pair = Vector2Extensions.Rationalize(startTilePosition, endTilePosition);
 //             startTilePosition = pair.Item1 - new Vector2I(1, 1);
 //             endTilePosition = pair.Item2 + new Vector2I(1, 1);
 

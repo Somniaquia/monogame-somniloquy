@@ -127,18 +127,24 @@ namespace Somniloquy {
     //     }
     // }
 
-    // public class BlurBrush : Brush {
-    //     public override void Paint(IPaintableLayer2D layer, bool initializingPress, Color color, Camera2D camera) {
-    //         if (initializingPress) {   
-    //             if (CurrentCommandChain is not null) CurrentCommandChain.AffectedPixels = null;
-    //             CurrentCommandChain = CommandManager.AddCommandChain(new CommandChain());
-    //         }
-
-    //         int radius = (int)(InputManager.GetPenPressure() * 32 / camera.Zoom) + 1;
-    //         int kernelRadius = (int)(InputManager.GetPenPressure() * 32 / camera.Zoom) + 1;
-    //         Blur(layer, radius, kernelRadius, camera);
+    // public class GradientBrush : Brush {
+    //     public override void Paint(PaintableLayer2D layer, bool initializingPress, Color color, Camera2D camera) {
+            
     //     }
     // }
+
+    public class BlurBrush : Brush {
+        public override void Paint(PaintableLayer2D layer, bool initializingPress, Color color, Camera2D camera) {
+            if (initializingPress) {   
+                if (CurrentCommandChain is not null) CurrentCommandChain.AffectedPixels = null;
+                CurrentCommandChain = CommandManager.AddCommandChain(new CommandChain());
+            }
+
+            int radius = (int)(InputManager.GetPenPressure() * 32 / camera.Zoom) + 1;
+            int kernelRadius = (int)(InputManager.GetPenPressure() * 32 / camera.Zoom) + 1;
+            Blur(layer, radius, kernelRadius, camera);
+        }
+    }
 
     // public class PatternBrush : Brush {
     //     public override void Paint(IPaintableLayer2D paintableLayer, bool initializingPress, Color color, Camera2D camera) {

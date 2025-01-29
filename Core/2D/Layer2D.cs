@@ -27,11 +27,26 @@ namespace Somniloquy {
         }
 
         public Layer2D InsertLayer(int index, Layer2D layer) {
-            Layers ??= new();
+        Layers ??= new();
             Layers.Insert(index, layer);
             layer.Section = Section;
             layer.Parent = this;
             return layer;
+        }
+
+        public void ToggleHide() {
+            if (Enabled) Hide();
+            else Show();
+        }
+
+        public void Hide() {
+            Enabled = false;
+            Layers?.ForEach(layer => layer.Hide());
+        }
+
+        public void Show() {
+            Enabled = true;
+            Layers?.ForEach(layer => layer.Show());
         }
 
         public bool HasChildren() => Layers is not null && Layers.Count > 0;
@@ -39,14 +54,14 @@ namespace Somniloquy {
         public virtual void Update() {
             if (Layers is null) return;
             foreach (var layer in Layers) {
-                if (layer.Enabled) layer.Update();
+                layer.Update();
             }
         }
 
         public virtual void Draw(Camera2D camera) {
             if (Layers is null) return;
             foreach (var layer in Layers) {
-                if (layer.Enabled) layer.Draw(camera);
+                layer.Draw(camera);
             }
         }
     }
@@ -79,8 +94,37 @@ namespace Somniloquy {
             });
         }
 
-        // TODO: Paint Fill
+        public void Fill(Vector2I startPos, Color color) {
+            Color? startColor = GetColor(startPos);
 
+            var stack = new Stack<Vector2I>();
+            var lookedPositions = new HashSet<Vector2I>();
+            var chain = new CommandChain();
+
+            stack.Push(startPos);
+            lookedPositions.Add(startPos);
+
+            while (stack.Count > 0 && lookedPositions.Count < 1000000) {
+                var pos = stack.Pop();
+                PaintPixel(pos, color, 1f, chain);
+
+                foreach (var checkPos in new Vector2I[] { new(1, 0), new(-1, 0), new(0, 1), new(0, -1) }) {
+                    var newPos = pos + checkPos;
+                    if (!lookedPositions.Contains(newPos) && GetColor(newPos) == startColor) {
+                        lookedPositions.Add(newPos);
+                        stack.Push(newPos);
+                    }
+                }
+            }
+
+            if (lookedPositions.Count >= 1000000) {
+                chain.Undo();
+                DebugInfo.AddTempLine(() => "Overload: Cancelled fill operation.", 5);
+            } else {
+                CommandManager.AddCommandChain(chain);
+            }
+        }
+        
         public virtual Color? GetColor(Vector2I position) { return null; }
 
         public virtual void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain = null) { }

@@ -44,19 +44,6 @@ namespace Somniloquy {
         public static Color InvertColor(Color color) {
             return new Color(255 - color.R, 255 - color.G, 255 - color.B);
         }
-    
-        public static RectangleF FixRectangle(RectangleF rectangle) {
-            if (rectangle.Width < 0) {
-                rectangle.X += rectangle.Width;
-                rectangle.Width = -rectangle.Width;
-            }
-
-            if (rectangle.Height < 0) {
-                rectangle.Y += rectangle.Height;
-                rectangle.Height = -rectangle.Height;
-            }
-            return rectangle;
-        }
 
         public static RectangleF ShrinkRectangle(RectangleF rectangle, Sides amount) {
             return new RectangleF(rectangle.X + amount.Left, rectangle.Y + amount.Up, rectangle.Width - amount.Left - amount.Right, rectangle.Height - amount.Up - amount.Down);
@@ -64,13 +51,6 @@ namespace Somniloquy {
         
         public static RectangleF ExpandRectangle(RectangleF rectangle, Sides amount) {
             return new RectangleF(rectangle.X - amount.Left, rectangle.Y - amount.Up, rectangle.Width + amount.Left + amount.Right, rectangle.Height + amount.Up + amount.Down);
-        }
-
-        public static (Vector2I, Vector2I) SortVector2Is(Vector2I Vector2I1, Vector2I Vector2I2) {
-            if (Vector2I1.X > Vector2I2.X) (Vector2I2.X, Vector2I1.X) = (Vector2I1.X, Vector2I2.X);
-            if (Vector2I1.Y > Vector2I2.Y) (Vector2I2.Y, Vector2I1.Y) = (Vector2I1.Y, Vector2I2.Y);
-
-            return (Vector2I1, Vector2I2);
         }
 
         public static Vector2I AnchorVector2I(Vector2I Vector2I, Vector2I anchor) {

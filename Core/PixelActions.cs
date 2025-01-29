@@ -6,9 +6,10 @@ namespace Somniloquy {
 
     public class PixelActions {
         public static void ApplyRectangleAction(Vector2I start, Vector2I end, bool filled, PixelAction action) {
+            (start, end) = Vector2Extensions.Rationalize(start, end);
             if (filled) {
-                for (int y = Util.Min(start.Y, end.Y); y <= Util.Max(start.Y, end.Y); y++) {
-                    for (int x = Util.Min(start.X, end.X); x <= Util.Max(start.X, end.X); x++) {
+                for (int y = start.Y; y <= end.Y; y++) {
+                    for (int x = start.X; x <= end.X; x++) {
                         action(new Vector2I(x, y));
                     }
                 }

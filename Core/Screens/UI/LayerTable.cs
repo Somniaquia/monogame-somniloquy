@@ -158,14 +158,13 @@ namespace Somniloquy {
                 Layer.Opacity = 1f;
             } else if (Focused) {
                 ((BoxUIDefaultRenderer)Renderer).Color = Color.Yellow;
-                // Layer.Opacity = 0.5f;
-                // Layer.Draw(Layer.Section.Screen.Camera);
+                Layer.Opacity = 0.2f;
 
                 if (InputManager.IsKeyDown(Keys.LeftAlt)) {
                     Screen.Editor.SelectedLayer = Layer;
                 } else {
                     if (InputManager.IsMouseButtonPressed(MouseButtons.LeftButton)) {
-                        Layer.Enabled = !Layer.Enabled;
+                        Layer.ToggleHide();
                     }
                 }
             } else if (Layer.Enabled) {

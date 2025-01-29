@@ -124,21 +124,53 @@
             return Chunks[chunkPosition].GetTile(tilePosInChunk);
         }
 
-        // public Tile2D[,] GetTiles(Vector2I tilePosition1, Vector2I tilePosition2) {
-        //     var (Vector2I1, Vector2I2) = Util.SortVector2Is(tilePosition1, tilePosition2);
-        //     int columns = Vector2I2.X - Vector2I1.X + 1;
-        //     int rows = Vector2I2.Y - Vector2I1.Y + 1;
+        public Tile2D[,] GetTiles(Vector2I tilePosition1, Vector2I tilePosition2) {
+            var (Vector2I1, Vector2I2) = Vector2Extensions.Rationalize(tilePosition1, tilePosition2);
+            int columns = Vector2I2.X - Vector2I1.X + 1;
+            int rows = Vector2I2.Y - Vector2I1.Y + 1;
 
-        //     var tiles = new Tile2D[columns, rows];
+            var tiles = new Tile2D[columns, rows];
 
-        //     for (int y = 0; y < rows; y++) {
-        //         for (int x = 0; x < columns; x++) {
-        //             tiles[x, y] = GetTile(Vector2I1 + new Vector2I(x, y));
-        //         }
-        //     }
+            for (int y = 0; y < rows; y++) {
+                for (int x = 0; x < columns; x++) {
+                    tiles[x, y] = GetTile(Vector2I1 + new Vector2I(x, y));
+                }
+            }
 
-        //     return tiles;
-        // }
+            return tiles;
+        }
+
+        public void FillTile(Vector2I startPos, Tile2D[,] tiles) {
+            Tile2D startTile = GetTile(startPos);
+
+            var stack = new Stack<Vector2I>();
+            var lookedPositions = new HashSet<Vector2I>();
+            var chain = new CommandChain();
+
+            stack.Push(startPos);
+            lookedPositions.Add(startPos);
+
+            while (stack.Count > 0 && lookedPositions.Count < 1000000) {
+                var pos = stack.Pop();
+                var displacement = pos - startPos;
+                SetTile(pos, tiles[Util.PosMod(displacement.X, tiles.GetLength(0)), Util.PosMod(displacement.Y, tiles.GetLength(1))], chain);
+
+                foreach (var checkPos in new Vector2I[] { new(1, 0), new(-1, 0), new(0, 1), new(0, -1) }) {
+                    var newPos = pos + checkPos;
+                    if (!lookedPositions.Contains(newPos) && GetTile(newPos) == startTile) {
+                        lookedPositions.Add(newPos);
+                        stack.Push(newPos);
+                    }
+                }
+            }
+
+            if (lookedPositions.Count >= 1000000) {
+                chain.Undo();
+                DebugInfo.AddTempLine(() => "Overload: Cancelled fill operation.", 5);
+            } else {
+                CommandManager.AddCommandChain(chain);
+            }
+        }
 
         #endregion
 
@@ -153,28 +185,30 @@
         }
 
         public override void Draw(Camera2D camera) {
-            var chunkLengthInPixels = ChunkLength * TileLength;
+            if (Opacity > 0f) {
+                var chunkLengthInPixels = ChunkLength * TileLength;
 
-            Vector2 topLeft = camera.VisibleBounds.TopLeft() - new Vector2(1);
-            Vector2 bottomRight = camera.VisibleBounds.BottomRight() + new Vector2(1);
-            Vector2I topLeftChunk = new((int)(topLeft.X / chunkLengthInPixels) - 1, (int)(topLeft.Y / chunkLengthInPixels) - 1);
-            Vector2I bottomRightChunk = new((int)(bottomRight.X / chunkLengthInPixels) + 1, (int)(bottomRight.Y / chunkLengthInPixels) + 1);
+                Vector2 topLeft = camera.VisibleBounds.TopLeft() - new Vector2(1);
+                Vector2 bottomRight = camera.VisibleBounds.BottomRight() + new Vector2(1);
+                Vector2I topLeftChunk = new((int)(topLeft.X / chunkLengthInPixels) - 1, (int)(topLeft.Y / chunkLengthInPixels) - 1);
+                Vector2I bottomRightChunk = new((int)(bottomRight.X / chunkLengthInPixels) + 1, (int)(bottomRight.Y / chunkLengthInPixels) + 1);
 
-            for (int y = topLeftChunk.Y; y < bottomRightChunk.Y; y++) {
-                for (int x = topLeftChunk.X; x < bottomRightChunk.X; x++) {
-                    var chunkIndex = new Vector2I(x, y);
-                    if (!Chunks.ContainsKey(chunkIndex)) continue;
-                    
-                    var chunkPos = chunkIndex * chunkLengthInPixels;
-                    var nextChunkPos = (chunkIndex + new Vector2I(1, 1)) * chunkLengthInPixels;
+                for (int y = topLeftChunk.Y; y < bottomRightChunk.Y; y++) {
+                    for (int x = topLeftChunk.X; x < bottomRightChunk.X; x++) {
+                        var chunkIndex = new Vector2I(x, y);
+                        if (!Chunks.ContainsKey(chunkIndex)) continue;
+                        
+                        var chunkPos = chunkIndex * chunkLengthInPixels;
+                        var nextChunkPos = (chunkIndex + new Vector2I(1, 1)) * chunkLengthInPixels;
 
-                    // float xLeft = MathF.Min(MathF.Max(topLeft.X, chunkPos.X), bottomRight.X);
-                    // float xRight = MathF.Max(MathF.Min(bottomRight.X, nextChunkPos.X), topLeft.X);
-                    // float yTop = MathF.Min(MathF.Max(topLeft.Y, chunkPos.Y), bottomRight.Y);
-                    // float yBottom = MathF.Max(MathF.Min(bottomRight.Y, nextChunkPos.Y), topLeft.Y);
+                        // float xLeft = MathF.Min(MathF.Max(topLeft.X, chunkPos.X), bottomRight.X);
+                        // float xRight = MathF.Max(MathF.Min(bottomRight.X, nextChunkPos.X), topLeft.X);
+                        // float yTop = MathF.Min(MathF.Max(topLeft.Y, chunkPos.Y), bottomRight.Y);
+                        // float yBottom = MathF.Max(MathF.Min(bottomRight.Y, nextChunkPos.Y), topLeft.Y);
 
-                    // Chunks[chunkIndex].Draw(camera, (Rectangle)new RectangleF(xLeft, yTop, xRight - xLeft, yBottom - yTop), (Rectangle)new RectangleF(xLeft - chunkPos.X, yTop - chunkPos.Y , xRight - xLeft, yBottom - yTop), 1f);
-                    Chunks[chunkIndex].Draw(camera, new Rectangle(chunkPos, Vector2I.One * chunkLengthInPixels), Rectangle.Empty, Opacity);
+                        // Chunks[chunkIndex].Draw(camera, (Rectangle)new RectangleF(xLeft, yTop, xRight - xLeft, yBottom - yTop), (Rectangle)new RectangleF(xLeft - chunkPos.X, yTop - chunkPos.Y , xRight - xLeft, yBottom - yTop), 1f);
+                        Chunks[chunkIndex].Draw(camera, new Rectangle(chunkPos, Vector2I.One * chunkLengthInPixels), Rectangle.Empty, Opacity);
+                    }
                 }
             }
 

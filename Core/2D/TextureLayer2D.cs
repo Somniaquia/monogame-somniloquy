@@ -115,25 +115,27 @@ namespace Somniloquy {
         }
 
         public override void Draw(Camera2D camera) {
-            Vector2 topLeft = camera.VisibleBounds.TopLeft() - new Vector2(1);
-            Vector2 bottomRight = camera.VisibleBounds.BottomRight() + new Vector2(1);
-            Vector2I topLeftChunk = new((int)(topLeft.X / ChunkLength) - 1, (int)(topLeft.Y / ChunkLength) - 1);
-            Vector2I bottomRightChunk = new((int)(bottomRight.X / ChunkLength) + 1, (int)(bottomRight.Y / ChunkLength) + 1);
+            if (Opacity > 0f) {
+                Vector2 topLeft = camera.VisibleBounds.TopLeft() - new Vector2(1);
+                Vector2 bottomRight = camera.VisibleBounds.BottomRight() + new Vector2(1);
+                Vector2I topLeftChunk = new((int)(topLeft.X / ChunkLength) - 1, (int)(topLeft.Y / ChunkLength) - 1);
+                Vector2I bottomRightChunk = new((int)(bottomRight.X / ChunkLength) + 1, (int)(bottomRight.Y / ChunkLength) + 1);
 
-            for (int y = topLeftChunk.Y; y < bottomRightChunk.Y; y++) {
-                for (int x = topLeftChunk.X; x < bottomRightChunk.X; x++) {
-                    var chunkIndex = new Vector2I(x, y);
-                    var chunkPos = chunkIndex * ChunkLength;
-                    var nextChunkPos = (chunkIndex + new Vector2I(1, 1)) * ChunkLength;
+                for (int y = topLeftChunk.Y; y < bottomRightChunk.Y; y++) {
+                    for (int x = topLeftChunk.X; x < bottomRightChunk.X; x++) {
+                        var chunkIndex = new Vector2I(x, y);
+                        var chunkPos = chunkIndex * ChunkLength;
+                        var nextChunkPos = (chunkIndex + new Vector2I(1, 1)) * ChunkLength;
 
-                    float xLeft = MathF.Min(MathF.Max(topLeft.X, chunkPos.X), bottomRight.X);
-                    float xRight = MathF.Max(MathF.Min(bottomRight.X, nextChunkPos.X), topLeft.X);
-                    float yTop = MathF.Min(MathF.Max(topLeft.Y, chunkPos.Y), bottomRight.Y);
-                    float yBottom = MathF.Max(MathF.Min(bottomRight.Y, nextChunkPos.Y), topLeft.Y);
-                    
-                    if (!Chunks.ContainsKey(chunkIndex)) continue;
+                        float xLeft = MathF.Min(MathF.Max(topLeft.X, chunkPos.X), bottomRight.X);
+                        float xRight = MathF.Max(MathF.Min(bottomRight.X, nextChunkPos.X), topLeft.X);
+                        float yTop = MathF.Min(MathF.Max(topLeft.Y, chunkPos.Y), bottomRight.Y);
+                        float yBottom = MathF.Max(MathF.Min(bottomRight.Y, nextChunkPos.Y), topLeft.Y);
+                        
+                        if (!Chunks.ContainsKey(chunkIndex)) continue;
 
-                    camera.Draw(Chunks[chunkIndex].Texture, (Rectangle)new RectangleF(xLeft, yTop, xRight - xLeft, yBottom - yTop), (Rectangle)new RectangleF(xLeft - chunkPos.X, yTop - chunkPos.Y , xRight - xLeft, yBottom - yTop), Color.White * Opacity);
+                        camera.Draw(Chunks[chunkIndex].Texture, (Rectangle)new RectangleF(xLeft, yTop, xRight - xLeft, yBottom - yTop), (Rectangle)new RectangleF(xLeft - chunkPos.X, yTop - chunkPos.Y , xRight - xLeft, yBottom - yTop), Color.White * Opacity);
+                    }
                 }
             }
 

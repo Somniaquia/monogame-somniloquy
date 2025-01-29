@@ -69,5 +69,23 @@ namespace Somniloquy {
                 return start ? rectangle.Y : rectangle.Y + rectangle.Height;
             }
         }
+
+        public static Rectangle Rationalize(Rectangle rectangle) {
+            if (rectangle.Width < 0) {
+                rectangle = new(rectangle.X + rectangle.Width, rectangle.Y, -rectangle.Width, rectangle.Height);
+            } if (rectangle.Height < 0) {
+                rectangle = new(rectangle.X, rectangle.Y + rectangle.Height, rectangle.Width, -rectangle.Height);
+            }
+            return rectangle;
+        }
+
+        public static RectangleF Rationalize(RectangleF rectangle) {
+            if (rectangle.Width < 0) {
+                rectangle = new(rectangle.X + rectangle.Width, rectangle.Y, -rectangle.Width, rectangle.Height);
+            } if (rectangle.Height < 0) {
+                rectangle = new(rectangle.X, rectangle.Y + rectangle.Height, rectangle.Width, -rectangle.Height);
+            }
+            return rectangle;
+        }
     }
 }
