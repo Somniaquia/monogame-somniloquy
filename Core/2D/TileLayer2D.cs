@@ -119,7 +119,8 @@
         public Tile2D GetTile(Vector2I tilePosition) {
             var chunkPosition = GetChunkPosition(tilePosition);
             var tilePosInChunk = GetTilePositionInChunk(tilePosition);
-
+            if (!Chunks.ContainsKey(chunkPosition)) return null;
+            
             return Chunks[chunkPosition].GetTile(tilePosInChunk);
         }
 

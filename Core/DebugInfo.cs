@@ -14,8 +14,13 @@ namespace Somniloquy {
             InputManager.RegisterKeybind(Keys.OemTilde, _ => Active = !Active, TriggerOnce.True);
         }
 
-        public static void Subscribe(Func<string> lineGenerator) {
+        public static Func<string> Subscribe(Func<string> lineGenerator) {
             lines.Add(lineGenerator);
+            return lineGenerator;
+        }
+
+        public static void Unsubscribe(Func<string> lineGenerator) {
+            lines.Remove(lineGenerator);
         }
 
         public static void AddTempLine(Func<string> lineGenerator, double time = -1) {

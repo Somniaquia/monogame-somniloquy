@@ -26,7 +26,7 @@ namespace Somniloquy {
         }
 
         public override void LoadContent() {
-            ChartTexture = new Texture2D(SQ.GD, ChartDimensions.X, ChartDimensions.Y); 
+            ChartTexture = new Texture2D(SQ.GD, ChartDimensions.X, ChartDimensions.Y);
             CreateChartTexture();
 
             HuePicker.LoadContent();

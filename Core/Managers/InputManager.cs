@@ -92,14 +92,14 @@ namespace Somniloquy {
             UpdateMouseState();
             UpdateTabletState();
 
-            foreach (var keybind in Keybinds) {
+            foreach (var keybind in Keybinds.ToList()) {
                 UpdateKeybindStatus(keybind);
                 if (keybind.Satisfied) { 
                     keybind.Action?.Invoke(); 
                 }
             }
 
-            foreach (var keybind in Keybinds) {
+            foreach (var keybind in Keybinds.ToList()) {
                 if (!keybind.Satisfied && keybind.PreviouslySatisfied) {
                     keybind.PostAction?.Invoke();
                 }

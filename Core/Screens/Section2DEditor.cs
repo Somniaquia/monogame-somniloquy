@@ -6,8 +6,6 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework.Graphics;
     using Microsoft.Xna.Framework.Input;
 
-    public enum PaintModeState { Idle, Rectangle, Line, Select }
-
     public class Section2DEditor : BoxUI {
         public Section2DScreen Screen;
         public EditorMode EditorMode;
@@ -18,6 +16,9 @@ namespace Somniloquy {
         public Section2DEditor(Section2DScreen screen) : base() {
             Screen = screen;
             Boundaries = screen.Boundaries;
+
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.F1, _ => { SwitchEditorMode(new PaintMode(Screen, this)); }, TriggerOnce.True));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.F2, _ => { SwitchEditorMode(new TileMode(Screen, this)); }, TriggerOnce.True));
 
             GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.W, _ => MoveScreen(new Vector2(0, -1)), TriggerOnce.False));
             GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.A, _ => MoveScreen(new Vector2(-1, 0)), TriggerOnce.False));
@@ -40,13 +41,17 @@ namespace Somniloquy {
             DebugInfo.Subscribe(() => $"Selected Layer: {SelectedLayer} - {SelectedLayer.Identifier}");
             DebugInfo.Subscribe(() => $"Undo: {CommandManager.UndoHistory.Count} Redo: {CommandManager.RedoHistory.Count}");
             SelectedLayer = Screen.Section.Root.Layers[0];
-
-            EditorMode = new PaintMode(Screen, this);
         }
 
         public override void LoadContent() {
             LayerTable.BuildUI();
-            EditorMode?.LoadContent();
+            SwitchEditorMode(new PaintMode(Screen, this));
+        }
+
+        public void SwitchEditorMode(EditorMode editorMode) {
+            EditorMode?.UnloadContent();
+            EditorMode = editorMode;
+            EditorMode.LoadContent();
         }
 
         public override void Update() {
@@ -114,6 +119,7 @@ namespace Somniloquy {
                 if (layer.Enabled) layer.Draw(Screen.Camera);
             }
 
+            EditorMode.Draw();
             Screen.Camera.SB.End();
             
             if (SelectedLayer is TileLayer2D tileLayer) {
@@ -155,8 +161,5 @@ namespace Somniloquy {
                 SQ.GD.DrawPrimitives(PrimitiveType.LineList, 0, verticesArray.Length / 2);
             }
         }
-    }
-    public class EditorTileMode {
-
     }
 }
