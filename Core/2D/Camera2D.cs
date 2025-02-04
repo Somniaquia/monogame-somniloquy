@@ -64,8 +64,7 @@ namespace Somniloquy {
                 Matrix.CreateTranslation(new Vector3(-CenterPosInWorld.X, -CenterPosInWorld.Y, 0)) *
                 Matrix.CreateRotationZ(Rotation) *
                 Matrix.CreateScale(new Vector3(Zoom, Zoom, 1)) *
-                Matrix.CreateTranslation(new Vector3(bounds.Width * 0.5f, bounds.Height * 0.5f, 0)
-            );
+                Matrix.CreateTranslation(new Vector3(bounds.Width * 0.5f, bounds.Height * 0.5f, 0));
             
             var topLeft = ToWorldPos(bounds.TopLeft());
             var topRight = ToWorldPos(bounds.TopRight());
@@ -93,7 +92,7 @@ namespace Somniloquy {
                 AverageMouseSpeed = currentMouseSpeed;
             }
         }
-
+        
         public Vector2 ToWorldPos(Vector2 screenPos) {
             return Vector2.Transform(screenPos, Matrix.Invert(Transform));
         }

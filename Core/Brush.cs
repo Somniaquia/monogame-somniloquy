@@ -36,7 +36,7 @@ namespace Somniloquy {
         public void Blur(PaintableLayer2D layer, int radius, int kernelRadius, Camera2D camera) {
             if (radius == 0 || kernelRadius == 0) return;
             float[,] kernel = Util.GetGaussianKernel(kernelRadius);
-            Vector2I mousePos = (Vector2I)camera.GlobalMousePos.Value;
+            Vector2I mousePos = (Vector2I)layer.ToLayerPos(camera.GlobalMousePos.Value);
 
             Color[,] newColors = new Color[2 * radius + 1, 2 * radius + 1];
             for (int x = -radius; x <= radius; x++) {
@@ -80,13 +80,13 @@ namespace Somniloquy {
             int penWidth = InputManager.GetPenPressure() != 0 ? (int)(InputManager.GetPenPressure() * 16 / camera.Zoom) : (int)(camera.AverageMouseSpeed * camera.Zoom / 1600);
             float penOpacity = 1;
 
-            if (initializingPress) {   
+            if (initializingPress) {
                 if (CurrentCommandChain is not null) CurrentCommandChain.AffectedPixels = null;
                 CurrentCommandChain = CommandManager.AddCommandChain(new CommandChain());
                 // (int)(InputManager.GetPenTilt().Length() * 5)
-                paintableLayer.PaintCircle((Vector2I)camera.GlobalMousePos.Value, penWidth, color, penOpacity, true, CurrentCommandChain);
+                paintableLayer.PaintCircle((Vector2I)paintableLayer.ToLayerPos(camera.GlobalMousePos.Value), penWidth, color, penOpacity, true, CurrentCommandChain);
             } else {
-                paintableLayer.PaintLine((Vector2I)camera.PreviousGlobalMousePos.Value, (Vector2I)camera.GlobalMousePos.Value, color, penOpacity, penWidth, CurrentCommandChain);
+                paintableLayer.PaintLine((Vector2I)paintableLayer.ToLayerPos(camera.PreviousGlobalMousePos.Value), (Vector2I)paintableLayer.ToLayerPos(camera.GlobalMousePos.Value), color, penOpacity, penWidth, CurrentCommandChain);
             }
 
             // Blur(paintableLayer, penWidth, penWidth, camera);
@@ -103,9 +103,9 @@ namespace Somniloquy {
                 if (CurrentCommandChain is not null) CurrentCommandChain.AffectedPixels = null;
                 CurrentCommandChain = CommandManager.AddCommandChain(new CommandChain());
                 // (int)(InputManager.GetPenTilt().Length() * 5)
-                paintableLayer.PaintCircle((Vector2I)camera.GlobalMousePos.Value, penWidth, color, penOpacity, true, CurrentCommandChain);
+                paintableLayer.PaintCircle((Vector2I)paintableLayer.ToLayerPos(camera.GlobalMousePos.Value), penWidth, color, penOpacity, true, CurrentCommandChain);
             } else {
-                paintableLayer.PaintLine((Vector2I)camera.PreviousGlobalMousePos.Value, (Vector2I)camera.GlobalMousePos.Value, color, penOpacity, penWidth, CurrentCommandChain);
+                paintableLayer.PaintLine((Vector2I)paintableLayer.ToLayerPos(camera.PreviousGlobalMousePos.Value), (Vector2I)paintableLayer.ToLayerPos(camera.GlobalMousePos.Value), color, penOpacity, penWidth, CurrentCommandChain);
             }
 
             // Blur(paintableLayer, penWidth, penWidth, camera);
@@ -120,9 +120,9 @@ namespace Somniloquy {
     //         if (initializingPress) {
     //             if (CurrentCommandChain is not null) CurrentCommandChain.AffectedPixels = null;
     //             CurrentCommandChain = CommandManager.AddCommandChain(new CommandChain());
-    //             paintableLayer.PaintCircle((Vector2I)camera.GlobalMousePos.Value, penWidth, color, penOpacity, true, CurrentCommandChain);
+    //             paintableLayer.PaintCircle((Vector2I)paintableLayer.ToLayerPos(camera.GlobalMousePos.Value), penWidth, color, penOpacity, true, CurrentCommandChain);
     //         } else {
-    //             paintableLayer.PaintLine((Vector2I)camera.PreviousGlobalMousePos.Value, (Vector2I)camera.GlobalMousePos.Value, color, penOpacity, penWidth, CurrentCommandChain);
+    //             paintableLayer.PaintLine((Vector2I)paintableLayer.ToLayerPos(camera.PreviousGlobalMousePos.Value), (Vector2I)paintableLayer.ToLayerPos(camera.GlobalMousePos.Value), color, penOpacity, penWidth, CurrentCommandChain);
     //         }
     //     }
     // }
@@ -157,9 +157,9 @@ namespace Somniloquy {
     //             if (CurrentCommandChain is not null) CurrentCommandChain.AffectedPixels = null;
     //             CurrentCommandChain = CommandManager.AddCommandChain(new CommandChain());
     //             // (int)(InputManager.GetPenTilt().Length() * 5)
-    //             paintableLayer.PaintCircle((Vector2I)camera.GlobalMousePos.Value, penWidth, color, penOpacity, true, CurrentCommandChain);
+    //             paintableLayer.PaintCircle((Vector2I)paintableLayer.ToLayerPos(camera.GlobalMousePos.Value), penWidth, color, penOpacity, true, CurrentCommandChain);
     //         } else {
-    //             paintableLayer.PaintLine((Vector2I)camera.PreviousGlobalMousePos.Value, (Vector2I)camera.GlobalMousePos.Value, color, penOpacity, penWidth, CurrentCommandChain);
+    //             paintableLayer.PaintLine((Vector2I)paintableLayer.ToLayerPos(camera.PreviousGlobalMousePos.Value), (Vector2I)paintableLayer.ToLayerPos(camera.GlobalMousePos.Value), color, penOpacity, penWidth, CurrentCommandChain);
     //         }
     //         CurrentCommandChain.AffectedPixels.Clear();
     //     }

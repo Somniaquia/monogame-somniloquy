@@ -3,6 +3,7 @@ namespace Somniloquy {
     using System.Collections.Generic;
     
     using Microsoft.Xna.Framework;
+    using Microsoft.Xna.Framework.Graphics;
     using Microsoft.Xna.Framework.Input;
 
     public abstract class EditorMode {
@@ -16,6 +17,10 @@ namespace Somniloquy {
             Screen = screen;
             Editor = editor;
         }
+        
+        public Vector2 ToLayerPos(Vector2 worldPos) {
+            return Editor.SelectedLayer.ToLayerPos(worldPos);
+        }
 
         public abstract void LoadContent();
         public abstract void Update();
@@ -26,12 +31,13 @@ namespace Somniloquy {
         }
     }
     
-    public enum PaintModeState { Idle, Rectangle, Line, Select }
+    public enum PaintModeState { Idle, Rectangle, Line, Select, Block }
 
     public class PaintMode : EditorMode {
         public PaintModeState PaintModeState = PaintModeState.Idle;
         public Vector2? PreviousGlobalMousePos;
 
+        public Texture2D SelectedTexture;
         public Color SelectedColor = Color.White;
         public ColorPicker ColorPicker;
 
@@ -47,6 +53,13 @@ namespace Somniloquy {
             Keybinds.Add(InputManager.RegisterKeybind(new object[] { MouseButtons.RightButton }, new object[] { Keys.LeftShift, Keys.LeftControl, Keys.LeftAlt, Keys.F }, _ => Erase(), TriggerOnce.False));
 
             Keybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.LeftAlt, MouseButtons.LeftButton }, new object[] { Keys.LeftControl }, _ => SelectColor(), TriggerOnce.False));
+            Keybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.LeftShift, Keys.C, MouseButtons.LeftButton }, new object[] { }, _ => SelectTexture(), _ => CopyTexture(), TriggerOnce.False));
+            Keybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.LeftShift, Keys.X, MouseButtons.LeftButton }, new object[] { }, _ => SelectTexture(), _ => CutTexture(), TriggerOnce.False));
+            Keybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.LeftShift, Keys.V, MouseButtons.LeftButton }, new object[] { }, _ => PasteTexture(), TriggerOnce.False));
+            
+            Keybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.LeftShift, MouseButtons.LeftButton }, new object[] { Keys.LeftControl }, _ => SelectTexture(), _ => SeperateLayer(new TextureLayer2D()), TriggerOnce.True));
+            Keybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.LeftShift, Keys.T, MouseButtons.LeftButton }, new object[] { Keys.LeftControl }, _ => SelectTexture(), _ => SeperateLayer(new TileLayer2D()), TriggerOnce.True));
+            Keybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.V }, new object[] { Keys.LeftControl }, _ => MergeLayer(), TriggerOnce.True));
 
             DebugBinds.Add(DebugInfo.Subscribe(() => $"Selected Brush: {Brush}"));
             DebugBinds.Add(DebugInfo.Subscribe(() => $"Selected Color: {SelectedColor}"));
@@ -79,7 +92,7 @@ namespace Somniloquy {
             if (InputManager.IsMouseButtonPressed(MouseButtons.LeftButton)) {
                 if (PreviousGlobalMousePos is null) return;
                 var chain = CommandManager.AddCommandChain(new CommandChain());
-                ((PaintableLayer2D)Editor.SelectedLayer).PaintRectangle((Vector2I)PreviousGlobalMousePos, (Vector2I)Screen.Camera.GlobalMousePos, SelectedColor, 1f, true, chain);
+                ((PaintableLayer2D)Editor.SelectedLayer).PaintRectangle((Vector2I)ToLayerPos(PreviousGlobalMousePos.Value), (Vector2I)ToLayerPos(Screen.Camera.GlobalMousePos.Value), SelectedColor, 1f, true, chain);
                 PreviousGlobalMousePos = Screen.Camera.GlobalMousePos;
             }
         }
@@ -92,10 +105,10 @@ namespace Somniloquy {
                 if (PreviousGlobalMousePos is null) return;
                 var chain = CommandManager.AddCommandChain(new CommandChain());
                 if (InputManager.IsKeyDown(Keys.LeftShift)) {
-                    ((PaintableLayer2D)Editor.SelectedLayer).PaintSnappedLine((Vector2I)PreviousGlobalMousePos, (Vector2I)Screen.Camera.GlobalMousePos, SelectedColor, 1f, 0, chain);
-                    PreviousGlobalMousePos = PixelActions.ApplySnappedLineAction((Vector2I)PreviousGlobalMousePos, (Vector2I)Screen.Camera.GlobalMousePos, 0, _ => { });
+                    ((PaintableLayer2D)Editor.SelectedLayer).PaintSnappedLine((Vector2I)ToLayerPos(PreviousGlobalMousePos.Value), (Vector2I)ToLayerPos(Screen.Camera.GlobalMousePos.Value), SelectedColor, 1f, 0, chain);
+                    PreviousGlobalMousePos = PixelActions.ApplySnappedLineAction((Vector2I)ToLayerPos(PreviousGlobalMousePos.Value), (Vector2I)ToLayerPos(Screen.Camera.GlobalMousePos.Value), 0, _ => { });
                 } else {
-                    ((PaintableLayer2D)Editor.SelectedLayer).PaintLine((Vector2I)PreviousGlobalMousePos, (Vector2I)Screen.Camera.GlobalMousePos, SelectedColor, 1f, 0, chain);
+                    ((PaintableLayer2D)Editor.SelectedLayer).PaintLine((Vector2I)ToLayerPos(PreviousGlobalMousePos.Value), (Vector2I)ToLayerPos(Screen.Camera.GlobalMousePos.Value), SelectedColor, 1f, 0, chain);
                     PreviousGlobalMousePos = Screen.Camera.GlobalMousePos;
                 }
             }
@@ -111,19 +124,68 @@ namespace Somniloquy {
             PaintModeState = PaintModeState.Idle;
         }
 
+        public void SelectTexture() {
+            if (!Editor.Focused || PaintModeState == PaintModeState.Block) return;
+            if (Editor.SelectedLayer is PaintableLayer2D layer) {
+                if (PreviousGlobalMousePos is null) {
+                    PreviousGlobalMousePos = Screen.Camera.GlobalMousePos;
+                    PaintModeState = PaintModeState.Select;
+                }
+                if (InputManager.IsMouseButtonPressed(MouseButtons.LeftButton)) {
+                    if (PreviousGlobalMousePos is null) return;
+                    var (start, end) = Vector2Extensions.Rationalize(PreviousGlobalMousePos.Value, Screen.Camera.GlobalMousePos.Value);
+                    SelectedTexture = layer.GetTexture(new Rectangle((Vector2I)start, (Vector2I)(end - start)));
+                }
+            }
+        }
+
+        public void CopyTexture() {
+            if (SelectedTexture is null) return;
+            PreviousGlobalMousePos = null;
+            PaintModeState = PaintModeState.Block;
+        }
+
+        public void CutTexture() {
+            PreviousGlobalMousePos = null;
+            PaintModeState = PaintModeState.Block;
+        }
+
+        public void SeperateLayer(PaintableLayer2D layer) {
+            Editor.SelectedLayer.AddLayer(layer);
+            var (start, end) = Vector2Extensions.Rationalize(PreviousGlobalMousePos.Value, Screen.Camera.GlobalMousePos.Value);
+            layer.PaintTexture(new Rectangle((Vector2I)start, (Vector2I)(end - start)), SelectedTexture, 1f);
+            CutTexture();
+        }
+
+        public void PasteTexture() {
+            if (!Editor.Focused || PaintModeState == PaintModeState.Block) return;
+            if (SelectedTexture is null) return;
+            if (Editor.SelectedLayer is PaintableLayer2D layer) {
+                layer.PaintTexture((Vector2I)ToLayerPos(Screen.Camera.GlobalMousePos.Value), SelectedTexture, 1f);
+            }
+        }
+
+        public void MergeLayer() {
+            if (!Editor.Focused || PaintModeState == PaintModeState.Block) return;
+            if (Editor.SelectedLayer.Parent is PaintableLayer2D parent && Editor.SelectedLayer is PaintableLayer2D layer) {
+                parent.PaintTexture(layer.GetTextureBounds(), layer.GetTexture(), 1f);
+                layer.Dispose();
+            }
+        }
+
         public void SelectColor() {
             if (!Editor.Focused) return;
             if (Editor.SelectedLayer is PaintableLayer2D layer) {
                 if (InputManager.IsKeyDown(Keys.LeftShift)) {
                     if (!InputManager.IsMouseButtonPressed(MouseButtons.LeftButton)) return;
-                    var color = layer.GetColor((Vector2I)Screen.Camera.GlobalMousePos.Value);
+                    var color = layer.GetColor((Vector2I)ToLayerPos(Screen.Camera.GlobalMousePos.Value));
                     if (color != null) {
                         color = SelectedColor.BlendWith(color.Value, 0.5f);
                         SelectedColor = color.Value;
                         ColorPicker.SetColor(color.Value);
                     }
                 } else {
-                    var color = layer.GetColor((Vector2I)Screen.Camera.GlobalMousePos.Value);
+                    var color = layer.GetColor((Vector2I)ToLayerPos(Screen.Camera.GlobalMousePos.Value));
                     if (color != null) {
                         SelectedColor = color.Value;
                         ColorPicker.SetColor(color.Value);
@@ -151,25 +213,27 @@ namespace Somniloquy {
             if (!Editor.Focused) return;
 
             if (Editor.SelectedLayer is PaintableLayer2D paintableLayer) {
-                paintableLayer.Fill((Vector2I)Screen.Camera.GlobalMousePos, SelectedColor);
+                paintableLayer.Fill((Vector2I)ToLayerPos(Screen.Camera.GlobalMousePos.Value), SelectedColor);
             }
         }
 
         public override void Update() { }
 
         public override void Draw() {
-            if (Editor.Focused && PaintModeState == PaintModeState.Idle) Screen.Camera.DrawPoint((Vector2I)Screen.Camera.GlobalMousePos, SelectedColor * 0.5f);
+            if (Editor.Focused && PaintModeState == PaintModeState.Idle) Screen.Camera.DrawPoint((Vector2I)ToLayerPos(Screen.Camera.GlobalMousePos.Value), SelectedColor * 0.5f);
             
             if (Editor.Focused && PreviousGlobalMousePos is not null) {
                 if (PaintModeState == PaintModeState.Line) {
                     if (InputManager.IsKeyDown(Keys.LeftShift)) {
-                        PixelActions.ApplySnappedLineAction((Vector2I)PreviousGlobalMousePos, (Vector2I)Screen.Camera.GlobalMousePos, 0, (pos) => Screen.Camera.SB.Draw(SQ.SB.Pixel, pos, SelectedColor * 0.5f));
+                        PixelActions.ApplySnappedLineAction((Vector2I)ToLayerPos(PreviousGlobalMousePos.Value), (Vector2I)ToLayerPos(Screen.Camera.GlobalMousePos.Value), 0, (pos) => Screen.Camera.SB.Draw(SQ.SB.Pixel, pos, SelectedColor * 0.5f));
                     } else {
-                        PixelActions.ApplyLineAction((Vector2I)PreviousGlobalMousePos, (Vector2I)Screen.Camera.GlobalMousePos, 0, (pos) => Screen.Camera.SB.Draw(SQ.SB.Pixel, pos, SelectedColor * 0.5f));
+                        PixelActions.ApplyLineAction((Vector2I)ToLayerPos(PreviousGlobalMousePos.Value), (Vector2I)ToLayerPos(Screen.Camera.GlobalMousePos.Value), 0, (pos) => Screen.Camera.SB.Draw(SQ.SB.Pixel, pos, SelectedColor * 0.5f));
                     }
                 } else if (PaintModeState == PaintModeState.Rectangle) {
-                    PixelActions.ApplyRectangleAction((Vector2I)PreviousGlobalMousePos, (Vector2I)Screen.Camera.GlobalMousePos, true, (pos) => Screen.Camera.SB.Draw(SQ.SB.Pixel, pos, SelectedColor * 0.5f));
-                }
+                    PixelActions.ApplyRectangleAction((Vector2I)ToLayerPos(PreviousGlobalMousePos.Value), (Vector2I)ToLayerPos(Screen.Camera.GlobalMousePos.Value), true, (pos) => Screen.Camera.SB.Draw(SQ.SB.Pixel, pos, SelectedColor * 0.5f));
+                } else if (PaintModeState == PaintModeState.Select) {
+                    PixelActions.ApplyRectangleAction((Vector2I)ToLayerPos(PreviousGlobalMousePos.Value), (Vector2I)ToLayerPos(Screen.Camera.GlobalMousePos.Value), true, (pos) => Screen.Camera.SB.Draw(SQ.SB.Pixel, pos, Color.White * 0.1f));
+                } 
             }
         }
     }

@@ -12,8 +12,8 @@ namespace Somniloquy {
         [JsonInclude] public int ChunkLength = 256;
         [JsonInclude] public Dictionary<Vector2I, TextureChunk2D> Chunks = new();
 
-        public TextureLayer2D() { }
-        public TextureLayer2D(string identifier) { }
+        public TextureLayer2D() : base() { }
+        public TextureLayer2D(string identifier) : base(identifier) { }
 
         public Vector2I GetChunkPosition(Vector2I canvasPosition) => canvasPosition / ChunkLength;
         public Vector2I GetPositionInChunk(Vector2I canvasPosition) => Util.PosMod(canvasPosition, new Vector2I(ChunkLength, ChunkLength));
@@ -21,7 +21,7 @@ namespace Somniloquy {
         public void PaintImage(Vector2I position, Texture2D texture, float opacity, CommandChain chain = null) {
             Color[] data = new Color[texture.Width * texture.Height];
             texture.GetData(data);
-
+            
             for (int y = 0; y < texture.Height; y++) {
                 for (int x = 0; x < texture.Width; x++) {
                     var pos = new Vector2I(x, y);
@@ -59,24 +59,14 @@ namespace Somniloquy {
             return color;
         }
 
-        public override Rectangle GetTextureBounds() {
+        public override Rectangle GetSelfBounds() {
             RemoveEmptyChunks();
             
             int chunkXMin = Chunks.Min(chunk => chunk.Key.X);
             int chunkXMax = Chunks.Max(chunk => chunk.Key.X);
             int chunkYMin = Chunks.Min(chunk => chunk.Key.Y);
-            int chunkYMax = Chunks.Max(chunk => chunk.Key.Y);
-
-            // var minChunk = Chunks[new Vector2I(chunkXMin, chunkYMin)];
-            // var maxChunk = Chunks[new Vector2I(chunkXMax, chunkYMax)];
+            int chunkYMax = Chunks.Max(chunk => chunk.Key.Y); 
             
-            // var minChunkBounds = minChunk.Texture.GetNonTransparentBounds(); // Oversight!
-            // var maxChunkBounds = minChunk.Texture.GetNonTransparentBounds();
-
-            // var xMin = chunkXMin * ChunkLength + minChunkBounds.Left;
-            // var yMin = chunkYMin * ChunkLength + minChunkBounds.Top;
-            // var xMax = chunkXMax * ChunkLength + minChunkBounds.Right;
-            // var yMax = chunkYMax * ChunkLength + minChunkBounds.Bottom;
             var xMin = chunkXMin * ChunkLength;
             var yMin = chunkYMin * ChunkLength;
             var xMax = (chunkXMax + 1) * ChunkLength;
@@ -93,8 +83,8 @@ namespace Somniloquy {
 
         // For image saving
         public void Draw(Vector2I topLeft, Vector2I bottomRight, float opacity = 1f) {
-            Vector2I topLeftChunk = new((int)((float)topLeft.X / ChunkLength) - 1, (int)((float)topLeft.Y / ChunkLength) - 1);
-            Vector2I bottomRightChunk = new((int)((float)bottomRight.X / ChunkLength) + 1, (int)((float)bottomRight.Y / ChunkLength) + 1);
+            Vector2I topLeftChunk = new(Util.Round((float)topLeft.X / ChunkLength) - 1, Util.Round((float)topLeft.Y / ChunkLength) - 1);
+            Vector2I bottomRightChunk = new(Util.Round((float)bottomRight.X / ChunkLength) + 1, Util.Round((float)bottomRight.Y / ChunkLength) + 1);
 
             for (int y = topLeftChunk.Y; y < bottomRightChunk.Y; y++) {
                 for (int x = topLeftChunk.X; x < bottomRightChunk.X; x++) {
@@ -116,25 +106,28 @@ namespace Somniloquy {
 
         public override void Draw(Camera2D camera) {
             if (Opacity > 0f) {
-                Vector2 topLeft = camera.VisibleBounds.TopLeft() - new Vector2(1);
-                Vector2 bottomRight = camera.VisibleBounds.BottomRight() + new Vector2(1);
-                Vector2I topLeftChunk = new((int)(topLeft.X / ChunkLength) - 1, (int)(topLeft.Y / ChunkLength) - 1);
-                Vector2I bottomRightChunk = new((int)(bottomRight.X / ChunkLength) + 1, (int)(bottomRight.Y / ChunkLength) + 1);
+                Matrix layerView = Transform * camera.Transform;
+                var visibleBounds = GetVisisbleBounds(camera);
+                Vector2 topLeft = visibleBounds.TopLeft() - Vector2.One;
+                Vector2 bottomRight = visibleBounds.BottomRight() + Vector2.One;
 
-                for (int y = topLeftChunk.Y; y < bottomRightChunk.Y; y++) {
-                    for (int x = topLeftChunk.X; x < bottomRightChunk.X; x++) {
+                Vector2I topLeftChunk = new Vector2I(Util.Round(topLeft.X / ChunkLength) - 2, Util.Round(topLeft.Y / ChunkLength) - 2);
+                Vector2I bottomRightChunk = new Vector2I(Util.Round(bottomRight.X / ChunkLength), Util.Round(bottomRight.Y / ChunkLength)) + Vector2I.One;
+
+                camera.SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, null, layerView);
+
+                for (int y = topLeftChunk.Y; y <= bottomRightChunk.Y; y++) {
+                    for (int x = topLeftChunk.X; x <= bottomRightChunk.X; x++) {
                         var chunkIndex = new Vector2I(x, y);
-                        var chunkPos = chunkIndex * ChunkLength;
-                        var nextChunkPos = (chunkIndex + new Vector2I(1, 1)) * ChunkLength;
+                        if (!Chunks.TryGetValue(chunkIndex, out var chunk)) continue;
 
-                        float xLeft = MathF.Min(MathF.Max(topLeft.X, chunkPos.X), bottomRight.X);
-                        float xRight = MathF.Max(MathF.Min(bottomRight.X, nextChunkPos.X), topLeft.X);
-                        float yTop = MathF.Min(MathF.Max(topLeft.Y, chunkPos.Y), bottomRight.Y);
-                        float yBottom = MathF.Max(MathF.Min(bottomRight.Y, nextChunkPos.Y), topLeft.Y);
-                        
-                        if (!Chunks.ContainsKey(chunkIndex)) continue;
+                        RectangleF chunkBounds = new(x * ChunkLength, y * ChunkLength, ChunkLength, ChunkLength);
+                        RectangleF visible = RectangleF.Intersect(new RectangleF(topLeft, bottomRight - topLeft), chunkBounds);
 
-                        camera.Draw(Chunks[chunkIndex].Texture, (Rectangle)new RectangleF(xLeft, yTop, xRight - xLeft, yBottom - yTop), (Rectangle)new RectangleF(xLeft - chunkPos.X, yTop - chunkPos.Y , xRight - xLeft, yBottom - yTop), Color.White * Opacity);
+                        if (visible.Width <= 0 || visible.Height <= 0) continue;
+                        Rectangle sourceRect = new(Util.Round(visible.X - chunkBounds.X), Util.Round(visible.Y - chunkBounds.Y), Util.Round(visible.Width), Util.Round(visible.Height));
+
+                        camera.SB.Draw(chunk.Texture, new Rectangle(Util.Round(visible.X), Util.Round(visible.Y), Util.Round(visible.Width), Util.Round(visible.Height)), sourceRect, Color.White * Opacity);
                     }
                 }
             }

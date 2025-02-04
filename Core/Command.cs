@@ -54,12 +54,12 @@ namespace Somniloquy {
         public void Redo() => commands.ForEach(command => command.Redo());
     }
 
-    public class TextureEditCommand : ICommand {
+    public class PixelChangeCommand : ICommand {
         private SQTexture2D target;
         private Vector2I position;
         private Color colorBefore, colorAfter;
 
-        public TextureEditCommand(SQTexture2D target, Vector2I position, Color colorBefore, Color colorAfter) {
+        public PixelChangeCommand(SQTexture2D target, Vector2I position, Color colorBefore, Color colorAfter) {
             this.target = target;
             this.position = position;
             this.colorBefore = colorBefore;
@@ -69,6 +69,36 @@ namespace Somniloquy {
         public void Undo() => target.SetPixel(position, colorBefore);
         public void Redo() => target.SetPixel(position, colorAfter);
     }
+
+    public class ChunkRegionChangeCommand : ICommand {
+        private SQTexture2D target;
+        private Rectangle region;
+        private Color[] textureDataBefore, textureDataAfter;
+
+        public ChunkRegionChangeCommand(SQTexture2D target, Rectangle region) {
+            this.target = target;
+            this.region = region;
+            target.GetData(textureDataBefore, region.TopLeft().Unwrap(region.Width), region.Width * region.Height);
+        }
+
+        public void Undo() {
+            target.GetData(textureDataAfter, region.TopLeft().Unwrap(region.Width), region.Width * region.Height);
+            target.SetData(textureDataBefore, region.TopLeft().Unwrap(region.Width), region.Width * region.Height);
+        }
+
+        public void Redo() {
+            target.SetData(textureDataAfter, region.TopLeft().Unwrap(region.Width), region.Width * region.Height);
+        }
+    }
+
+    // public class ChunkChangeCommand : ICommand {
+    //     private SQTexture2D target;
+    //     private Texture2D textureBefore, textureAfter;
+
+    //     public ChunkChangeCommand() {
+
+    //     }
+    // }
 
     public class TextureChunkSetCommand : ICommand {
         private TextureLayer2D target;

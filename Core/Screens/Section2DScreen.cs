@@ -10,6 +10,7 @@ namespace Somniloquy {
         public Section2D Section;
         public Camera2D Camera = new();
         public Section2DEditor Editor;
+        public Section2DPlayer Player;
 
         public Section2DScreen(Rectangle boundaries, Section2D section = null) : base(boundaries) {
             Section = section;
@@ -24,23 +25,41 @@ namespace Somniloquy {
             Editor = new(this);
             Camera.MaxZoom = 32f;
             Camera.MinZoom = 1 / 4f;
+
+            InputManager.RegisterKeybind(Keys.Enter, _ => TogglePlay(), TriggerOnce.True);
         }
 
         public override void LoadContent() {
             Camera.LoadContent();
             Editor.LoadContent();
         }
+        
+        public void TogglePlay() {
+            if (Player is not null) {
+                Player.UnloadContent();
+                Player = null;
+                Editor = new(this);
+                Editor.SwitchEditorMode(new PaintMode(this, Editor));
+            } else {
+                if (ScreenManager.FocusedScreen != this) return; 
+                Editor.UnloadContent();
+                Editor = null;
+                Player = new(this);
+            }
+        }
 
         public override void Update() {
             base.Update();
-            Camera.Update();
             Editor?.Update();
             Section?.Update();
+            Player?.Update();
+            Camera.Update();
         }
 
         public override void Draw() {
             Camera.SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, transformMatrix: Camera.Transform);
             Editor?.Draw();
+            Player?.Draw();
             // Camera.SB.End();
         }
     }

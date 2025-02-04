@@ -22,7 +22,7 @@ namespace Somniloquy {
         }
 
         public void SetPixel(Vector2I position, Color color, CommandChain chain = null) {
-            chain?.AddCommand(new TextureEditCommand(this, position, TextureData[position.Unwrap(Width)], color));
+            chain?.AddCommand(new PixelChangeCommand(this, position, TextureData[position.Unwrap(Width)], color));
             TextureData[position.Unwrap(Width)] = color;
             ChangedTextures.Add(this);
         }

@@ -1,3 +1,4 @@
+
 namespace Somniloquy {
     using System;
     using System.Collections.Generic;
@@ -62,6 +63,10 @@ namespace Somniloquy {
         public bool Selected => ScreenManager.SelectedScreen == this;
 
         public virtual void LoadContent() { }
+
+        public virtual void UnloadContent() {
+            ScreenManager.Screens.Remove(this);
+        }
 
         public virtual void Update() {
             if (Focusable) {

@@ -40,7 +40,7 @@ namespace Somniloquy {
         }
 
         private Vector2I GetTilePos(TileLayer2D layer) {
-            return layer.GetTilePosition((Vector2I)Screen.Camera.GlobalMousePos);
+            return layer.GetTilePosition((Vector2I)ToLayerPos(Screen.Camera.GlobalMousePos.Value));
         }
 
         public void SelectTile() {

@@ -1,6 +1,7 @@
 ﻿namespace Somniloquy {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Text.Json;
     using System.Text.Json.Serialization;
     
@@ -73,6 +74,26 @@
             var color = Chunks[chunkPosition].GetColor(positionInChunk);
             if (color == Color.Transparent) return null;
             return color;
+        }
+
+        public override Rectangle GetSelfBounds() {
+            RemoveEmptyChunks();
+            
+            int chunkXMin = Chunks.Min(chunk => chunk.Key.X);
+            int chunkXMax = Chunks.Max(chunk => chunk.Key.X);
+            int chunkYMin = Chunks.Min(chunk => chunk.Key.Y);
+            int chunkYMax = Chunks.Max(chunk => chunk.Key.Y); 
+            
+            var xMin = chunkXMin * ChunkLength * TileLength;
+            var yMin = chunkYMin * ChunkLength * TileLength;
+            var xMax = (chunkXMax + 1) * ChunkLength * TileLength;
+            var yMax = (chunkYMax + 1) * ChunkLength * TileLength;
+
+            return new Rectangle(xMin, yMin, xMax - xMin, yMax - yMin);
+        }
+
+        public void RemoveEmptyChunks() {
+            
         }
 
         #region Tile Methods

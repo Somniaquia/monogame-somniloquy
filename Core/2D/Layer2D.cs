@@ -11,6 +11,7 @@ namespace Somniloquy {
         [JsonIgnore] public Section2D Section;
         [JsonIgnore] public Layer2D Parent;
         [JsonInclude] public List<Layer2D> Layers;
+        [JsonInclude] public Matrix Transform = Matrix.Identity;
         [JsonInclude] public string Identifier = "";
         [JsonIgnore] public bool Enabled = true;
         [JsonIgnore] public float Opacity = 1f;
@@ -19,6 +20,10 @@ namespace Somniloquy {
         public Layer2D(string identifier) { Identifier = identifier; }
 
         public Layer2D AddLayer(Layer2D layer) {
+            // layer.Transform =
+            //     Matrix.CreateTranslation(new Vector3(-10, -10, 0)) *
+            //     Matrix.CreateRotationZ(3.141592653589793238f);
+            //     Matrix.CreateScale(new Vector3(0.5f, 0.5f, 1));
             Layers ??= new();
             Layers.Add(layer);
             layer.Section = Section;
@@ -51,6 +56,52 @@ namespace Somniloquy {
 
         public bool HasChildren() => Layers is not null && Layers.Count > 0;
 
+        public bool Contains(Layer2D child) {
+            if (child == this) return true;
+            if (Layers is null) return false;
+            return Layers.Any(layer => layer.Contains(child));
+        }
+
+        public RectangleF GetVisisbleBounds(Camera2D camera) {
+            if (Transform == Matrix.Identity) return camera.VisibleBounds;
+
+            Rectangle bounds = SQ.GD.Viewport.Bounds;
+
+            var topLeft = ToLayerPos(camera.ToWorldPos(bounds.TopLeft()));
+            var topRight = ToLayerPos(camera.ToWorldPos(bounds.TopRight()));
+            var bottomLeft = ToLayerPos(camera.ToWorldPos(bounds.BottomLeft()));
+            var bottomRight = ToLayerPos(camera.ToWorldPos(bounds.BottomRight()));
+            
+            var left = Util.Min(topLeft.X, topRight.X, bottomLeft.X, bottomRight.X);
+            var right = Util.Max(topLeft.X, topRight.X, bottomLeft.X, bottomRight.X);
+            var up = Util.Min(topLeft.Y, topRight.Y, bottomLeft.Y, bottomRight.Y);
+            var down = Util.Max(topLeft.Y, topRight.Y, bottomLeft.Y, bottomRight.Y);
+
+            return new RectangleF(left, up, right - left, down - up);
+        }
+
+        public Vector2 ToWorldPos(Vector2 layerPos) {
+            return Vector2.Transform(layerPos, Transform);
+        }
+
+        public RectangleF ToWorldPos(RectangleF layerRectangle) {
+            return new RectangleF(
+                ToWorldPos(layerRectangle.Location),
+                ToWorldPos(layerRectangle.Location + layerRectangle.Size) - ToWorldPos(layerRectangle.Location)
+            );
+        }
+
+        public Vector2 ToLayerPos(Vector2 worldPos) {
+            return Vector2.Transform(worldPos, Matrix.Invert(Transform));
+        }
+
+        public RectangleF ToLayerPos(RectangleF worldRectangle) {
+            return new RectangleF(
+                ToLayerPos(worldRectangle.Location),
+                ToLayerPos(worldRectangle.Location + worldRectangle.Size) - ToLayerPos(worldRectangle.Location)
+            );
+        }
+
         public virtual void Update() {
             if (Layers is null) return;
             foreach (var layer in Layers) {
@@ -64,6 +115,8 @@ namespace Somniloquy {
                 layer.Draw(camera);
             }
         }
+
+        public virtual void Dispose() { }
     }
 
     public class PaintableLayer2D : Layer2D {
@@ -129,11 +182,15 @@ namespace Somniloquy {
 
         public virtual void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain = null) { }
 
-        /// <summary>
-        /// TODOO:::: Complete re-write of image export function
-        /// </summary>
-        public virtual Rectangle GetTextureBounds() {
-            List<Rectangle> bounds = (from layer in Layers where layer is TextureLayer2D let textureLayer = (TextureLayer2D)layer select textureLayer.GetTextureBounds()).ToList();
+        public virtual void PaintTexture(Rectangle rectangle, Texture2D texture, float opacity, CommandChain chain = null) { }
+        public virtual void PaintTexture(Vector2I start, Texture2D texture, float opacity, CommandChain chain = null) { }
+
+        public virtual Rectangle GetSelfBounds() => Rectangle.Empty;
+
+        public Rectangle GetTextureBounds() {
+            List<Rectangle> bounds = Layers.Where(l => l is PaintableLayer2D layer).Select(layer => ((PaintableLayer2D)layer).GetTextureBounds()).ToList();
+            
+            bounds.Add(GetSelfBounds());
 
             int xMin = bounds.Min(bound => bound.Left);
             int xMax = bounds.Max(bound => bound.Right);
@@ -144,7 +201,7 @@ namespace Somniloquy {
         }
 
         /// <summary>
-        /// TODOO:::: Complete re-write of image export function
+        /// TODOO:::: Complete re-wridte of image export function
         /// </summary>
         public void SaveTexture(string path) {
             Texture2D texture = GetTexture();
@@ -156,7 +213,7 @@ namespace Somniloquy {
         /// <summary>
         /// TODOO:::: Complete re-write of image export function
         /// </summary>
-        public Texture2D GetTexture() {
+        public Texture2D GetTexture(Rectangle? rectangle = null) {
             var bounds = GetTextureBounds();
             RenderTarget2D target = new(SQ.GD, bounds.Width, bounds.Height);
 

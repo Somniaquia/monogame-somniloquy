@@ -11,6 +11,7 @@ namespace Somniloquy {
         public EditorMode EditorMode;
 
         public List<Keybind> GlobalKeybinds = new();
+        public List<Func<string>> GlobalDebugBinds = new();
         public Layer2D SelectedLayer;
 
         public Section2DEditor(Section2DScreen screen) : base() {
@@ -40,14 +41,23 @@ namespace Somniloquy {
 
             LayerTable.Initialize();
 
-            DebugInfo.Subscribe(() => $"Selected Layer: {SelectedLayer} - {SelectedLayer.Identifier}");
-            DebugInfo.Subscribe(() => $"Undo: {CommandManager.UndoHistory.Count} Redo: {CommandManager.RedoHistory.Count}");
+            GlobalDebugBinds.Add(DebugInfo.Subscribe(() => $"Selected Layer: {SelectedLayer} - {SelectedLayer.Identifier}"));
+            GlobalDebugBinds.Add(DebugInfo.Subscribe(() => $"Undo: {CommandManager.UndoHistory.Count} Redo: {CommandManager.RedoHistory.Count}"));
             SelectedLayer = Screen.Section.Root.Layers[0];
         }
 
         public override void LoadContent() {
             LayerTable.BuildUI();
             SwitchEditorMode(new PaintMode(Screen, this));
+            Screen.Camera.TargetZoom = 4f;
+        }
+
+        public override void UnloadContent() {
+            base.UnloadContent();
+            EditorMode?.UnloadContent();
+            GlobalKeybinds.ForEach(bind => InputManager.UnregisterKeybind(bind));
+            GlobalDebugBinds.ForEach(bind => DebugInfo.Unsubscribe(bind));
+            LayerTable.DestroyUI();
         }
 
         public void SwitchEditorMode(EditorMode editorMode) {
@@ -71,7 +81,7 @@ namespace Somniloquy {
         public void MoveScreen(params object[] parameters) {
             if (!Focused) return;
             if (parameters.Length == 1 && parameters[0] is Vector2 direction) {
-                Screen.Camera.MoveCamera(direction * 0.75f);
+                Screen.Camera.MoveCamera(direction * 1.2f);
             }
         }
 
@@ -119,7 +129,7 @@ namespace Somniloquy {
         public override void Draw() {
             Screen.Section.Draw(Screen.Camera);
 
-            EditorMode.Draw();
+            EditorMode?.Draw();
             Screen.Camera.SB.End();
             
             if (SelectedLayer is TileLayer2D tileLayer) {

@@ -153,7 +153,7 @@ namespace Somniloquy {
         public override void Update() {
             base.Update();
 
-            if (Layer == Screen.Editor.SelectedLayer) {
+            if (Layer == Screen.Editor.SelectedLayer || Screen.Editor.SelectedLayer.Contains(Layer)) {
                 ((BoxUIDefaultRenderer)Renderer).Color = Color.Cyan;
                 Layer.Opacity = 1f;
             } else if (Focused) {

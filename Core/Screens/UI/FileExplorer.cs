@@ -178,9 +178,9 @@ namespace Somniloquy {
             if (parent is null) ScreenManager.GetFirstOfType<Section2DScreen>().Section.Root.AddLayer(layer);
             else parent.AddLayer(layer);
 
+            try {
                 Texture2D texture = Texture2D.FromFile(SQ.GD, path);
                 layer.PaintImage(Vector2I.Zero, texture, 1f, CommandManager.AddCommandChain(new CommandChain()));
-            try {
                 // DebugInfo.AddTempLine(() => $"Imported image - {Path.GetFileName(path)}.", 5);
             } catch (Exception e) {
                 DebugInfo.AddTempLine(() => $"Error reading {Path.GetFileName(path)}: {e.Message}", 5);

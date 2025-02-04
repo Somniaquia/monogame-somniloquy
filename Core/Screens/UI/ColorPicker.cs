@@ -69,8 +69,8 @@ namespace Somniloquy {
 
             float updateSpeed = InputManager.IsMouseButtonDown(MouseButtons.LeftButton) ? 0.001f : 0.004f;
             
-            if (InputManager.IsKeyDown(Keys.U)) { Hue -= updateSpeed * 255; updateChart = true; }
-            if (InputManager.IsKeyDown(Keys.O)) { Hue += updateSpeed * 255; updateChart = true; }
+            if (InputManager.IsKeyDown(Keys.U)) { Hue -= updateSpeed * 128; updateChart = true; }
+            if (InputManager.IsKeyDown(Keys.O)) { Hue += updateSpeed * 128; updateChart = true; }
 
             if (InputManager.IsKeyDown(Keys.I)) { PositionOnChart += new Vector2(0, -updateSpeed); }
             if (InputManager.IsKeyDown(Keys.K)) { PositionOnChart += new Vector2(0, updateSpeed); }

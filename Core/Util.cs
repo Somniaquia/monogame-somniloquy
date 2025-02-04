@@ -9,6 +9,10 @@ namespace Somniloquy {
     public static class Util {
         private static Random random = new();
 
+        public static int Round(float num) {
+            return (int)MathF.Round(num);
+        }
+
         public static float Lerp(float origin, float target, float lerpModifier) {
             return origin * (1 - lerpModifier) + target * lerpModifier;
         }
