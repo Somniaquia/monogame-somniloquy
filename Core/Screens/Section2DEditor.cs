@@ -21,18 +21,27 @@ namespace Somniloquy {
             GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.F1, _ => { SwitchEditorMode(new PaintMode(Screen, this)); }, TriggerOnce.True));
             GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.F2, _ => { SwitchEditorMode(new TileMode(Screen, this)); }, TriggerOnce.True));
 
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.W, _ => MoveScreen(new Vector2(0, -1)), TriggerOnce.False));
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.A, _ => MoveScreen(new Vector2(-1, 0)), TriggerOnce.False));
-			GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.S, _ => MoveScreen(new Vector2(0, 1)), TriggerOnce.False));
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.D, _ => MoveScreen(new Vector2(1, 0)), TriggerOnce.False));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.W, Keys.Space, _ => MoveScreen(new Vector2(0, -1)), TriggerOnce.False));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.A, Keys.Space, _ => MoveScreen(new Vector2(-1, 0)), TriggerOnce.False));
+			GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.S, Keys.Space, _ => MoveScreen(new Vector2(0, 1)), TriggerOnce.False));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.D, Keys.Space, _ => MoveScreen(new Vector2(1, 0)), TriggerOnce.False));
 
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.Q, _ => ZoomScreen(-0.05f), TriggerOnce.False));
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.E, _ => ZoomScreen(0.05f), TriggerOnce.False));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.Q, Keys.Space, _ => ZoomScreen(-0.05f), TriggerOnce.False));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.E, Keys.Space, _ => ZoomScreen(0.05f), TriggerOnce.False));
             GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.OemPipe, _ => Screen.Camera.TargetRotation = 0, TriggerOnce.True));
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.OemOpenBrackets, _ => RotateScreen(-0.05f), TriggerOnce.False));
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.OemCloseBrackets, _ => RotateScreen(0.05f), TriggerOnce.False));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.OemOpenBrackets, Keys.Space, _ => RotateScreen(-0.05f), TriggerOnce.False));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.OemCloseBrackets, Keys.Space, _ => RotateScreen(0.05f), TriggerOnce.False));
             
             GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.LeftAlt, _ => SelectLayerUnderMouse(), TriggerOnce.False));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.Q }, _ => ScaleLayer(0.5f), TriggerOnce.Block));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.E }, _ => ScaleLayer(2f), TriggerOnce.Block));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.W }, _ => MoveLayer(new Vector2I(0, -1)), TriggerOnce.Block));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.A }, _ => MoveLayer(new Vector2I(-1 , 0)), TriggerOnce.Block));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.S }, _ => MoveLayer(new Vector2I(0, 1)), TriggerOnce.Block));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.D }, _ => MoveLayer(new Vector2I(1, 0)), TriggerOnce.Block));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.OemOpenBrackets }, _ => RotateLayer(-3.141592653589793238f / 8), TriggerOnce.Block));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.OemCloseBrackets }, _ => RotateLayer(3.141592653589793238f / 8), TriggerOnce.Block));
+
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.H }, _ => SelectedLayer?.ToggleHide(), TriggerOnce.True));
             GlobalKeybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.Space, Keys.S }, _ => { Screen.Section.Root.ToggleHide(); SelectedLayer?.Show(); }, TriggerOnce.True));
 
@@ -96,6 +105,30 @@ namespace Somniloquy {
             if (!Focused) return;
             if (parameters.Length == 1 && parameters[0] is float ratio) {
                 Screen.Camera.RotateCamera(ratio);
+            }
+        }
+
+        public void MoveLayer(params object[] parameters) {
+            if (!Focused) return;
+            if (parameters.Length == 1 && parameters[0] is Vector2I direction && SelectedLayer is not null) {
+                SelectedLayer.Displacement += direction;
+                SelectedLayer.UpdateTransform();
+            }
+        }
+
+        public void ScaleLayer(params object[] parameters) {
+            if (!Focused) return;
+            if (parameters.Length == 1 && parameters[0] is float ratio && SelectedLayer is not null) {
+                SelectedLayer.Scale *= ratio;
+                SelectedLayer.UpdateTransform();
+            }
+        }
+
+        public void RotateLayer(params object[] parameters) {
+            if (!Focused) return;
+            if (parameters.Length == 1 && parameters[0] is float ratio && SelectedLayer is not null) {
+                SelectedLayer.Rotation += ratio;
+                SelectedLayer.UpdateTransform();
             }
         }
 

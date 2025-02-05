@@ -209,10 +209,15 @@
             if (Opacity > 0f) {
                 var chunkLengthInPixels = ChunkLength * TileLength;
 
-                Vector2 topLeft = camera.VisibleBounds.TopLeft() - new Vector2(1);
-                Vector2 bottomRight = camera.VisibleBounds.BottomRight() + new Vector2(1);
-                Vector2I topLeftChunk = new((int)(topLeft.X / chunkLengthInPixels) - 1, (int)(topLeft.Y / chunkLengthInPixels) - 1);
-                Vector2I bottomRightChunk = new((int)(bottomRight.X / chunkLengthInPixels) + 1, (int)(bottomRight.Y / chunkLengthInPixels) + 1);
+                Matrix layerView = Transform * camera.Transform;
+                var visibleBounds = GetVisisbleBounds(camera);
+                Vector2 topLeft = visibleBounds.TopLeft() - Vector2.One;
+                Vector2 bottomRight = visibleBounds.BottomRight() + Vector2.One;
+
+                Vector2I topLeftChunk = new(Util.Round(topLeft.X / chunkLengthInPixels) - 2, Util.Round(topLeft.Y / chunkLengthInPixels) - 2);
+                Vector2I bottomRightChunk = new(Util.Round(bottomRight.X / chunkLengthInPixels) + 1, Util.Round(bottomRight.Y / chunkLengthInPixels) + 1);
+
+                camera.SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, null, layerView);
 
                 for (int y = topLeftChunk.Y; y < bottomRightChunk.Y; y++) {
                     for (int x = topLeftChunk.X; x < bottomRightChunk.X; x++) {
@@ -220,15 +225,14 @@
                         if (!Chunks.ContainsKey(chunkIndex)) continue;
                         
                         var chunkPos = chunkIndex * chunkLengthInPixels;
-                        var nextChunkPos = (chunkIndex + new Vector2I(1, 1)) * chunkLengthInPixels;
 
-                        // float xLeft = MathF.Min(MathF.Max(topLeft.X, chunkPos.X), bottomRight.X);
-                        // float xRight = MathF.Max(MathF.Min(bottomRight.X, nextChunkPos.X), topLeft.X);
-                        // float yTop = MathF.Min(MathF.Max(topLeft.Y, chunkPos.Y), bottomRight.Y);
-                        // float yBottom = MathF.Max(MathF.Min(bottomRight.Y, nextChunkPos.Y), topLeft.Y);
+                        RectangleF chunkBounds = new(x * chunkLengthInPixels, y * chunkLengthInPixels, chunkLengthInPixels, chunkLengthInPixels);
+                        RectangleF visible = RectangleF.Intersect(new RectangleF(topLeft, bottomRight - topLeft), chunkBounds);
 
-                        // Chunks[chunkIndex].Draw(camera, (Rectangle)new RectangleF(xLeft, yTop, xRight - xLeft, yBottom - yTop), (Rectangle)new RectangleF(xLeft - chunkPos.X, yTop - chunkPos.Y , xRight - xLeft, yBottom - yTop), 1f);
-                        Chunks[chunkIndex].Draw(camera, new Rectangle(chunkPos, Vector2I.One * chunkLengthInPixels), Rectangle.Empty, Opacity);
+                        if (visible.Width <= 0 || visible.Height <= 0) continue;
+                        Rectangle sourceRect = new(Util.Round(visible.X - chunkBounds.X), Util.Round(visible.Y - chunkBounds.Y), Util.Round(visible.Width), Util.Round(visible.Height));
+
+                        Chunks[chunkIndex].Draw(camera, new Rectangle(chunkPos, Vector2I.One * chunkLengthInPixels), sourceRect, Opacity);
                     }
                 }
             }

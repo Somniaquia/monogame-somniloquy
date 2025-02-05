@@ -86,6 +86,8 @@ namespace Somniloquy {
             Vector2I topLeftChunk = new(Util.Round((float)topLeft.X / ChunkLength) - 1, Util.Round((float)topLeft.Y / ChunkLength) - 1);
             Vector2I bottomRightChunk = new(Util.Round((float)bottomRight.X / ChunkLength) + 1, Util.Round((float)bottomRight.Y / ChunkLength) + 1);
 
+            SQ.SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, null, Transform);
+
             for (int y = topLeftChunk.Y; y < bottomRightChunk.Y; y++) {
                 for (int x = topLeftChunk.X; x < bottomRightChunk.X; x++) {
                     var chunkIndex = new Vector2I(x, y);
@@ -111,8 +113,8 @@ namespace Somniloquy {
                 Vector2 topLeft = visibleBounds.TopLeft() - Vector2.One;
                 Vector2 bottomRight = visibleBounds.BottomRight() + Vector2.One;
 
-                Vector2I topLeftChunk = new Vector2I(Util.Round(topLeft.X / ChunkLength) - 2, Util.Round(topLeft.Y / ChunkLength) - 2);
-                Vector2I bottomRightChunk = new Vector2I(Util.Round(bottomRight.X / ChunkLength), Util.Round(bottomRight.Y / ChunkLength)) + Vector2I.One;
+                Vector2I topLeftChunk = new Vector2I(Util.Round(topLeft.X / ChunkLength) - 2, Util.Round(topLeft.Y / ChunkLength) - 2); // For some reason subtracting only (1, 1) instead of (2, 2) cuts off leftmost and topmost chunks from the screen
+                Vector2I bottomRightChunk = new Vector2I(Util.Round(bottomRight.X / ChunkLength) + 1, Util.Round(bottomRight.Y / ChunkLength) + 1);
 
                 camera.SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, null, layerView);
 

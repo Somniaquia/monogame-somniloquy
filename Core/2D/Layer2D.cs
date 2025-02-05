@@ -11,8 +11,12 @@ namespace Somniloquy {
         [JsonIgnore] public Section2D Section;
         [JsonIgnore] public Layer2D Parent;
         [JsonInclude] public List<Layer2D> Layers;
-        [JsonInclude] public Matrix Transform = Matrix.Identity;
         [JsonInclude] public string Identifier = "";
+
+        [JsonInclude] public Vector2I Displacement = Vector2I.Zero;
+        [JsonInclude] public float Scale = 1f;
+        [JsonInclude] public float Rotation = 0f;
+        [JsonIgnore] public Matrix Transform = Matrix.Identity;
         [JsonIgnore] public bool Enabled = true;
         [JsonIgnore] public float Opacity = 1f;
         
@@ -20,10 +24,6 @@ namespace Somniloquy {
         public Layer2D(string identifier) { Identifier = identifier; }
 
         public Layer2D AddLayer(Layer2D layer) {
-            // layer.Transform =
-            //     Matrix.CreateTranslation(new Vector3(-10, -10, 0)) *
-            //     Matrix.CreateRotationZ(3.141592653589793238f);
-            //     Matrix.CreateScale(new Vector3(0.5f, 0.5f, 1));
             Layers ??= new();
             Layers.Add(layer);
             layer.Section = Section;
@@ -60,6 +60,16 @@ namespace Somniloquy {
             if (child == this) return true;
             if (Layers is null) return false;
             return Layers.Any(layer => layer.Contains(child));
+        }
+
+        public void UpdateTransform() {
+            Transform =
+                Matrix.CreateRotationZ(Rotation) *
+                Matrix.CreateScale(new Vector3(Scale, Scale, 1)) *
+                Matrix.CreateTranslation(new Vector3(Displacement.X, Displacement.Y, 0));
+            
+            if (Parent is not null) Transform = Parent.Transform * Transform;
+            Layers?.ForEach(layer => UpdateTransform());
         }
 
         public RectangleF GetVisisbleBounds(Camera2D camera) {
