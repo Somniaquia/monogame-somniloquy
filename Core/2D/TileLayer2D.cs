@@ -232,12 +232,75 @@
                         if (visible.Width <= 0 || visible.Height <= 0) continue;
                         Rectangle sourceRect = new(Util.Round(visible.X - chunkBounds.X), Util.Round(visible.Y - chunkBounds.Y), Util.Round(visible.Width), Util.Round(visible.Height));
 
-                        Chunks[chunkIndex].Draw(camera, new Rectangle(chunkPos, Vector2I.One * chunkLengthInPixels), sourceRect, Opacity);
+                        var chunk = Chunks[chunkIndex]; // TODO: only render tiles inside screen
+                        var destination = new Rectangle(chunkPos, Vector2I.One * chunkLengthInPixels);
+                        for (int tileY = 0; tileY < ChunkLength; tileY++) {
+                            for (int tileX = 0; tileX < ChunkLength; tileX++) {
+                                chunk.Tiles[tileX, tileY]?.Draw(camera, new Rectangle(new Vector2I(destination.X + tileX * TileLength, destination.Y + tileY * TileLength), new Vector2I(TileLength)), Opacity);
+                            }
+                        }
                     }
                 }
             }
 
+            DrawCollisionBounds(camera);
             base.Draw(camera);
+        }
+
+        public void DrawCollisionBounds(Camera2D camera) {
+            camera.SB.End();
+
+            List<VertexPositionColor> vertices = new();
+            var chunkLengthInPixels = ChunkLength * TileLength;
+
+            var visibleBounds = GetVisisbleBounds(camera);
+            Vector2 topLeft = visibleBounds.TopLeft() - Vector2.One;
+            Vector2 bottomRight = visibleBounds.BottomRight() + Vector2.One;
+
+            Vector2I topLeftChunk = new(Util.Round(topLeft.X / chunkLengthInPixels) - 2, Util.Round(topLeft.Y / chunkLengthInPixels) - 2);
+            Vector2I bottomRightChunk = new(Util.Round(bottomRight.X / chunkLengthInPixels) + 1, Util.Round(bottomRight.Y / chunkLengthInPixels) + 1);
+        
+            for (int y = topLeftChunk.Y; y < bottomRightChunk.Y; y++) {
+                for (int x = topLeftChunk.X; x < bottomRightChunk.X; x++) {
+                    var chunkIndex = new Vector2I(x, y);
+                    if (!Chunks.ContainsKey(chunkIndex)) continue;
+                    
+                    RectangleF chunkBounds = new(x * chunkLengthInPixels, y * chunkLengthInPixels, chunkLengthInPixels, chunkLengthInPixels);
+                    RectangleF visible = RectangleF.Intersect(new RectangleF(topLeft, bottomRight - topLeft), chunkBounds);
+
+                    if (visible.Width <= 0 || visible.Height <= 0) continue;
+                    Rectangle sourceRect = new(Util.Round(visible.X - chunkBounds.X), Util.Round(visible.Y - chunkBounds.Y), Util.Round(visible.Width), Util.Round(visible.Height));
+
+                    var chunk = Chunks[chunkIndex];
+                    for (int tileY = 0; tileY < ChunkLength; tileY++) {
+                        for (int tileX = 0; tileX < ChunkLength; tileX++) {
+                            if (chunk.Tiles[tileX, tileY] is null) continue;
+                            var tileVertices = chunk.Tiles[tileX, tileY]?.CollisionVertices;
+                            if (tileVertices.Length < 2) return;
+                            var offsetX = chunkLengthInPixels * x + TileLength * tileX;
+                            var offsetY = chunkLengthInPixels * y + TileLength * tileY;
+                            for (int i = 0; i < tileVertices.Length - 1; i++) {
+                                vertices.Add(new VertexPositionColor(new Vector3(camera.ToScreenPos(ToWorldPos(new Vector2(offsetX + tileVertices[i].X, offsetY + tileVertices[i].Y))), 0), Color.Tomato));
+                                vertices.Add(new VertexPositionColor(new Vector3(camera.ToScreenPos(ToWorldPos(new Vector2(offsetX + tileVertices[i + 1].X, offsetY + tileVertices[i + 1].Y))), 0), Color.Tomato));
+                            }
+                            vertices.Add(new VertexPositionColor(new Vector3(camera.ToScreenPos(ToWorldPos(new Vector2(offsetX + tileVertices.Last().X, offsetY + tileVertices.Last().Y))), 0), Color.Tomato));
+                            vertices.Add(new VertexPositionColor(new Vector3(camera.ToScreenPos(ToWorldPos(new Vector2(offsetX + tileVertices[0].X, offsetY + tileVertices[0 + 1].Y))), 0), Color.Tomato));
+                        }
+                    }
+                }
+            }
+
+            if (vertices.Count == 0) return;
+            var verticesArray = vertices.ToArray();
+
+            VertexBuffer vertexBuffer = new(SQ.GD, typeof(VertexPositionColor), verticesArray.Length, BufferUsage.WriteOnly);
+            vertexBuffer.SetData(verticesArray);
+            SQ.GD.SetVertexBuffer(vertexBuffer);
+
+            foreach (var pass in SQ.BasicEffect.CurrentTechnique.Passes) {
+                pass.Apply();
+                SQ.GD.DrawPrimitives(PrimitiveType.LineList, 0, verticesArray.Length / 2);
+            }
         }
     }
 
@@ -288,6 +351,7 @@
                     .SetCurrentAnimation("0");
 
                 tile = new Tile2D().SetSprite(sprite);
+                tile.CollisionVertices = new Vector2[] { new(0, 0), new(16, 0), new(16, 16), new(0, 16) };
 
                 SetTile(GetTilePositionInChunk(positionInChunk), tile);
             }
@@ -308,14 +372,6 @@
                 return null;
             }
             return tile.GetColor(posInTile);
-        }
-
-        public void Draw(Camera2D camera, Rectangle destination, Rectangle source, float opacity = 1f) {
-            for (int y = 0; y < Parent.ChunkLength; y++) {
-                for (int x = 0; x < Parent.ChunkLength; x++) {
-                    Tiles[x, y]?.Draw(camera, new Rectangle(new Vector2I(destination.X + x * Parent.TileLength, destination.Y + y * Parent.TileLength), new Vector2I(Parent.TileLength)), opacity);
-                }
-            }
         }
     }
 

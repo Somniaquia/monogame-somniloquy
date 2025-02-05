@@ -220,6 +220,7 @@ namespace Somniloquy {
         public override void Update() { }
 
         public override void Draw() {
+            Screen.Camera.SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, transformMatrix: Screen.Camera.Transform);
             if (Editor.Focused && PaintModeState == PaintModeState.Idle) Screen.Camera.DrawPoint((Vector2I)ToLayerPos(Screen.Camera.GlobalMousePos.Value), SelectedColor * 0.5f);
             
             if (Editor.Focused && PreviousGlobalMousePos is not null) {

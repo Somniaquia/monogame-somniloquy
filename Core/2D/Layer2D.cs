@@ -64,12 +64,12 @@ namespace Somniloquy {
 
         public void UpdateTransform() {
             Transform =
-                Matrix.CreateRotationZ(Rotation) *
                 Matrix.CreateScale(new Vector3(Scale, Scale, 1)) *
+                Matrix.CreateRotationZ(Rotation) *
                 Matrix.CreateTranslation(new Vector3(Displacement.X, Displacement.Y, 0));
             
             if (Parent is not null) Transform = Parent.Transform * Transform;
-            Layers?.ForEach(layer => UpdateTransform());
+            Layers?.ForEach(layer => layer.UpdateTransform());
         }
 
         public RectangleF GetVisisbleBounds(Camera2D camera) {

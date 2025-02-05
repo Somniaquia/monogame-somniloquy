@@ -161,8 +161,8 @@ namespace Somniloquy {
 
         public override void Draw() {
             Screen.Section.Draw(Screen.Camera);
-
             EditorMode?.Draw();
+
             Screen.Camera.SB.End();
             
             if (SelectedLayer is TileLayer2D tileLayer) {
@@ -180,15 +180,15 @@ namespace Somniloquy {
             var bounds = Screen.Camera.VisibleBounds;
 
             for (float y = MathF.Floor(bounds.Top / spacing) * spacing; y <= bounds.Bottom; y += spacing) {
-                Vector2 start = Screen.Camera.ToScreenPos(new Vector2(bounds.Left, y));
-                Vector2 end = Screen.Camera.ToScreenPos(new Vector2(bounds.Right, y));
+                Vector2 start = Screen.Camera.ToScreenPos(SelectedLayer.ToWorldPos(new Vector2(bounds.Left, y)));
+                Vector2 end = Screen.Camera.ToScreenPos(SelectedLayer.ToWorldPos(new Vector2(bounds.Right, y)));
                 vertices.Add(new VertexPositionColor(new Vector3(start, 0), color));
                 vertices.Add(new VertexPositionColor(new Vector3(end, 0), color));
             }
 
             for (float x = MathF.Floor(bounds.Left / spacing) * spacing; x <= bounds.Right; x += spacing) {
-                Vector2 start = Screen.Camera.ToScreenPos(new Vector2(x, bounds.Top));
-                Vector2 end = Screen.Camera.ToScreenPos(new Vector2(x, bounds.Bottom));
+                Vector2 start = Screen.Camera.ToScreenPos(SelectedLayer.ToWorldPos(new Vector2(x, bounds.Top)));
+                Vector2 end = Screen.Camera.ToScreenPos(SelectedLayer.ToWorldPos(new Vector2(x, bounds.Bottom)));
                 vertices.Add(new VertexPositionColor(new Vector3(start, 0), color));
                 vertices.Add(new VertexPositionColor(new Vector3(end, 0), color));
             }

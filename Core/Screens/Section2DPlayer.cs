@@ -30,6 +30,8 @@ namespace Somniloquy {
         }
 
         public override void Draw() {
+            Screen.Camera.SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, transformMatrix: Screen.Camera.Transform);
+
             base.Draw();
             Screen.Section.Draw(Screen.Camera);
             Player.Draw(Screen.Camera);

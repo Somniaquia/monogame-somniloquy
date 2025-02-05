@@ -1,69 +1,71 @@
 namespace Somniloquy {
     using System;
     using System.Collections.Generic;
-
+    using System.Linq;
     using Microsoft.Xna.Framework;
+    using Microsoft.Xna.Framework.Graphics;
     using Microsoft.Xna.Framework.Input;
     
 
     public class Entity {
         public CircleF CollisionBounds { get; set; }
         public Vector2 Velocity { get; set; }
-        public TileLayer2D CurrentLayer { get; set; }
+        public Layer2D CurrentLayer { get; set; }
 
         public virtual void Update() {
-            
         }
 
         public Vector2 ResolveCollisions(Vector2 potentialPosition) {
-            // Vector2I startTilePosition = CurrentLayer.GetTilePosition((Vector2I)CollisionBounds.Center);
-            // Vector2I endTilePosition = CurrentLayer.GetTilePosition((Vector2I)potentialPosition);
+            if (CurrentLayer is TileLayer2D layer) {
+                Vector2I startTilePosition = layer.GetTilePosition((Vector2I)CollisionBounds.Center);
+                Vector2I endTilePosition = layer.GetTilePosition((Vector2I)potentialPosition);
 
-            // var pair = Vector2Extensions.Rationalize(startTilePosition, endTilePosition);
-            // startTilePosition = pair.Item1 - new Vector2I(1, 1);
-            // endTilePosition = pair.Item2 + new Vector2I(1, 1);
+                var pair = Vector2Extensions.Rationalize(startTilePosition, endTilePosition);
+                startTilePosition = pair.Item1 - new Vector2I(1, 1);
+                endTilePosition = pair.Item2 + new Vector2I(1, 1);
 
-            // for (int y = startTilePosition.Y; y <= endTilePosition.Y; y++) {
-            //     for (int x = startTilePosition.X; x <= endTilePosition.X; x++) {
-                    
-            //         var tile = CurrentLayer.GetTile(new Vector2I(x, y));
-            //         if (tile is null) continue;
+                for (int y = startTilePosition.Y; y <= endTilePosition.Y; y++) {
+                    for (int x = startTilePosition.X; x <= endTilePosition.X; x++) {
+                        
+                        var tile = layer.GetTile(new Vector2I(x, y));
+                        if (tile is null) continue;
 
-                    // var tileBounds = new Rectangle(x * CurrentLayer.TileLength, y * CurrentLayer.TileLength, CurrentLayer.TileLength, CurrentLayer.TileLength);
+                        var tileBounds = new Rectangle(x * layer.TileLength, y * layer.TileLength, layer.TileLength, layer.TileLength);
 
-                    // Vector2 nearestVector2I = new(
-                    //     MathF.Max(x * CurrentLayer.TileLength, MathF.Min(potentialPosition.X, (x + 1) * CurrentLayer.TileLength)),
-                    //     MathF.Max(y * CurrentLayer.TileLength, MathF.Min(potentialPosition.Y, (y + 1) * CurrentLayer.TileLength))
-                    // );
+                        Vector2 nearestVector2I = new(
+                            MathF.Max(x * layer.TileLength, MathF.Min(potentialPosition.X, (x + 1) * layer.TileLength)),
+                            MathF.Max(y * layer.TileLength, MathF.Min(potentialPosition.Y, (y + 1) * layer.TileLength))
+                        );
 
-                    // Vector2 rayToNearest = nearestVector2I - potentialPosition;
-                    // float overlap = CollisionBounds.Radius - rayToNearest.Length();
+                        Vector2 rayToNearest = nearestVector2I - potentialPosition;
+                        float overlap = CollisionBounds.Radius - rayToNearest.Length();
 
-                    // if (float.IsNaN(overlap)) overlap = 0;
+                        if (float.IsNaN(overlap)) overlap = 0;
 
-                    // if (overlap > 0) {
-                    //     potentialPosition -= Vector2.Normalize(rayToNearest) * overlap;
-                    // }
+                        if (overlap > 0) {
+                            potentialPosition -= Vector2.Normalize(rayToNearest) * overlap;
+                        }
 
-                    // var vertices = tile.CollisionVertices;
-                    // if (vertices is null) continue;
+                        var vertices = tile.CollisionVertices;
+                        if (vertices is null) continue;
 
-                    // for (var i = 0; i < vertices.Length; i++) {
-                    //     var v1 = vertices[i] + new Vector2(x, y) * TileLayer2D.TileLength;
-                    //     var v2 = vertices[(i + 1) % vertices.Length] + new Vector2(x, y) * TileLayer2D.TileLength;
-                    //     if (!Util.Intersects((v1, v2), CollisionBounds)) continue;
+                        for (var i = 0; i < vertices.Length; i++) {
+                            var v1 = vertices[i] + new Vector2(x, y) * layer.TileLength;
+                            var v2 = vertices[(i + 1) % vertices.Length] + new Vector2(x, y) * layer.TileLength;
+                            if (!CollisionBounds.IntersectsLine(v1, v2)) continue;
 
-                    //     Vector2 closestVector2IOnEdge = Util.GetClosestVector2IOnLine((v1, v2), potentialPosition);
-                    //     float distanceToEdge = (closestVector2IOnEdge - potentialPosition).Length();
+                            Vector2 closestVector2IOnEdge = Util.GetClosestVector2IOnLine((v1, v2), potentialPosition);
+                            float distanceToEdge = (closestVector2IOnEdge - potentialPosition).Length();
 
-                    //     if (distanceToEdge < CollisionBounds.Radius && distanceToEdge > 0) {
-                    //         var collisionDirection = Vector2.Normalize(potentialPosition - closestVector2IOnEdge);
-                    //         var overlap = CollisionBounds.Radius - distanceToEdge;
-                    //         potentialPosition += collisionDirection * overlap;
-                    //     }
-                    // }
-            //     }
-            // }
+                            if (distanceToEdge < CollisionBounds.Radius && distanceToEdge > 0) {
+                                var collisionDirection = Vector2.Normalize(potentialPosition - closestVector2IOnEdge);
+                                overlap = CollisionBounds.Radius - distanceToEdge;
+                                potentialPosition += collisionDirection * overlap;
+                            }
+                        }
+                    }
+                }
+            }
 
             return potentialPosition;
         }
@@ -72,7 +74,9 @@ namespace Somniloquy {
             //if (FSprite is not null) {
             //    Somniloquy.DrawFunctionalSprite(FSprite, FSprite.GetDestinationRectangle(MathsHelper.ToVector2I(CollisionBounds.Center)), null);
             //} else {
-            camera.SB.DrawCircle((Vector2I)CollisionBounds.Center, (int)CollisionBounds.Radius, Color.White, false);
+            camera.SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
+            int radius = (int)(CollisionBounds.Radius * camera.Zoom);
+            camera.SB.DrawCircle((Vector2I)camera.ToScreenPos(CollisionBounds.Center), radius, Color.DeepPink, false);
             //}
         }
     }
@@ -104,7 +108,9 @@ namespace Somniloquy {
 
         public Player(Camera2D camera) {
             Camera = camera;
-            CollisionBounds = new(Vector2.Zero, 7);
+            CollisionBounds = new(Vector2.Zero, 8);
+            var screen = ScreenManager.GetFirstOfType<Section2DScreen>();
+            CurrentLayer = screen?.Section?.Root?.Layers?.Find(layer => layer is TileLayer2D);
         }
 
         public override void Update() {

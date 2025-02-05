@@ -158,7 +158,7 @@ namespace Somniloquy {
                 Layer.Opacity = 1f;
             } else if (Focused) {
                 ((BoxUIDefaultRenderer)Renderer).Color = Color.Yellow;
-                Layer.Opacity = 0.2f;
+                Layer.Opacity = 0.5f;
 
                 if (InputManager.IsKeyDown(Keys.LeftAlt)) {
                     Screen.Editor.SelectedLayer = Layer;
@@ -169,7 +169,7 @@ namespace Somniloquy {
                 }
             } else if (Layer.Enabled) {
                 ((BoxUIDefaultRenderer)Renderer).Color = Color.White;
-                Layer.Opacity = 0.2f;
+                Layer.Opacity = 0.5f;
             } else {
                 ((BoxUIDefaultRenderer)Renderer).Color = Color.Gray;
                 Layer.Opacity = 0f;

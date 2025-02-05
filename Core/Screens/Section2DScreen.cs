@@ -41,7 +41,7 @@ namespace Somniloquy {
                 Editor = new(this);
                 Editor.SwitchEditorMode(new PaintMode(this, Editor));
             } else {
-                if (ScreenManager.FocusedScreen != this) return; 
+                if (ScreenManager.FocusedScreen != Editor) return; 
                 Editor.UnloadContent();
                 Editor = null;
                 Player = new(this);
