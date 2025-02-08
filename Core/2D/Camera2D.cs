@@ -46,7 +46,6 @@ namespace Somniloquy {
 
         public void LoadContent() {
             SB = new(SQ.GD);
-            DebugInfo.Subscribe(() => $"Zoom: {Zoom}");
         }
 
         public void Update() {

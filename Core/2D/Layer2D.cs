@@ -54,6 +54,11 @@ namespace Somniloquy {
             Layers?.ForEach(layer => layer.Show());
         }
 
+        public List<Layer2D> GetSelfAndChildren() {
+            if (Layers is null) return new List<Layer2D>() { this };
+            return new List<Layer2D> { this }.Concat(Layers.SelectMany(layer => layer.GetSelfAndChildren())).ToList();
+        }
+
         public bool HasChildren() => Layers is not null && Layers.Count > 0;
 
         public bool Contains(Layer2D child) {

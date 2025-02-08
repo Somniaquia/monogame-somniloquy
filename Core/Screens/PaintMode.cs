@@ -86,30 +86,30 @@ namespace Somniloquy {
         }
 
         public void PaintRectangle() {
-            if (PreviousGlobalMousePos is null) PreviousGlobalMousePos = Screen.Camera.GlobalMousePos;
+            if (PreviousGlobalMousePos is null) PreviousGlobalMousePos = Editor.Camera.GlobalMousePos;
             PaintModeState = PaintModeState.Rectangle;
 
             if (InputManager.IsMouseButtonPressed(MouseButtons.LeftButton)) {
                 if (PreviousGlobalMousePos is null) return;
                 var chain = CommandManager.AddCommandChain(new CommandChain());
-                ((PaintableLayer2D)Editor.SelectedLayer).PaintRectangle((Vector2I)ToLayerPos(PreviousGlobalMousePos.Value), (Vector2I)ToLayerPos(Screen.Camera.GlobalMousePos.Value), SelectedColor, 1f, true, chain);
-                PreviousGlobalMousePos = Screen.Camera.GlobalMousePos;
+                ((PaintableLayer2D)Editor.SelectedLayer).PaintRectangle((Vector2I)ToLayerPos(PreviousGlobalMousePos.Value), (Vector2I)ToLayerPos(Editor.Camera.GlobalMousePos.Value), SelectedColor, 1f, true, chain);
+                PreviousGlobalMousePos = Editor.Camera.GlobalMousePos;
             }
         }
 
         public void PaintLine() {
-            if (PreviousGlobalMousePos is null) PreviousGlobalMousePos = Screen.Camera.GlobalMousePos;
+            if (PreviousGlobalMousePos is null) PreviousGlobalMousePos = Editor.Camera.GlobalMousePos;
             PaintModeState = PaintModeState.Line;
 
             if (InputManager.IsMouseButtonPressed(MouseButtons.LeftButton)) {
                 if (PreviousGlobalMousePos is null) return;
                 var chain = CommandManager.AddCommandChain(new CommandChain());
                 if (InputManager.IsKeyDown(Keys.LeftShift)) {
-                    ((PaintableLayer2D)Editor.SelectedLayer).PaintSnappedLine((Vector2I)ToLayerPos(PreviousGlobalMousePos.Value), (Vector2I)ToLayerPos(Screen.Camera.GlobalMousePos.Value), SelectedColor, 1f, 0, chain);
-                    PreviousGlobalMousePos = PixelActions.ApplySnappedLineAction((Vector2I)ToLayerPos(PreviousGlobalMousePos.Value), (Vector2I)ToLayerPos(Screen.Camera.GlobalMousePos.Value), 0, _ => { });
+                    ((PaintableLayer2D)Editor.SelectedLayer).PaintSnappedLine((Vector2I)ToLayerPos(PreviousGlobalMousePos.Value), (Vector2I)ToLayerPos(Editor.Camera.GlobalMousePos.Value), SelectedColor, 1f, 0, chain);
+                    PreviousGlobalMousePos = PixelActions.ApplySnappedLineAction((Vector2I)ToLayerPos(PreviousGlobalMousePos.Value), (Vector2I)ToLayerPos(Editor.Camera.GlobalMousePos.Value), 0, _ => { });
                 } else {
-                    ((PaintableLayer2D)Editor.SelectedLayer).PaintLine((Vector2I)ToLayerPos(PreviousGlobalMousePos.Value), (Vector2I)ToLayerPos(Screen.Camera.GlobalMousePos.Value), SelectedColor, 1f, 0, chain);
-                    PreviousGlobalMousePos = Screen.Camera.GlobalMousePos;
+                    ((PaintableLayer2D)Editor.SelectedLayer).PaintLine((Vector2I)ToLayerPos(PreviousGlobalMousePos.Value), (Vector2I)ToLayerPos(Editor.Camera.GlobalMousePos.Value), SelectedColor, 1f, 0, chain);
+                    PreviousGlobalMousePos = Editor.Camera.GlobalMousePos;
                 }
             }
         }
@@ -128,12 +128,12 @@ namespace Somniloquy {
             if (!Editor.Focused || PaintModeState == PaintModeState.Block) return;
             if (Editor.SelectedLayer is PaintableLayer2D layer) {
                 if (PreviousGlobalMousePos is null) {
-                    PreviousGlobalMousePos = Screen.Camera.GlobalMousePos;
+                    PreviousGlobalMousePos = Editor.Camera.GlobalMousePos;
                     PaintModeState = PaintModeState.Select;
                 }
                 if (InputManager.IsMouseButtonPressed(MouseButtons.LeftButton)) {
                     if (PreviousGlobalMousePos is null) return;
-                    var (start, end) = Vector2Extensions.Rationalize(PreviousGlobalMousePos.Value, Screen.Camera.GlobalMousePos.Value);
+                    var (start, end) = Vector2Extensions.Rationalize(PreviousGlobalMousePos.Value, Editor.Camera.GlobalMousePos.Value);
                     SelectedTexture = layer.GetTexture(new Rectangle((Vector2I)start, (Vector2I)(end - start)));
                 }
             }
@@ -152,7 +152,7 @@ namespace Somniloquy {
 
         public void SeperateLayer(PaintableLayer2D layer) {
             Editor.SelectedLayer.AddLayer(layer);
-            var (start, end) = Vector2Extensions.Rationalize(PreviousGlobalMousePos.Value, Screen.Camera.GlobalMousePos.Value);
+            var (start, end) = Vector2Extensions.Rationalize(PreviousGlobalMousePos.Value, Editor.Camera.GlobalMousePos.Value);
             layer.PaintTexture(new Rectangle((Vector2I)start, (Vector2I)(end - start)), SelectedTexture, 1f);
             CutTexture();
         }
@@ -161,7 +161,7 @@ namespace Somniloquy {
             if (!Editor.Focused || PaintModeState == PaintModeState.Block) return;
             if (SelectedTexture is null) return;
             if (Editor.SelectedLayer is PaintableLayer2D layer) {
-                layer.PaintTexture((Vector2I)ToLayerPos(Screen.Camera.GlobalMousePos.Value), SelectedTexture, 1f);
+                layer.PaintTexture((Vector2I)ToLayerPos(Editor.Camera.GlobalMousePos.Value), SelectedTexture, 1f);
             }
         }
 
@@ -178,14 +178,14 @@ namespace Somniloquy {
             if (Editor.SelectedLayer is PaintableLayer2D layer) {
                 if (InputManager.IsKeyDown(Keys.LeftShift)) {
                     if (!InputManager.IsMouseButtonPressed(MouseButtons.LeftButton)) return;
-                    var color = layer.GetColor((Vector2I)ToLayerPos(Screen.Camera.GlobalMousePos.Value));
+                    var color = layer.GetColor((Vector2I)ToLayerPos(Editor.Camera.GlobalMousePos.Value));
                     if (color != null) {
                         color = SelectedColor.BlendWith(color.Value, 0.5f);
                         SelectedColor = color.Value;
                         ColorPicker.SetColor(color.Value);
                     }
                 } else {
-                    var color = layer.GetColor((Vector2I)ToLayerPos(Screen.Camera.GlobalMousePos.Value));
+                    var color = layer.GetColor((Vector2I)ToLayerPos(Editor.Camera.GlobalMousePos.Value));
                     if (color != null) {
                         SelectedColor = color.Value;
                         ColorPicker.SetColor(color.Value);
@@ -197,7 +197,7 @@ namespace Somniloquy {
         public void Paint() {
             if (!Editor.Focused) return;
             if (Editor.SelectedLayer is PaintableLayer2D paintableLayer) {
-                Brush.Paint(paintableLayer, InputManager.IsMouseButtonPressed(MouseButtons.LeftButton), SelectedColor, Screen.Camera);
+                Brush.Paint(paintableLayer, InputManager.IsMouseButtonPressed(MouseButtons.LeftButton), SelectedColor, Editor.Camera);
             }
         }
 
@@ -205,7 +205,7 @@ namespace Somniloquy {
             if (!Editor.Focused) return;
 
             if (Editor.SelectedLayer is PaintableLayer2D paintableLayer) {
-                Brush.Paint(paintableLayer, InputManager.IsMouseButtonPressed(MouseButtons.RightButton), Color.Transparent, Screen.Camera);
+                Brush.Paint(paintableLayer, InputManager.IsMouseButtonPressed(MouseButtons.RightButton), Color.Transparent, Editor.Camera);
             }
         }
 
@@ -213,27 +213,27 @@ namespace Somniloquy {
             if (!Editor.Focused) return;
 
             if (Editor.SelectedLayer is PaintableLayer2D paintableLayer) {
-                paintableLayer.Fill((Vector2I)ToLayerPos(Screen.Camera.GlobalMousePos.Value), SelectedColor);
+                paintableLayer.Fill((Vector2I)ToLayerPos(Editor.Camera.GlobalMousePos.Value), SelectedColor);
             }
         }
 
         public override void Update() { }
 
         public override void Draw() {
-            Screen.Camera.SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, transformMatrix: Screen.Camera.Transform);
-            if (Editor.Focused && PaintModeState == PaintModeState.Idle) Screen.Camera.DrawPoint((Vector2I)ToLayerPos(Screen.Camera.GlobalMousePos.Value), SelectedColor * 0.5f);
+            Editor.Camera.SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, transformMatrix: Editor.Camera.Transform);
+            if (Editor.Focused && PaintModeState == PaintModeState.Idle) Editor.Camera.DrawPoint((Vector2I)ToLayerPos(Editor.Camera.GlobalMousePos.Value), SelectedColor * 0.5f);
             
             if (Editor.Focused && PreviousGlobalMousePos is not null) {
                 if (PaintModeState == PaintModeState.Line) {
                     if (InputManager.IsKeyDown(Keys.LeftShift)) {
-                        PixelActions.ApplySnappedLineAction((Vector2I)ToLayerPos(PreviousGlobalMousePos.Value), (Vector2I)ToLayerPos(Screen.Camera.GlobalMousePos.Value), 0, (pos) => Screen.Camera.SB.Draw(SQ.SB.Pixel, pos, SelectedColor * 0.5f));
+                        PixelActions.ApplySnappedLineAction((Vector2I)ToLayerPos(PreviousGlobalMousePos.Value), (Vector2I)ToLayerPos(Editor.Camera.GlobalMousePos.Value), 0, (pos) => Editor.Camera.SB.Draw(SQ.SB.Pixel, pos, SelectedColor * 0.5f));
                     } else {
-                        PixelActions.ApplyLineAction((Vector2I)ToLayerPos(PreviousGlobalMousePos.Value), (Vector2I)ToLayerPos(Screen.Camera.GlobalMousePos.Value), 0, (pos) => Screen.Camera.SB.Draw(SQ.SB.Pixel, pos, SelectedColor * 0.5f));
+                        PixelActions.ApplyLineAction((Vector2I)ToLayerPos(PreviousGlobalMousePos.Value), (Vector2I)ToLayerPos(Editor.Camera.GlobalMousePos.Value), 0, (pos) => Editor.Camera.SB.Draw(SQ.SB.Pixel, pos, SelectedColor * 0.5f));
                     }
                 } else if (PaintModeState == PaintModeState.Rectangle) {
-                    PixelActions.ApplyRectangleAction((Vector2I)ToLayerPos(PreviousGlobalMousePos.Value), (Vector2I)ToLayerPos(Screen.Camera.GlobalMousePos.Value), true, (pos) => Screen.Camera.SB.Draw(SQ.SB.Pixel, pos, SelectedColor * 0.5f));
+                    PixelActions.ApplyRectangleAction((Vector2I)ToLayerPos(PreviousGlobalMousePos.Value), (Vector2I)ToLayerPos(Editor.Camera.GlobalMousePos.Value), true, (pos) => Editor.Camera.SB.Draw(SQ.SB.Pixel, pos, SelectedColor * 0.5f));
                 } else if (PaintModeState == PaintModeState.Select) {
-                    PixelActions.ApplyRectangleAction((Vector2I)ToLayerPos(PreviousGlobalMousePos.Value), (Vector2I)ToLayerPos(Screen.Camera.GlobalMousePos.Value), true, (pos) => Screen.Camera.SB.Draw(SQ.SB.Pixel, pos, Color.White * 0.1f));
+                    PixelActions.ApplyRectangleAction((Vector2I)ToLayerPos(PreviousGlobalMousePos.Value), (Vector2I)ToLayerPos(Editor.Camera.GlobalMousePos.Value), true, (pos) => Editor.Camera.SB.Draw(SQ.SB.Pixel, pos, Color.White * 0.1f));
                 } 
             }
         }

@@ -7,7 +7,7 @@ namespace Somniloquy {
 
     public class Tile2D {
         [JsonInclude] public Sprite2D Sprite;
-        [JsonInclude] public Vector2[] CollisionVertices;
+        [JsonInclude] public List<Vector2> CollisionVertices;
 
         public Tile2D() { }
 

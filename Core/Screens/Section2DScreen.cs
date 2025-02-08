@@ -8,7 +8,6 @@ namespace Somniloquy {
 
     public class Section2DScreen : BoxUI {
         public Section2D Section;
-        public Camera2D Camera = new();
         public Section2DEditor Editor;
         public Section2DPlayer Player;
 
@@ -21,16 +20,12 @@ namespace Somniloquy {
             }
 
             Section.Screen = this;
-
             Editor = new(this);
-            Camera.MaxZoom = 32f;
-            Camera.MinZoom = 1 / 4f;
 
             InputManager.RegisterKeybind(Keys.Enter, _ => TogglePlay(), TriggerOnce.True);
         }
 
         public override void LoadContent() {
-            Camera.LoadContent();
             Editor.LoadContent();
         }
         
@@ -40,11 +35,13 @@ namespace Somniloquy {
                 Player = null;
                 Editor = new(this);
                 Editor.SwitchEditorMode(new PaintMode(this, Editor));
+                Editor.LoadContent();
             } else {
                 if (ScreenManager.FocusedScreen != Editor) return; 
                 Editor.UnloadContent();
                 Editor = null;
                 Player = new(this);
+                Player.LoadContent();
             }
         }
 
@@ -53,11 +50,9 @@ namespace Somniloquy {
             Editor?.Update();
             Section?.Update();
             Player?.Update();
-            Camera.Update();
         }
 
         public override void Draw() {
-            Camera.SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, transformMatrix: Camera.Transform);
             Editor?.Draw();
             Player?.Draw();
             // Camera.SB.End();

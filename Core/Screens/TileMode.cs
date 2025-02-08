@@ -3,6 +3,7 @@ namespace Somniloquy {
     using System.Collections.Generic;
     
     using Microsoft.Xna.Framework;
+    using Microsoft.Xna.Framework.Graphics;
     using Microsoft.Xna.Framework.Input;
 
     public enum TileModeState { Idle, Rectangle, Line, Select, Block }
@@ -25,7 +26,7 @@ namespace Somniloquy {
             Keybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.LeftAlt, MouseButtons.LeftButton }, new object[] { Keys.LeftShift, Keys.LeftControl, Keys.F }, _ => SelectTile(), TriggerOnce.False));
             Keybinds.Add(InputManager.RegisterKeybind(new object[] { Keys.LeftShift, Keys.LeftAlt }, new object[] { Keys.LeftControl, Keys.F }, _ => SelectTiles(), _ => PostSelectTiles(), TriggerOnce.False));
 
-            DebugBinds.Add(DebugInfo.Subscribe(() => { 
+            DebugBinds.Add(DebugInfo.Subscribe(() => {
                 if (SelectedTiles is null) return "Selected Tiles: None";
                 return $"Selected Tiles: {SelectedTiles.GetLength(0)}x{SelectedTiles.GetLength(1)}";
             }));
@@ -40,7 +41,7 @@ namespace Somniloquy {
         }
 
         private Vector2I GetTilePos(TileLayer2D layer) {
-            return layer.GetTilePosition((Vector2I)ToLayerPos(Screen.Camera.GlobalMousePos.Value));
+            return layer.GetTilePosition((Vector2I)ToLayerPos(Editor.Camera.GlobalMousePos.Value));
         }
 
         public void SelectTile() {
@@ -167,32 +168,33 @@ namespace Somniloquy {
 
         public override void Draw() {
             if (Editor.SelectedLayer is TileLayer2D layer) {
+                Editor.Camera.SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, transformMatrix: Editor.Camera.Transform);
 
                 if (Editor.Focused && TileModeState == TileModeState.Idle || TileModeState == TileModeState.Block) {
                     var tilePos = GetTilePos(layer);
-                    if (SelectedTiles is not null && SelectedTiles[0, 0] is not null) SelectedTiles[0, 0].Draw(Screen.Camera, new Rectangle(tilePos * layer.TileLength, new(layer.TileLength)), 0.25f);
-                    Screen.Camera.DrawFilledRectangle(new RectangleF(tilePos * layer.TileLength, new(layer.TileLength)), Color.White * 0.1f);
+                    if (SelectedTiles is not null && SelectedTiles[0, 0] is not null) SelectedTiles[0, 0].Draw(Editor.Camera, new Rectangle(tilePos * layer.TileLength, new(layer.TileLength)), 0.25f);
+                    Editor.Camera.DrawFilledRectangle(new RectangleF(tilePos * layer.TileLength, new(layer.TileLength)), Color.White * 0.1f);
                 } else if (Editor.Focused && PreviousTilePos is not null) {
                     if (TileModeState == TileModeState.Line) {
                         if (InputManager.IsKeyDown(Keys.LeftShift)) {
                             PixelActions.ApplySnappedLineAction(PreviousTilePos.Value, GetTilePos(layer), 0, (pos) => {
                                 var displacement = pos - PreviousTilePos;
-                                SelectedTiles[Util.PosMod(displacement.Value.X, SelectedTiles.GetLength(0)), Util.PosMod(displacement.Value.Y, SelectedTiles.GetLength(1))].Draw(Screen.Camera, new Rectangle(pos * layer.TileLength, new(layer.TileLength)), 0.25f);
+                                SelectedTiles[Util.PosMod(displacement.Value.X, SelectedTiles.GetLength(0)), Util.PosMod(displacement.Value.Y, SelectedTiles.GetLength(1))].Draw(Editor.Camera, new Rectangle(pos * layer.TileLength, new(layer.TileLength)), 0.25f);
                             });
                         } else {
                             PixelActions.ApplyLineAction(PreviousTilePos.Value, GetTilePos(layer), 0, (pos) => {
                                 var displacement = pos - PreviousTilePos;
-                                SelectedTiles[Util.PosMod(displacement.Value.X, SelectedTiles.GetLength(0)), Util.PosMod(displacement.Value.Y, SelectedTiles.GetLength(1))].Draw(Screen.Camera, new Rectangle(pos * layer.TileLength, new(layer.TileLength)), 0.25f);
+                                SelectedTiles[Util.PosMod(displacement.Value.X, SelectedTiles.GetLength(0)), Util.PosMod(displacement.Value.Y, SelectedTiles.GetLength(1))].Draw(Editor.Camera, new Rectangle(pos * layer.TileLength, new(layer.TileLength)), 0.25f);
                             });
                         }
                     } else if (TileModeState == TileModeState.Rectangle) {
                         PixelActions.ApplyRectangleAction(PreviousTilePos.Value, GetTilePos(layer), true, (pos) => {
                             var displacement = pos - PreviousTilePos;
-                            SelectedTiles[Util.PosMod(displacement.Value.X, SelectedTiles.GetLength(0)), Util.PosMod(displacement.Value.Y, SelectedTiles.GetLength(1))].Draw(Screen.Camera, new Rectangle(pos * layer.TileLength, new(layer.TileLength)), 0.25f);
+                            SelectedTiles[Util.PosMod(displacement.Value.X, SelectedTiles.GetLength(0)), Util.PosMod(displacement.Value.Y, SelectedTiles.GetLength(1))].Draw(Editor.Camera, new Rectangle(pos * layer.TileLength, new(layer.TileLength)), 0.25f);
                         });
                     } else if (TileModeState == TileModeState.Select) {
                         var (start, end) = Vector2Extensions.Rationalize(PreviousTilePos.Value, GetTilePos(layer));
-                        Screen.Camera.DrawFilledRectangle(new RectangleF(start * layer.TileLength, layer.TileLength * (end - start + new Vector2I(1))), Color.White * 0.1f);
+                        Editor.Camera.DrawFilledRectangle(new RectangleF(start * layer.TileLength, layer.TileLength * (end - start + new Vector2I(1))), Color.White * 0.1f);
                     }
                 }
             }

@@ -13,6 +13,10 @@ namespace Somniloquy {
             return (int)MathF.Round(num);
         }
 
+        public static Vector2I Round(Vector2 v) {
+            return new Vector2I(Round(v.X), Round(v.Y));
+        }
+
         public static float Lerp(float origin, float target, float lerpModifier) {
             return origin * (1 - lerpModifier) + target * lerpModifier;
         }

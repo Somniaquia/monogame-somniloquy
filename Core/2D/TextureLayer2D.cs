@@ -107,30 +107,65 @@ namespace Somniloquy {
         }
 
         public override void Draw(Camera2D camera) {
-            if (Opacity > 0f) {
-                Matrix layerView = Transform * camera.Transform;
-                var visibleBounds = GetVisisbleBounds(camera);
-                Vector2 topLeft = visibleBounds.TopLeft() - Vector2.One;
-                Vector2 bottomRight = visibleBounds.BottomRight() + Vector2.One;
+            if (Opacity == 0f) { base.Draw(camera); return; }
 
-                Vector2I topLeftChunk = new Vector2I(Util.Round(topLeft.X / ChunkLength) - 2, Util.Round(topLeft.Y / ChunkLength) - 2); // For some reason subtracting only (1, 1) instead of (2, 2) cuts off leftmost and topmost chunks from the screen
-                Vector2I bottomRightChunk = new Vector2I(Util.Round(bottomRight.X / ChunkLength) + 1, Util.Round(bottomRight.Y / ChunkLength) + 1);
+            Matrix layerView = Transform * camera.Transform;
+            var visibleBounds = GetVisisbleBounds(camera);
+            Vector2 topLeft = visibleBounds.TopLeft() - Vector2.One;
+            Vector2 bottomRight = visibleBounds.BottomRight() + Vector2.One;
 
-                camera.SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, null, layerView);
+            Vector2I topLeftChunk = new Vector2I(Util.Round(topLeft.X / ChunkLength) - 2, Util.Round(topLeft.Y / ChunkLength) - 2); // For some reason subtracting only (1, 1) instead of (2, 2) cuts off leftmost and topmost chunks from the screen
+            Vector2I bottomRightChunk = new Vector2I(Util.Round(bottomRight.X / ChunkLength) + 1, Util.Round(bottomRight.Y / ChunkLength) + 1);
 
-                for (int y = topLeftChunk.Y; y <= bottomRightChunk.Y; y++) {
-                    for (int x = topLeftChunk.X; x <= bottomRightChunk.X; x++) {
-                        var chunkIndex = new Vector2I(x, y);
-                        if (!Chunks.TryGetValue(chunkIndex, out var chunk)) continue;
+            camera.SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, null, layerView);
 
-                        RectangleF chunkBounds = new(x * ChunkLength, y * ChunkLength, ChunkLength, ChunkLength);
-                        RectangleF visible = RectangleF.Intersect(new RectangleF(topLeft, bottomRight - topLeft), chunkBounds);
+            for (int y = topLeftChunk.Y; y <= bottomRightChunk.Y; y++) {
+                for (int x = topLeftChunk.X; x <= bottomRightChunk.X; x++) {
+                    var chunkIndex = new Vector2I(x, y);
+                    if (!Chunks.TryGetValue(chunkIndex, out var chunk)) continue;
 
-                        if (visible.Width <= 0 || visible.Height <= 0) continue;
-                        Rectangle sourceRect = new(Util.Round(visible.X - chunkBounds.X), Util.Round(visible.Y - chunkBounds.Y), Util.Round(visible.Width), Util.Round(visible.Height));
+                    RectangleF chunkBounds = new(x * ChunkLength, y * ChunkLength, ChunkLength, ChunkLength);
+                    RectangleF visible = RectangleF.Intersect(new RectangleF(topLeft, bottomRight - topLeft), chunkBounds);
 
-                        camera.SB.Draw(chunk.Texture, new Rectangle(Util.Round(visible.X), Util.Round(visible.Y), Util.Round(visible.Width), Util.Round(visible.Height)), sourceRect, Color.White * Opacity);
+                    if (visible.Width <= 0 || visible.Height <= 0) continue;
+                    Rectangle sourceRect = new(Util.Round(visible.X - chunkBounds.X), Util.Round(visible.Y - chunkBounds.Y), Util.Round(visible.Width), Util.Round(visible.Height));
+
+                    camera.SB.Draw(chunk.Texture, new Rectangle(Util.Round(visible.X), Util.Round(visible.Y), Util.Round(visible.Width), Util.Round(visible.Height)), sourceRect, Color.White * Opacity);
+                }
+            }
+
+            base.Draw(camera);
+        }
+
+        public void DrawCollisionBounds(Camera2D camera) {
+            if (Opacity == 0f) return;
+            camera.SB.End();
+            List<VertexPositionColor> vertices = new();
+
+            var visibleBounds = GetVisisbleBounds(camera);
+            Vector2 topLeft = visibleBounds.TopLeft() - Vector2.One;
+            Vector2 bottomRight = visibleBounds.BottomRight() + Vector2.One;
+
+            Vector2I topLeftChunk = new Vector2I(Util.Round(topLeft.X / ChunkLength) - 2, Util.Round(topLeft.Y / ChunkLength) - 2); // For some reason subtracting only (1, 1) instead of (2, 2) cuts off leftmost and topmost chunks from the screen
+            Vector2I bottomRightChunk = new Vector2I(Util.Round(bottomRight.X / ChunkLength) + 1, Util.Round(bottomRight.Y / ChunkLength) + 1);
+
+            for (int y = topLeftChunk.Y; y <= bottomRightChunk.Y; y++) {
+                for (int x = topLeftChunk.X; x <= bottomRightChunk.X; x++) {
+                    var chunkIndex = new Vector2I(x, y);
+                    if (!Chunks.TryGetValue(chunkIndex, out var chunk)) continue;
+                    
+                    var chunkVertices = chunk.CollisionVertices;
+                    if (chunkVertices is null || chunkVertices.Count == 0) continue;
+
+                    var offsetX = ChunkLength * x;
+                    var offsetY = ChunkLength * y;
+                    for (int i = 0; i < chunkVertices.Count - 1; i++) {
+                        vertices.Add(new VertexPositionColor(new Vector3(camera.ToScreenPos(ToWorldPos(new Vector2(offsetX + chunkVertices[i].X, offsetY + chunkVertices[i].Y))), 0), Color.Tomato * Opacity));
+                        vertices.Add(new VertexPositionColor(new Vector3(camera.ToScreenPos(ToWorldPos(new Vector2(offsetX + chunkVertices[i + 1].X, offsetY + chunkVertices[i + 1].Y))), 0), Color.Tomato * Opacity));
                     }
+                    vertices.Add(new VertexPositionColor(new Vector3(camera.ToScreenPos(ToWorldPos(new Vector2(offsetX + chunkVertices.Last().X, offsetY + chunkVertices.Last().Y))), 0), Color.Tomato * Opacity));
+                    vertices.Add(new VertexPositionColor(new Vector3(camera.ToScreenPos(ToWorldPos(new Vector2(offsetX + chunkVertices[0].X, offsetY + chunkVertices[0].Y))), 0), Color.Tomato * Opacity));
+                
                 }
             }
 
@@ -142,6 +177,7 @@ namespace Somniloquy {
         [JsonIgnore] public TextureLayer2D ParentLayer;
         [JsonInclude] public SQTexture2D Texture;
         [JsonInclude] public int ChunkLength;
+        [JsonInclude] public List<Vector2> CollisionVertices;
         
         public TextureChunk2D() { }
 

@@ -8,16 +8,17 @@ namespace Somniloquy {
 
     public class Section2DPlayer : BoxUI {
         public Section2DScreen Screen;
+        public Camera2D Camera = new();
         public Player Player;
 
         public Section2DPlayer(Section2DScreen screen) : base() {
             Screen = screen;
-            Player = new(Screen.Camera);
-            Screen.Camera.TargetZoom = 8f;
+            Player = new(Camera);
         }
 
         public override void LoadContent() {
-            
+            Camera.LoadContent();
+            Camera.TargetZoom = 8f;
         }
 
         public override void UnloadContent() {
@@ -27,15 +28,14 @@ namespace Somniloquy {
         public override void Update() {
             base.Update();
             Player.Update();
+            Camera.Update();
         }
 
         public override void Draw() {
-            Screen.Camera.SB.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, transformMatrix: Screen.Camera.Transform);
-
             base.Draw();
-            Screen.Section.Draw(Screen.Camera);
-            Player.Draw(Screen.Camera);
-            Screen.Camera.SB.End();
+            Screen.Section.Draw(Camera);
+            Player.Draw(Camera);
+            Camera.SB.End();
         }
     }
 }

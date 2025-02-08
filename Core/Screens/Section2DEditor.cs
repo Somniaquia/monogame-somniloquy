@@ -8,11 +8,13 @@ namespace Somniloquy {
 
     public class Section2DEditor : BoxUI {
         public Section2DScreen Screen;
+        public Camera2D Camera = new();
         public EditorMode EditorMode;
 
         public List<Keybind> GlobalKeybinds = new();
         public List<Func<string>> GlobalDebugBinds = new();
         public Layer2D SelectedLayer;
+        public bool SyncTiles;
 
         public Section2DEditor(Section2DScreen screen) : base() {
             Screen = screen;
@@ -20,6 +22,7 @@ namespace Somniloquy {
 
             GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.F1, _ => { SwitchEditorMode(new PaintMode(Screen, this)); }, TriggerOnce.True));
             GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.F2, _ => { SwitchEditorMode(new TileMode(Screen, this)); }, TriggerOnce.True));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.F3, _ => { SwitchEditorMode(new CollisionMode(Screen, this)); }, TriggerOnce.True));
 
             GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.W, Keys.Space, _ => MoveScreen(new Vector2(0, -1)), TriggerOnce.False));
             GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.A, Keys.Space, _ => MoveScreen(new Vector2(-1, 0)), TriggerOnce.False));
@@ -28,7 +31,7 @@ namespace Somniloquy {
 
             GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.Q, Keys.Space, _ => ZoomScreen(-0.05f), TriggerOnce.False));
             GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.E, Keys.Space, _ => ZoomScreen(0.05f), TriggerOnce.False));
-            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.OemPipe, _ => Screen.Camera.TargetRotation = 0, TriggerOnce.True));
+            GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.OemPipe, _ => Camera.TargetRotation = 0, TriggerOnce.True));
             GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.OemOpenBrackets, Keys.Space, _ => RotateScreen(-0.05f), TriggerOnce.False));
             GlobalKeybinds.Add(InputManager.RegisterKeybind(Keys.OemCloseBrackets, Keys.Space, _ => RotateScreen(0.05f), TriggerOnce.False));
             
@@ -50,6 +53,7 @@ namespace Somniloquy {
 
             LayerTable.Initialize();
 
+            GlobalDebugBinds.Add(DebugInfo.Subscribe(() => $"EditorMode: {EditorMode}"));
             GlobalDebugBinds.Add(DebugInfo.Subscribe(() => $"Selected Layer: {SelectedLayer} - {SelectedLayer.Identifier}"));
             GlobalDebugBinds.Add(DebugInfo.Subscribe(() => $"Undo: {CommandManager.UndoHistory.Count} Redo: {CommandManager.RedoHistory.Count}"));
             SelectedLayer = Screen.Section.Root.Layers[0];
@@ -58,7 +62,8 @@ namespace Somniloquy {
         public override void LoadContent() {
             LayerTable.BuildUI();
             SwitchEditorMode(new PaintMode(Screen, this));
-            Screen.Camera.TargetZoom = 4f;
+            Camera.LoadContent();
+            Camera.TargetZoom = 4f;
         }
 
         public override void UnloadContent() {
@@ -78,6 +83,7 @@ namespace Somniloquy {
         public override void Update() {
             base.Update();
             EditorMode?.Update();
+            Camera.Update();
             // ZoomScreen(InputManager.ScrollWheelDelta * 0.001f);
         }
 
@@ -90,21 +96,21 @@ namespace Somniloquy {
         public void MoveScreen(params object[] parameters) {
             if (!Focused) return;
             if (parameters.Length == 1 && parameters[0] is Vector2 direction) {
-                Screen.Camera.MoveCamera(direction * 1.2f);
+                Camera.MoveCamera(direction * 1.2f);
             }
         }
 
         public void ZoomScreen(params object[] parameters) {
             if (!Focused) return;
             if (parameters.Length == 1 && parameters[0] is float ratio) {
-                Screen.Camera.ZoomCamera(ratio * 0.75f);
+                Camera.ZoomCamera(ratio * 0.75f);
             }
         }
 
         public void RotateScreen(params object[] parameters) {
             if (!Focused) return;
             if (parameters.Length == 1 && parameters[0] is float ratio) {
-                Screen.Camera.RotateCamera(ratio);
+                Camera.RotateCamera(ratio);
             }
         }
 
@@ -138,7 +144,7 @@ namespace Somniloquy {
             iter ??= Screen.Section.Root.Layers;
             foreach (var layer in iter) {
                 if (layer.Enabled && layer is PaintableLayer2D paintableLayer) {
-                    Color? color = paintableLayer.GetColor((Vector2I)Screen.Camera.GlobalMousePos.Value);
+                    Color? color = paintableLayer.GetColor((Vector2I)Camera.GlobalMousePos.Value);
                     if (color != null && color.Value.A != 0) {
                         SelectedLayer = layer;
                     }
@@ -160,35 +166,34 @@ namespace Somniloquy {
         }
 
         public override void Draw() {
-            Screen.Section.Draw(Screen.Camera);
+            Screen.Section.Draw(Camera);
             EditorMode?.Draw();
 
-            Screen.Camera.SB.End();
-            
             if (SelectedLayer is TileLayer2D tileLayer) {
-                DrawGrids(tileLayer.TileLength, Color.White * MathF.Min(Screen.Camera.Zoom / 16.0f, 0.25f));
-                DrawGrids(tileLayer.ChunkLength * tileLayer.TileLength, Color.White * MathF.Min(Screen.Camera.Zoom / 4.0f, 0.5f));
+                DrawGrids(tileLayer.TileLength, Color.White * MathF.Min(Camera.Zoom / 16.0f, 0.25f));
+                DrawGrids(tileLayer.ChunkLength * tileLayer.TileLength, Color.White * MathF.Min(Camera.Zoom / 4.0f, 0.5f));
             } else if (SelectedLayer is TextureLayer2D textureLayer) {
-                DrawGrids(textureLayer.ChunkLength, Color.White * MathF.Min(Screen.Camera.Zoom / 4.0f, 0.5f));
+                DrawGrids(textureLayer.ChunkLength, Color.White * MathF.Min(Camera.Zoom / 4.0f, 0.5f));
             }
         }
 
         private void DrawGrids(int spacing, Color color) {
             if (color.A < 5) return;
+            Camera.SB.End();
 
             List<VertexPositionColor> vertices = new();
-            var bounds = Screen.Camera.VisibleBounds;
+            var bounds = Camera.VisibleBounds;
 
             for (float y = MathF.Floor(bounds.Top / spacing) * spacing; y <= bounds.Bottom; y += spacing) {
-                Vector2 start = Screen.Camera.ToScreenPos(SelectedLayer.ToWorldPos(new Vector2(bounds.Left, y)));
-                Vector2 end = Screen.Camera.ToScreenPos(SelectedLayer.ToWorldPos(new Vector2(bounds.Right, y)));
+                Vector2 start = Camera.ToScreenPos(SelectedLayer.ToWorldPos(new Vector2(bounds.Left, y)));
+                Vector2 end = Camera.ToScreenPos(SelectedLayer.ToWorldPos(new Vector2(bounds.Right, y)));
                 vertices.Add(new VertexPositionColor(new Vector3(start, 0), color));
                 vertices.Add(new VertexPositionColor(new Vector3(end, 0), color));
             }
 
             for (float x = MathF.Floor(bounds.Left / spacing) * spacing; x <= bounds.Right; x += spacing) {
-                Vector2 start = Screen.Camera.ToScreenPos(SelectedLayer.ToWorldPos(new Vector2(x, bounds.Top)));
-                Vector2 end = Screen.Camera.ToScreenPos(SelectedLayer.ToWorldPos(new Vector2(x, bounds.Bottom)));
+                Vector2 start = Camera.ToScreenPos(SelectedLayer.ToWorldPos(new Vector2(x, bounds.Top)));
+                Vector2 end = Camera.ToScreenPos(SelectedLayer.ToWorldPos(new Vector2(x, bounds.Bottom)));
                 vertices.Add(new VertexPositionColor(new Vector3(start, 0), color));
                 vertices.Add(new VertexPositionColor(new Vector3(end, 0), color));
             }
