@@ -7,9 +7,11 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
 
+    [JsonDerivedType(typeof(TextureLayer2D), "TextureLayer2D")]
+    [JsonDerivedType(typeof(TileLayer2D), "TileLayer2D")]
     public class Layer2D {
-        [JsonIgnore] public Section2D Section;
-        [JsonIgnore] public Layer2D Parent;
+        [JsonInclude] public Section2D Section;
+        [JsonInclude] public Layer2D Parent;
         [JsonInclude] public List<Layer2D> Layers;
         [JsonInclude] public string Identifier = "";
 
@@ -17,7 +19,7 @@ namespace Somniloquy {
         [JsonInclude] public float Scale = 1f;
         [JsonInclude] public float Rotation = 0f;
         [JsonIgnore] public Matrix Transform = Matrix.Identity;
-        [JsonIgnore] public bool Enabled = true;
+        [JsonInclude] public bool Enabled = true;
         [JsonIgnore] public float Opacity = 1f;
         
         public Layer2D() { }
@@ -243,35 +245,6 @@ namespace Somniloquy {
             SQ.SB.End();
             SQ.GD.SetRenderTarget(null);
             return target;
-        }
-    }
-
-    public class Layer2DConverter : JsonConverter<Layer2D> {
-        public override Layer2D Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
-            using (JsonDocument document = JsonDocument.ParseValue(ref reader)) {
-                var root = document.RootElement;
-
-                if (!root.TryGetProperty("Type", out var typeProp))
-                    throw new JsonException("Missing type discriminator in JSON.");
-
-                string type = typeProp.GetString();
-
-                return type switch {
-                    "TextureLayer2D" => JsonSerializer.Deserialize<TextureLayer2D>(root.GetRawText(), options),
-                    "TileLayer2D" => JsonSerializer.Deserialize<TileLayer2D>(root.GetRawText(), options),
-                    _ => throw new JsonException($"Unsupported type: {type}")
-                };
-            }
-        }
-
-        public override void Write(Utf8JsonWriter writer, Layer2D value, JsonSerializerOptions options) {
-            writer.WriteStartObject();
-            writer.WriteString("Type", value.GetType().Name);
-            foreach (var property in JsonSerializer.SerializeToElement(value, value.GetType(), options).EnumerateObject()) {
-                property.WriteTo(writer);
-            }
-
-            writer.WriteEndObject();
         }
     }
 }

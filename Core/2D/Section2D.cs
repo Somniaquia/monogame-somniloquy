@@ -9,9 +9,7 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework;
 
     public class Section2D {
-        [JsonIgnore] public Section2DScreen Screen;
-        [JsonIgnore] public World World;
-
+        [JsonInclude] public World World;
         [JsonInclude] public string Identifier;
         [JsonInclude] public Vector2 CoordsInWorldMap;
         [JsonInclude] public Layer2D Root;
@@ -31,12 +29,14 @@ namespace Somniloquy {
 
         public string Serialize() {
             var options = new JsonSerializerOptions {
-                WriteIndented = true, Converters = {
-                    new Layer2DConverter(),
-                    new SQTexture2DConverter(),
+                WriteIndented = true, 
+                ReferenceHandler = ReferenceHandler.Preserve, 
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+                Converters = {
                     new Vector2IKeyDictionaryConverter<TextureChunk2D>(),
                     new Vector2IKeyDictionaryConverter<TileChunk2D>(),
-                    new TileChunk2DConverter(),
+                    new Tile2DArrayConverter(),
+                    new SQTexture2DConverter(),
                     new Vector2IConverter(),
                 }
             };
@@ -46,12 +46,12 @@ namespace Somniloquy {
 
         public static Section2D Deserialize(string json) {
             var options = new JsonSerializerOptions {
+                ReferenceHandler = ReferenceHandler.Preserve, 
                 Converters = {
-                    new Layer2DConverter(),
-                    new SQTexture2DConverter(),
                     new Vector2IKeyDictionaryConverter<TextureChunk2D>(),
                     new Vector2IKeyDictionaryConverter<TileChunk2D>(),
-                    new TileChunk2DConverter(),
+                    new Tile2DArrayConverter(),
+                    new SQTexture2DConverter(),
                     new Vector2IConverter(),
                 }
             };

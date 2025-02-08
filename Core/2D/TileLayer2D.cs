@@ -306,11 +306,12 @@
 
     public class TileChunk2D {
         [JsonInclude] public Tile2D[,] Tiles;
-        [JsonIgnore] public TileLayer2D Parent;
+        [JsonInclude] public TileLayer2D Parent;
 
         public Vector2I GetTilePositionInChunk(Vector2I positionInChunk) => positionInChunk / new Vector2I(Parent.TileLength);
         public Vector2I GetPositionInTile(Vector2I positionInChunk) => Util.PosMod(positionInChunk, new Vector2I(Parent.TileLength));
         
+        public TileChunk2D() { }
         public TileChunk2D (TileLayer2D parent) {
             Parent = parent;
 
@@ -375,13 +376,54 @@
         }
     }
 
-    public class TileChunk2DConverter : JsonConverter<TileChunk2D> {
-        public override TileChunk2D Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
-            throw new NotImplementedException();
+    public class Tile2DArrayConverter : JsonConverter<Tile2D[,]> {
+        public override Tile2D[,] Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
+            if (reader.TokenType != JsonTokenType.StartArray) {
+                throw new JsonException();
+            }
+
+            reader.Read(); int rows = reader.GetInt32();
+            reader.Read(); int cols = reader.GetInt32();
+            reader.Read();
+
+            var tiles = new Tile2D[rows, cols];
+
+            for (int i = 0; i < rows; i++) {
+                if (reader.TokenType != JsonTokenType.StartArray) {
+                    throw new JsonException();
+                }
+                reader.Read();
+
+                for (int j = 0; j < cols; j++) {
+                    tiles[i, j] = JsonSerializer.Deserialize<Tile2D>(ref reader, options);
+                    reader.Read();
+                }
+            }
+
+            if (reader.TokenType != JsonTokenType.EndArray) {
+                throw new JsonException();
+            }
+
+            return tiles;
         }
 
-        public override void Write(Utf8JsonWriter writer, TileChunk2D value, JsonSerializerOptions options) {
-            throw new NotImplementedException();
+        public override void Write(Utf8JsonWriter writer, Tile2D[,] value, JsonSerializerOptions options) {
+            int rows = value.GetLength(0);
+            int cols = value.GetLength(1);
+
+            writer.WriteStartArray();
+            writer.WriteNumberValue(rows);
+            writer.WriteNumberValue(cols);
+
+            for (int i = 0; i < rows; i++) {
+                writer.WriteStartArray();
+                for (int j = 0; j < cols; j++) {
+                    JsonSerializer.Serialize(writer, value[i, j], options);
+                }
+                writer.WriteEndArray();
+            }
+
+            writer.WriteEndArray();
         }
     }
 }

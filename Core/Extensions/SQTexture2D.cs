@@ -12,7 +12,7 @@ namespace Somniloquy {
 
     public class SQTexture2D : Texture2D, ISpriteSheet {
         public static HashSet<SQTexture2D> ChangedTextures = new();
-
+        
         public Color[] TextureData;
 
         public SQTexture2D(GraphicsDevice graphicsDevice, int width, int height) : base(graphicsDevice, width, height) {

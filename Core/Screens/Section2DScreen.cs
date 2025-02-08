@@ -19,9 +19,7 @@ namespace Somniloquy {
                 Section.Root.AddLayer(new TextureLayer2D());
             }
 
-            Section.Screen = this;
             Editor = new(this);
-
             InputManager.RegisterKeybind(Keys.Enter, _ => TogglePlay(), TriggerOnce.True);
         }
 

@@ -4,10 +4,14 @@ namespace Somniloquy {
     using System.Text.Json.Serialization;
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
+    using MoonSharp.Interpreter;
+
+    public enum TileEventTriggers { OnEnter, WhileStand, OnStep, OnLeave }
 
     public class Tile2D {
         [JsonInclude] public Sprite2D Sprite;
         [JsonInclude] public List<Vector2> CollisionVertices;
+        [JsonInclude] public Dictionary<TileEventTriggers, Script> Scripts;
 
         public Tile2D() { }
 

@@ -68,6 +68,7 @@ namespace Somniloquy {
             SelectedLayer.Opacity = 0.5f;
             Keybinds.Add(InputManager.RegisterKeybind(new object[] { MouseButtons.LeftButton }, new object[] { Keys.LeftShift, Keys.LeftControl, Keys.LeftAlt, Keys.F }, _ => AddVertex(), TriggerOnce.False));
             Keybinds.Add(InputManager.RegisterKeybind(new object[] { MouseButtons.RightButton }, new object[] { Keys.LeftShift, Keys.LeftControl, Keys.LeftAlt, Keys.F }, _ => RemoveVertex(), TriggerOnce.False));
+            LayerTable.DestroyUI();
         }
 
         private Vector2I GetMouseLocation() {

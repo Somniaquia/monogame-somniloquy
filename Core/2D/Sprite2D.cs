@@ -7,6 +7,7 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
 
+    [JsonDerivedType(typeof(TileSpriteSheet), "TileSpriteSheet")]
     public interface ISpriteSheet {
         public Color GetColor(Vector2I position);
         public void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain);
@@ -22,6 +23,7 @@ namespace Somniloquy {
         [JsonInclude] public List<SQTexture2D> SheetChunks = new();
         [JsonInclude] public HashSet<Vector2I> UnoccupiedTileSlots = new();
 
+        public TileSpriteSheet() { }
         public TileSpriteSheet(int tileLength, int sheetChunkLength) {
             SheetChunkLength = sheetChunkLength;
             TileLength = tileLength;
@@ -74,6 +76,7 @@ namespace Somniloquy {
         public PackedSpriteSheet(GraphicsDevice graphicsDevice, int width, int height) : base(graphicsDevice, width, height) { }
     }
 
+    [JsonDerivedType(typeof(SheetAnimationFrame2D), "SheetAnimationFrame2D")]
     public interface IAnimationFrame2D {
         public Color GetColor(Vector2I position);
         public void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain);
@@ -161,24 +164,6 @@ namespace Somniloquy {
 
         public void Draw(Camera2D camera, Rectangle destination, Color color, SpriteEffects effects = SpriteEffects.None) {
             CurrentAnimation?.Draw(camera, destination, color, effects);
-        }
-
-        public string Serialize() {
-            var options = new JsonSerializerOptions {
-                WriteIndented = true, 
-                ReferenceHandler = ReferenceHandler.Preserve,
-            };
-
-            return JsonSerializer.Serialize(this, options);
-        }
-
-        public static Section2D Deserialize(string json) {
-            var options = new JsonSerializerOptions {
-                WriteIndented = true, 
-                ReferenceHandler = ReferenceHandler.Preserve,
-            };
-
-            return JsonSerializer.Deserialize<Section2D>(json, options);
         }
     }
 }
