@@ -35,27 +35,38 @@ namespace Somniloquy {
                 Converters = {
                     new Vector2IKeyDictionaryConverter<TextureChunk2D>(),
                     new Vector2IKeyDictionaryConverter<TileChunk2D>(),
+                    new Vector2Converter(),
+                    new Vector2IConverter(),
+                    new RectangleConverter(),
+                    new RectangleFConverter(),
+                    new CircleFConverter(),
                     new Tile2DArrayConverter(),
                     new SQTexture2DConverter(),
                     new Vector2IConverter(),
                 }
             };
-
+            options.ReferenceHandler = new SQReferenceHandler();
             return JsonSerializer.Serialize(this, options);
         }
 
         public static Section2D Deserialize(string json) {
             var options = new JsonSerializerOptions {
+                WriteIndented = true, 
                 ReferenceHandler = ReferenceHandler.Preserve, 
                 Converters = {
                     new Vector2IKeyDictionaryConverter<TextureChunk2D>(),
                     new Vector2IKeyDictionaryConverter<TileChunk2D>(),
+                    new Vector2Converter(),
+                    new Vector2IConverter(),
+                    new RectangleConverter(),
+                    new RectangleFConverter(),
+                    new CircleFConverter(),
                     new Tile2DArrayConverter(),
                     new SQTexture2DConverter(),
                     new Vector2IConverter(),
                 }
             };
-
+            options.ReferenceHandler = new SQReferenceHandler();
             return JsonSerializer.Deserialize<Section2D>(json, options);
         }
     }

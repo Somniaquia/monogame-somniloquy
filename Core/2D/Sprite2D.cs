@@ -21,7 +21,7 @@ namespace Somniloquy {
 
         [JsonInclude] public List<Tile2D> Tiles = new();
         [JsonInclude] public List<SQTexture2D> SheetChunks = new();
-        [JsonInclude] public HashSet<Vector2I> UnoccupiedTileSlots = new();
+        [JsonIgnore] public HashSet<Vector2I> UnoccupiedTileSlots = new();
 
         public TileSpriteSheet() { }
         public TileSpriteSheet(int tileLength, int sheetChunkLength) {
@@ -107,7 +107,7 @@ namespace Somniloquy {
     public class Animation2D {
         [JsonInclude] public List<IAnimationFrame2D> Frames = new();
         [JsonInclude] public float FrameDuration = 0.2f;
-        [JsonIgnore] public int CurrentFrameIndex;
+        [JsonInclude] public int CurrentFrameIndex;
         [JsonIgnore] public IAnimationFrame2D CurrentFrame { get {return Frames[CurrentFrameIndex];} }
         
         public Color GetColor(Vector2I position) => CurrentFrame.GetColor(position);
@@ -140,7 +140,7 @@ namespace Somniloquy {
 
     public class Sprite2D {
         [JsonInclude] public Dictionary<string, Animation2D> Animations = new();
-        [JsonIgnore] public Animation2D CurrentAnimation;
+        [JsonInclude] public Animation2D CurrentAnimation;
 
         public Sprite2D AddAnimation(string name, Animation2D animation) {
             Animations[name] = animation;

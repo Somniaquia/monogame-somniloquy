@@ -379,29 +379,34 @@
     public class Tile2DArrayConverter : JsonConverter<Tile2D[,]> {
         public override Tile2D[,] Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
             if (reader.TokenType != JsonTokenType.StartArray) {
-                throw new JsonException();
+                throw new JsonException("Expected StartArray token.");
             }
 
             reader.Read(); int rows = reader.GetInt32();
             reader.Read(); int cols = reader.GetInt32();
-            reader.Read();
+            reader.Read(); 
 
             var tiles = new Tile2D[rows, cols];
 
             for (int i = 0; i < rows; i++) {
                 if (reader.TokenType != JsonTokenType.StartArray) {
-                    throw new JsonException();
+                    throw new JsonException("Expected StartArray token for row.");
                 }
                 reader.Read();
 
                 for (int j = 0; j < cols; j++) {
                     tiles[i, j] = JsonSerializer.Deserialize<Tile2D>(ref reader, options);
-                    reader.Read();
+                    reader.Read(); // Move to the next element or end of row
                 }
+
+                if (reader.TokenType != JsonTokenType.EndArray) {
+                    throw new JsonException("Expected EndArray token for row.");
+                }
+                reader.Read(); // Move to the next row or end of 2D array
             }
 
             if (reader.TokenType != JsonTokenType.EndArray) {
-                throw new JsonException();
+                throw new JsonException("Expected EndArray token for 2D array.");
             }
 
             return tiles;

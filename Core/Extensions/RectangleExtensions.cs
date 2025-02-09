@@ -1,6 +1,9 @@
 namespace Somniloquy {
     using Microsoft.Xna.Framework;
-
+    using System;
+    using System.Text.Json;
+    using System.Text.Json.Serialization;
+    
     public static class RectangleExtensions {
         public static Vector2I TopLeft(this Rectangle rectangle) {
             return new(rectangle.Left, rectangle.Top);

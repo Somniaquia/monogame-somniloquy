@@ -122,7 +122,7 @@ namespace Somniloquy {
 
             var texture = new SQTexture2D(SQ.GD, decodedWidth, decodedHeight);
             texture.SetData(textureDataBytes);
-
+            texture.GetData(texture.TextureData);
             return texture;
         }
 
