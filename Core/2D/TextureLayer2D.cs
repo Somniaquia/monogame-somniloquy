@@ -106,7 +106,7 @@ namespace Somniloquy {
             }
         }
 
-        public override void Draw(Camera2D camera) {
+        public override void Draw(Camera2D camera, bool collisionBounds = false) {
             if (Opacity == 0f) { base.Draw(camera); return; }
 
             Matrix layerView = Transform * camera.Transform;
@@ -134,6 +134,7 @@ namespace Somniloquy {
                 }
             }
 
+            if (collisionBounds) DrawCollisionBounds(camera);
             base.Draw(camera);
         }
 
@@ -165,8 +166,19 @@ namespace Somniloquy {
                     }
                     vertices.Add(new VertexPositionColor(new Vector3(camera.ToScreenPos(ToWorldPos(new Vector2(offsetX + chunkVertices.Last().X, offsetY + chunkVertices.Last().Y))), 0), Color.Tomato * Opacity));
                     vertices.Add(new VertexPositionColor(new Vector3(camera.ToScreenPos(ToWorldPos(new Vector2(offsetX + chunkVertices[0].X, offsetY + chunkVertices[0].Y))), 0), Color.Tomato * Opacity));
-                
                 }
+            }
+
+            if (vertices.Count == 0) return;
+            var verticesArray = vertices.ToArray();
+
+            VertexBuffer vertexBuffer = new(SQ.GD, typeof(VertexPositionColor), verticesArray.Length, BufferUsage.WriteOnly);
+            vertexBuffer.SetData(verticesArray);
+            SQ.GD.SetVertexBuffer(vertexBuffer);
+
+            foreach (var pass in SQ.BasicEffect.CurrentTechnique.Passes) {
+                pass.Apply();
+                SQ.GD.DrawPrimitives(PrimitiveType.LineList, 0, verticesArray.Length / 2);
             }
 
             base.Draw(camera);

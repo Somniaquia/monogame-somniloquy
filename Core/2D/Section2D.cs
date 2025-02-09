@@ -23,8 +23,8 @@ namespace Somniloquy {
             Root.Update();
         }
 
-        public void Draw(Camera2D camera) {
-            Root.Draw(camera);
+        public void Draw(Camera2D camera, bool collisionBounds = false) {
+            Root.Draw(camera, collisionBounds);
         }
 
         public string Serialize() {

@@ -64,6 +64,8 @@ namespace Somniloquy {
             SwitchEditorMode(new PaintMode(Screen, this));
             Camera.LoadContent();
             Camera.TargetZoom = 4f;
+            Camera.MaxZoom = 1000f;
+            Camera.MinZoom = 0.01f;
         }
 
         public override void UnloadContent() {
@@ -139,7 +141,7 @@ namespace Somniloquy {
         }
 
         public void SelectLayerUnderMouse(List<Layer2D> iter = null) {
-            if (!Focused) return;
+            if (!Focused || EditorMode is CollisionEditMode) return;
 
             iter ??= Screen.Section.Root.Layers;
             foreach (var layer in iter) {
@@ -166,7 +168,7 @@ namespace Somniloquy {
         }
 
         public override void Draw() {
-            Screen.Section.Draw(Camera);
+            Screen.Section.Draw(Camera, EditorMode is CollisionMode or CollisionEditMode);
             EditorMode?.Draw();
 
             if (SelectedLayer is TileLayer2D tileLayer) {

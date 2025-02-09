@@ -66,6 +66,7 @@ namespace Somniloquy {
             DebugBinds.Add(DebugInfo.Subscribe(() => $"Pen Pressure: {InputManager.AveragePenPressure} Tilt: {InputManager.PenTilt}"));
         
             ColorPicker = new ColorPicker(new Rectangle(SQ.WindowSize.X - 264, SQ.WindowSize.Y - 264, 256, 256), this);
+            LayerTable.BuildUI();
         }
 
         public override void LoadContent() {

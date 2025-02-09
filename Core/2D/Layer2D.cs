@@ -126,10 +126,10 @@ namespace Somniloquy {
             }
         }
 
-        public virtual void Draw(Camera2D camera) {
+        public virtual void Draw(Camera2D camera, bool collisionBounds = false) {
             if (Layers is null) return;
             foreach (var layer in Layers) {
-                layer.Draw(camera);
+                layer.Draw(camera, collisionBounds);
             }
         }
 

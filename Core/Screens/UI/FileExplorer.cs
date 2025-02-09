@@ -7,6 +7,7 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
     using Microsoft.Xna.Framework.Input;
+    using System.IO.Compression;
 
     public static class FileExplorer {
         public static bool Active;
@@ -142,7 +143,7 @@ namespace Somniloquy {
         }
 
         public static void SaveSection(string saveName) {
-            if (saveName == "") return;
+            if (string.IsNullOrEmpty(saveName)) return;
 
             var section = ScreenManager.GetFirstOfType<Section2DScreen>().Section;
             if (section == null) {
@@ -155,21 +156,38 @@ namespace Somniloquy {
 
             if (!Directory.Exists(CurrentDirectory)) {
                 DebugInfo.AddTempLine(() => "Current directory is invalid.", 5);
-                return; // TODO: Create folders duh I am lazy
+                return;
             }
 
-            // var sectionIdentifier = section.Identifier == "" ? section.Identifier : "temp"; 
             string filePath = Path.Combine(CurrentDirectory, $"{saveName}.sqSection2D");
-
+            
             try {
-                File.WriteAllText(filePath, json);
+                using (FileStream fileStream = new FileStream(filePath, FileMode.Create))
+                using (GZipStream gzipStream = new GZipStream(fileStream, CompressionMode.Compress))
+                using (StreamWriter writer = new StreamWriter(gzipStream)) {
+                    writer.Write(json);
+                }
                 DebugInfo.AddTempLine(() => $"Section saved to {filePath}", 5);
                 DestroyUI();
             } catch (Exception e) {
                 DebugInfo.AddTempLine(() => $"Error saving section: {e.Message}", 5);
             }
+        }
 
-            // OpenDirectory(CurrentDirectory);
+        public static void LoadSection(string path) {
+            try {
+                using (FileStream fileStream = new FileStream(path, FileMode.Open))
+                using (GZipStream gzipStream = new GZipStream(fileStream, CompressionMode.Decompress))
+                using (StreamReader reader = new StreamReader(gzipStream)) {
+                    string json = reader.ReadToEnd();
+                    var sectionScreen = ScreenManager.GetFirstOfType<Section2DScreen>();
+                    sectionScreen.Section = Section2D.Deserialize(json);
+                    sectionScreen.Editor.SelectedLayer = sectionScreen.Section.Root.GetSelfAndChildren().OfType<PaintableLayer2D>().FirstOrDefault();
+                    DebugInfo.AddTempLine(() => $"Loaded section from {Path.GetFileName(path)}", 5);
+                }
+            } catch (Exception e) {
+                DebugInfo.AddTempLine(() => $"Error loading section: {e.Message}", 5);
+            }
         }
 
         public static void LoadImage(string path, Layer2D parent = null) {
@@ -232,14 +250,7 @@ namespace Somniloquy {
                             DebugInfo.AddTempLine(() => $"Error: Section2DScreen doesn't exist.", 5);
                             return;
                         }
-                        // try {
-                            string json = File.ReadAllText(path);
-                            sectionScreen.Section = Section2D.Deserialize(json);
-                            sectionScreen.Editor.SelectedLayer = sectionScreen.Section.Root.Layers.OfType<TextureLayer2D>().FirstOrDefault();
-                            DebugInfo.AddTempLine(() => $"Loaded section from {Path.GetFileName(path)}", 5);
-                        // } catch (Exception e) {
-                        //     DebugInfo.AddTempLine(() => $"Error reading {Path.GetFileName(path)}: {e.Message}", 5);
-                        // }
+                        LoadSection(path);
                         DestroyUI();
                         LayerTable.BuildUI();
                     } else {

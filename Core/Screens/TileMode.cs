@@ -30,6 +30,7 @@ namespace Somniloquy {
                 if (SelectedTiles is null) return "Selected Tiles: None";
                 return $"Selected Tiles: {SelectedTiles.GetLength(0)}x{SelectedTiles.GetLength(1)}";
             }));
+            LayerTable.BuildUI();
         }
 
         public override void LoadContent() {

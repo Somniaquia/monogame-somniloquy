@@ -205,7 +205,7 @@
             // }
         }
 
-        public override void Draw(Camera2D camera) {
+        public override void Draw(Camera2D camera, bool collisionBounds = false) {
             if (Opacity == 0f) { base.Draw(camera); return; }
 
             var chunkLengthInPixels = ChunkLength * TileLength;
@@ -243,7 +243,7 @@
             
             }
 
-            DrawCollisionBounds(camera);
+            if (collisionBounds) DrawCollisionBounds(camera);
             base.Draw(camera);
         }
 
