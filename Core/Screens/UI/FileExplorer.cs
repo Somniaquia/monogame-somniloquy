@@ -41,7 +41,8 @@ namespace Somniloquy {
             DebugInfo.Active = false;
             if (ScreenManager.GetFirstOfType<ColorPicker>() is not null) ScreenManager.GetFirstOfType<ColorPicker>().Active = false;
             LayerTable.DestroyUI();
-
+            
+            
             var directoryLabel = new TextLabel(RootUI, 20, 5) { Identifier = "path", PerpendicularAxisFill = true };
             var mainBox = new BoxUI(RootUI, 20, 0) { MainAxis = Axis.Horizontal, Identifier = "mainBox", MainAxisFill = true, PerpendicularAxisFill = true };
                 ContentsBox = new BoxUI(mainBox) { MainAxis = Axis.Vertical, Identifier = "contents", MainAxisShrink = true, PerpendicularAxisFill = true };
@@ -87,7 +88,7 @@ namespace Somniloquy {
                 _ = new TextLabel(ContentsBox, 0, 10, file.Split('\\')[^1]) { Focusable = false, PerpendicularAxisFill = true };
             }
             ((TextLabel)RootUI.GetChildByID("path")).Text = CurrentDirectory;
-            if (DirectoryContents.Count > 0) ((TextLabel)ContentsBox.Children[HighlightedLine]).DefaultColor = Color.Yellow;
+            if (DirectoryContents.Count > 0) ((TextLabel)ContentsBox.Children[HighlightedLine]).TextColor = Color.Yellow;
 
             // DebugInfo.AddTempLine(() => $"Directory contents: {DirectoryContents.Count}", 2);
             RootUI.PositionChildren();
@@ -113,9 +114,9 @@ namespace Somniloquy {
 
         public static void MoveHighlightedLine(int amount) {
             if (DirectoryContents.Count == 0) return;
-            ((TextLabel)ContentsBox.Children[HighlightedLine]).DefaultColor = Color.White;
+            ((TextLabel)ContentsBox.Children[HighlightedLine]).TextColor = ScreenManager.DefaultUIColor;
             HighlightedLine = Util.PosMod(HighlightedLine + amount, DirectoryContents.Count);
-            ((TextLabel)ContentsBox.Children[HighlightedLine]).DefaultColor = Color.Yellow;
+            ((TextLabel)ContentsBox.Children[HighlightedLine]).TextColor = Color.Yellow;
 
             if (ContentsBox.Overflowed) {
                 var boxLength = ContentsBox.GetAvailableSpace(ContentsBox.MainAxis);

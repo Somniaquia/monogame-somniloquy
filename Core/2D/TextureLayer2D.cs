@@ -135,7 +135,7 @@ namespace Somniloquy {
             }
 
             if (collisionBounds) DrawCollisionBounds(camera);
-            base.Draw(camera);
+            base.Draw(camera, collisionBounds);
         }
 
         public void DrawCollisionBounds(Camera2D camera) {
@@ -155,17 +155,15 @@ namespace Somniloquy {
                     var chunkIndex = new Vector2I(x, y);
                     if (!Chunks.TryGetValue(chunkIndex, out var chunk)) continue;
                     
-                    var chunkVertices = chunk.CollisionVertices;
+                    var chunkVertices = chunk.CollisionEdges;
                     if (chunkVertices is null || chunkVertices.Count == 0) continue;
 
                     var offsetX = ChunkLength * x;
                     var offsetY = ChunkLength * y;
-                    for (int i = 0; i < chunkVertices.Count - 1; i++) {
-                        vertices.Add(new VertexPositionColor(new Vector3(camera.ToScreenPos(ToWorldPos(new Vector2(offsetX + chunkVertices[i].X, offsetY + chunkVertices[i].Y))), 0), Color.Tomato * Opacity));
-                        vertices.Add(new VertexPositionColor(new Vector3(camera.ToScreenPos(ToWorldPos(new Vector2(offsetX + chunkVertices[i + 1].X, offsetY + chunkVertices[i + 1].Y))), 0), Color.Tomato * Opacity));
+                    for (int i = 0; i < chunkVertices.Count; i++) {
+                        vertices.Add(new VertexPositionColor(new Vector3(camera.ToScreenPos(ToWorldPos(new Vector2(offsetX + chunkVertices[i].Item1.X, offsetY + chunkVertices[i].Item1.Y))), 0), Color.Tomato * Opacity));
+                        vertices.Add(new VertexPositionColor(new Vector3(camera.ToScreenPos(ToWorldPos(new Vector2(offsetX + chunkVertices[i].Item2.X, offsetY + chunkVertices[i].Item2.Y))), 0), Color.Tomato * Opacity));
                     }
-                    vertices.Add(new VertexPositionColor(new Vector3(camera.ToScreenPos(ToWorldPos(new Vector2(offsetX + chunkVertices.Last().X, offsetY + chunkVertices.Last().Y))), 0), Color.Tomato * Opacity));
-                    vertices.Add(new VertexPositionColor(new Vector3(camera.ToScreenPos(ToWorldPos(new Vector2(offsetX + chunkVertices[0].X, offsetY + chunkVertices[0].Y))), 0), Color.Tomato * Opacity));
                 }
             }
 
@@ -180,8 +178,6 @@ namespace Somniloquy {
                 pass.Apply();
                 SQ.GD.DrawPrimitives(PrimitiveType.LineList, 0, verticesArray.Length / 2);
             }
-
-            base.Draw(camera);
         }
     }
     
@@ -189,7 +185,7 @@ namespace Somniloquy {
         [JsonIgnore] public TextureLayer2D ParentLayer;
         [JsonInclude] public SQTexture2D Texture;
         [JsonInclude] public int ChunkLength;
-        [JsonInclude] public List<Vector2> CollisionVertices;
+        [JsonInclude] public List<(Vector2, Vector2)> CollisionEdges;
         
         public TextureChunk2D() { }
 

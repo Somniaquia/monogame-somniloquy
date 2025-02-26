@@ -8,6 +8,7 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework.Graphics;
 
     [JsonDerivedType(typeof(TileSpriteSheet), "TileSpriteSheet")]
+    [JsonDerivedType(typeof(PackedSpriteSheet), "PackedSpriteSheet")]
     public interface ISpriteSheet {
         public Color GetColor(Vector2I position);
         public void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain);
@@ -76,15 +77,15 @@ namespace Somniloquy {
         public PackedSpriteSheet(GraphicsDevice graphicsDevice, int width, int height) : base(graphicsDevice, width, height) { }
     }
 
-    [JsonDerivedType(typeof(SheetAnimationFrame2D), "SheetAnimationFrame2D")]
-    public interface IAnimationFrame2D {
+    [JsonDerivedType(typeof(SheetSpriteFrame2D), "SheetSpriteFrame2D")]
+    public interface ISpriteFrame2D {
         public Color GetColor(Vector2I position);
         public void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain);
         public void SetPixel(Vector2I position, Color color, CommandChain chain);
         public void Draw(Camera2D camera, Rectangle destination, Color color, SpriteEffects effects = SpriteEffects.None);
     }
 
-    public class SheetAnimationFrame2D : IAnimationFrame2D {
+    public class SheetSpriteFrame2D : ISpriteFrame2D {
         [JsonInclude] public ISpriteSheet SpriteSheet;
         [JsonInclude] public Rectangle SourceRect;
 
@@ -104,66 +105,78 @@ namespace Somniloquy {
         }
     }
 
-    public class Animation2D {
-        [JsonInclude] public List<IAnimationFrame2D> Frames = new();
-        [JsonInclude] public float FrameDuration = 0.2f;
-        [JsonInclude] public int CurrentFrameIndex;
-        [JsonIgnore] public IAnimationFrame2D CurrentFrame { get {return Frames[CurrentFrameIndex];} }
-        
-        public Color GetColor(Vector2I position) => CurrentFrame.GetColor(position);
-        public void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain) => CurrentFrame.PaintPixel(position, color, opacity, chain);
-        public void SetPixel(Vector2I position, Color color, CommandChain chain) => CurrentFrame.SetPixel(position, color, chain);
+    public class SpriteFrameCollection2D {
+        [JsonInclude] public List<(string Name, List<string> Values)> Conditions = new();
+        [JsonInclude] public Dictionary<string, ISpriteFrame2D> Frames = new();
 
-        public Animation2D AddFrame(ISpriteSheet spriteSheet, Rectangle sourceRect) {
-            Frames.Add(new SheetAnimationFrame2D { SpriteSheet = spriteSheet, SourceRect = sourceRect });
-            return this;
-        }
+        public SpriteFrameCollection2D() { }
 
-        public Animation2D SetFrameDuration(float duration) {
-            FrameDuration = duration;
-            return this;
-        }
-
-        public Animation2D SetStartFrame(int index) {
-            if (index >= 0 && index < Frames.Count) CurrentFrameIndex = index;
-            return this;
-        }
-
-        public void Update() {
-
-        }
-
-        public void Draw(Camera2D camera, Rectangle destination, Color color, SpriteEffects effects = SpriteEffects.None) {
-            CurrentFrame.Draw(camera, destination, color, effects);
-        }
-    }
-
-    public class Sprite2D {
-        [JsonInclude] public Dictionary<string, Animation2D> Animations = new();
-        [JsonInclude] public Animation2D CurrentAnimation;
-
-        public Sprite2D AddAnimation(string name, Animation2D animation) {
-            Animations[name] = animation;
-            return this;
-        }
-
-        public Sprite2D SetCurrentAnimation(string name) {
-            if (Animations.TryGetValue(name, out var animation)) {
-                CurrentAnimation = animation;
+        public SpriteFrameCollection2D(params (string Name, string InitialValue)[] conditions) {
+            foreach (var (name, value) in conditions) {
+                Conditions.Add((name, new List<string> { value }));
             }
-            return this;
         }
 
-        public Color GetColor(Vector2I position) => CurrentAnimation.GetColor(position);
-        public void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain) => CurrentAnimation.PaintPixel(position, color, opacity, chain);
-        public void SetPixel(Vector2I position, Color color, CommandChain chain) => CurrentAnimation.SetPixel(position, color, chain);
+        public bool AddCondition(string name, string initialValue) {
+            if (Conditions.Any(c => c.Name == name)) return false;
+            Conditions.Add((name, new List<string> { initialValue }));
 
-        public void Update() {
-            CurrentAnimation?.Update();
+            foreach (var pair in Frames.ToList()) {
+                string newKey = $"{pair.Key}|{initialValue}";
+                Frames.Remove(pair.Key);
+                Frames[newKey] = pair.Value;
+            }
+
+            return true;
         }
 
-        public void Draw(Camera2D camera, Rectangle destination, Color color, SpriteEffects effects = SpriteEffects.None) {
-            CurrentAnimation?.Draw(camera, destination, color, effects);
+        public bool RenameCondition(string name, string newName) {
+            var condition = Conditions.FirstOrDefault(c => c.Name == name);
+            if (condition.Name == null) return false;
+
+            int index = Conditions.FindIndex(c => c.Name == name);
+            Conditions[index] = (newName, Conditions[index].Values);
+
+            foreach (var pair in Frames.ToList()) {
+                string[] parts = pair.Key.Split('|');
+                if (parts.Length != Conditions.Count) continue;
+
+                string newKey = string.Join("|", parts.Take(index).Concat(new string[] { newName }).Concat(parts.Skip(index + 1)));
+                Frames.Remove(pair.Key);
+                Frames[newKey] = pair.Value;
+            }
+
+            return true;
+        }
+
+        public bool RemoveCondition(string name) {
+            var condition = Conditions.FirstOrDefault(c => c.Name == name);
+            if (condition.Name == null) return false;
+
+            int index = Conditions.FindIndex(c => c.Name == name);
+            Conditions.RemoveAt(index);
+
+            foreach (var pair in Frames.ToList()) {
+                string[] parts = pair.Key.Split('|');
+                if (parts.Length != Conditions.Count + 1) continue;
+
+                string newKey = string.Join("|", parts.Take(index).Concat(parts.Skip(index + 1)));
+                Frames.Remove(pair.Key);
+                Frames[newKey] = pair.Value;
+            }
+
+            return true;
+        }
+
+        public void AddFrame(string[] conditionValues, string conditionName, string conditionValue) {
+            
+        }
+
+        public ISpriteFrame2D GetFrame(params string[] conditionValues) {
+            if (conditionValues.Length != Conditions.Count) return null;
+
+            string key = string.Join("|", conditionValues);
+            return Frames.TryGetValue(key, out var frame) ? frame : null;
         }
     }
 }

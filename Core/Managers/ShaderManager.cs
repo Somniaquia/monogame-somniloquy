@@ -6,7 +6,7 @@ namespace Somniloquy {
     using Microsoft.Xna.Framework.Graphics;
 
     public static class ShaderManager {
-        private static string ShaderDirectory = "Content/Shaders/";
+        private static string ShaderDirectory = "Assets/Shaders/";
 
         private static FileSystemWatcher ShaderWatcher;
         private static Effect FallbackShader;

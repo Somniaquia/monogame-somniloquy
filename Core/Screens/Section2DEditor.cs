@@ -172,10 +172,10 @@ namespace Somniloquy {
             EditorMode?.Draw();
 
             if (SelectedLayer is TileLayer2D tileLayer) {
-                DrawGrids(tileLayer.TileLength, Color.White * MathF.Min(Camera.Zoom / 16.0f, 0.25f));
-                DrawGrids(tileLayer.ChunkLength * tileLayer.TileLength, Color.White * MathF.Min(Camera.Zoom / 4.0f, 0.5f));
+                DrawGrids(tileLayer.TileLength, Screen.Section.GridColor * MathF.Min(Camera.Zoom / 16.0f, 0.25f));
+                DrawGrids(tileLayer.ChunkLength * tileLayer.TileLength, Screen.Section.GridColor * MathF.Min(Camera.Zoom / 4.0f, 0.5f));
             } else if (SelectedLayer is TextureLayer2D textureLayer) {
-                DrawGrids(textureLayer.ChunkLength, Color.White * MathF.Min(Camera.Zoom / 4.0f, 0.5f));
+                DrawGrids(textureLayer.ChunkLength, Screen.Section.GridColor * MathF.Min(Camera.Zoom / 4.0f, 0.5f));
             }
         }
 

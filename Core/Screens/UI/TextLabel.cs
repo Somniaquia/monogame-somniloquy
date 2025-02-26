@@ -7,7 +7,7 @@ namespace Somniloquy {
 
     public class TextLabel : BoxUI {
         public string Text;
-        public Color DefaultColor = Color.White;
+        public Color TextColor = Color.White;
         public bool Editable;
         public Axis LetterAxis; // is each letter standing upright are or lying 90 degrees
 
@@ -55,12 +55,14 @@ namespace Somniloquy {
             Text = text;
             Editable = editable;
             LetterAxis = letterAxis;
+            TextColor = ScreenManager.DefaultUIColor;
         }
 
         public TextLabel(Rectangle boundaries, string text = null, Axis letterAxis = Axis.Horizontal, bool editable = false) : base(boundaries) {
             Text = text;
             Editable = editable;
             LetterAxis = letterAxis;
+            TextColor = ScreenManager.DefaultUIColor;
         }
 
         public override float GetContentLength(Axis axis) {
@@ -123,12 +125,12 @@ namespace Somniloquy {
 
         public override void Draw() {
             base.Draw();
-            SQ.SB.DrawString(SQ.Misaki, Text, Boundaries.TopLeft() + Padding.TopLeft(), DefaultColor);    
+            SQ.SB.DrawString(SQ.Misaki, Text, Boundaries.TopLeft() + Padding.TopLeft(), TextColor);    
         }   
 
         public override void Draw(Vector2 displacement) {
             base.Draw(displacement);
-            if (Text is not null) SQ.SB.DrawString(SQ.Misaki, Text, Boundaries.TopLeft() + Padding.TopLeft() + displacement, DefaultColor);    
+            if (Text is not null) SQ.SB.DrawString(SQ.Misaki, Text, Boundaries.TopLeft() + Padding.TopLeft() + displacement, TextColor);    
         }
     }
 }

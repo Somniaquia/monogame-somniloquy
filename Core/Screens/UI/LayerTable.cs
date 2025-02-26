@@ -168,7 +168,7 @@ namespace Somniloquy {
                     }
                 }
             } else if (Layer.Enabled) {
-                ((BoxUIDefaultRenderer)Renderer).Color = Color.White;
+                ((BoxUIDefaultRenderer)Renderer).Color = ScreenManager.DefaultUIColor;
                 Layer.Opacity = 0.5f;
             } else {
                 ((BoxUIDefaultRenderer)Renderer).Color = Color.Gray;

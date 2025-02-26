@@ -14,6 +14,8 @@ namespace Somniloquy {
         public static List<Screen> SelectedScreenCollection;
         public static Screen SelectedScreen;
 
+        public static Color DefaultUIColor = Color.White;
+
         public static Screen AddScreen(Screen screen) {
             Screens.Add(screen);
             return screen;
@@ -42,6 +44,10 @@ namespace Somniloquy {
         public static void Update() {
             foreach (var screen in Screens) {
                 screen.Update();
+            }
+
+            if (GetFirstOfType<Section2DScreen>() is not null && GetFirstOfType<Section2DScreen>().Section is not null) {
+                DefaultUIColor = Util.InvertColor(GetFirstOfType<Section2DScreen>().Section.BackgroundColor);
             }
         }
 

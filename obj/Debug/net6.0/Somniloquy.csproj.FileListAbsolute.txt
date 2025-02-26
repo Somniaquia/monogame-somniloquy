@@ -202,7 +202,6 @@ C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\Fonts\Misaki.xnb
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\Fonts\UDMinchoM.xnb
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\Shaders\BloomCombine.xnb
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\Shaders\BloomExtract.xnb
-C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\Shaders\ETFractal.xnb
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\Shaders\GaussianBlur.xnb
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Loops\bgm006.wav
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Loops\loop_74.wav
@@ -235,22 +234,6 @@ C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Loops\n3-tSP.wav
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Loops\n3-tWW.wav
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Loops\n3-WeR.wav
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Loops\本名_1_small.wav
-C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\bin\DesktopGL\Content\Fonts\Misaki.xnb
-C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\bin\DesktopGL\Content\Fonts\UDMinchoM.xnb
-C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\bin\DesktopGL\Content\Shaders\BloomCombine.xnb
-C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\bin\DesktopGL\Content\Shaders\BloomExtract.xnb
-C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\bin\DesktopGL\Content\Shaders\ETFractal.xnb
-C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\bin\DesktopGL\Content\Shaders\GaussianBlur.xnb
-C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\bin\DesktopGL\Fonts\Mincho Gothic 0.xnb
-C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\bin\DesktopGL\Fonts\Mincho Gothic.xnb
-C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\bin\DesktopGL\Fonts\MisakiGothic2nd.xnb
-C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\bin\DesktopGL\Fonts\MisakiMincho.xnb
-C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\bin\watch.npl.temp
-C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\obj\DesktopGL\net6.0\Content\.mgcontent
-C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\obj\DesktopGL\net6.0\Content\.mgstats
-C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\obj\DesktopGL\net6.0\Content\Fonts\Misaki.mgcontent
-C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\obj\DesktopGL\net6.0\Content\Shaders\ETFractal.mgcontent
-C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\Shaders\ETFractal.mgfx
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\ExternalAssemblies\FMod\fmod.dll
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\ExternalAssemblies\FMod\fmodL.dll
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\ExternalAssemblies\FMod\fmodstudio.dll
@@ -319,3 +302,20 @@ C:\Somnia\Projects\monogame-somniloquy\obj\Debug\net6.0\Somniloquy.pdb
 C:\Somnia\Projects\monogame-somniloquy\obj\Debug\net6.0\Somniloquy.genruntimeconfig.cache
 C:\Somnia\Projects\monogame-somniloquy\obj\Debug\net6.0\ref\Somniloquy.dll
 C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\MoonSharp.Interpreter.dll
+C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\bin\DesktopGL\Content\Fonts\Misaki.xnb
+C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\bin\DesktopGL\Content\Fonts\UDMinchoM.xnb
+C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\bin\DesktopGL\Content\Shaders\BloomCombine.xnb
+C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\bin\DesktopGL\Content\Shaders\BloomExtract.xnb
+C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\bin\DesktopGL\Content\Shaders\GaussianBlur.xnb
+C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\bin\DesktopGL\Fonts\Mincho Gothic 0.xnb
+C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\bin\DesktopGL\Fonts\Mincho Gothic.xnb
+C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\bin\DesktopGL\Fonts\MisakiGothic2nd.xnb
+C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\bin\DesktopGL\Fonts\MisakiMincho.xnb
+C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\bin\watch.npl.temp
+C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\obj\DesktopGL\net6.0\Content\.mgcontent
+C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\obj\DesktopGL\net6.0\Content\.mgstats
+C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Content\obj\DesktopGL\net6.0\Content\Fonts\Misaki.mgcontent
+C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Shaders\ETFractal.fx
+C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Shaders\ETFractal.mgfx
+C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Worlds\room.sqSection2D
+C:\Somnia\Projects\monogame-somniloquy\bin\Debug\net6.0\Assets\Worlds\lavenderWatersTest.sqSection2D

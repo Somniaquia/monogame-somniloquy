@@ -13,10 +13,16 @@ namespace Somniloquy {
         [JsonInclude] public string Identifier;
         [JsonInclude] public Vector2 CoordsInWorldMap;
         [JsonInclude] public Layer2D Root;
+        
         [JsonInclude] public TileSpriteSheet SpriteSheet = new(16, 64);
+        [JsonInclude] public SpriteFrameCollection2D TileSprite;
+
+        [JsonInclude] public Color BackgroundColor = Color.Black;
+        [JsonInclude] public Color GridColor;
 
         public Section2D() {
             Root = new Layer2D("Root") { Section = this };
+            GridColor = Util.InvertColor(BackgroundColor);
         }
 
         public void Update() {
@@ -24,12 +30,12 @@ namespace Somniloquy {
         }
 
         public void Draw(Camera2D camera, bool collisionBounds = false) {
+            SQ.GD.Clear(BackgroundColor);
             Root.Draw(camera, collisionBounds);
         }
 
         public string Serialize() {
             var options = new JsonSerializerOptions {
-                WriteIndented = true, 
                 ReferenceHandler = ReferenceHandler.Preserve, 
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
                 Converters = {
@@ -51,7 +57,6 @@ namespace Somniloquy {
 
         public static Section2D Deserialize(string json) {
             var options = new JsonSerializerOptions {
-                WriteIndented = true, 
                 ReferenceHandler = ReferenceHandler.Preserve, 
                 Converters = {
                     new Vector2IKeyDictionaryConverter<TextureChunk2D>(),

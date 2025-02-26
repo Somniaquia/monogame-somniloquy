@@ -17,9 +17,12 @@ namespace Somniloquy {
     public class BoxUIDefaultRenderer : BoxUIRenderer {
         public Color Color;
 
-        public BoxUIDefaultRenderer() : this(Color.White) { }
-        public BoxUIDefaultRenderer(Color color) {
-            Color = color;
+        public BoxUIDefaultRenderer(Color? color = null) {
+            if (color is null) {
+                Color = ScreenManager.DefaultUIColor;
+            } else {
+                Color = color.Value;
+            }
         }
 
         public override void Draw(RectangleF rectangle) {

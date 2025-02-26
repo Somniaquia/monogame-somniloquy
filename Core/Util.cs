@@ -50,7 +50,7 @@ namespace Somniloquy {
         }
 
         public static Color InvertColor(Color color) {
-            return new Color(255 - color.R, 255 - color.G, 255 - color.B);
+            return new Color(255 - color.R, 255 - color.G, 255 - color.B, color.A);
         }
 
         public static RectangleF ShrinkRectangle(RectangleF rectangle, Sides amount) {
@@ -113,14 +113,14 @@ namespace Somniloquy {
         //     return distanceSquared <= radiusSquared;
         // }
 
-        public static Vector2 GetClosestVector2IOnLine((Vector2, Vector2) line, Vector2 Vector2I) {
+        public static Vector2 GetClosestVector2OnLine((Vector2, Vector2) line, Vector2 Vector2) {
             float lineLengthSquared = (line.Item2 - line.Item1).LengthSquared();
 
             if (lineLengthSquared == 0f) {
                 return line.Item1;
             }
 
-            float t = MathHelper.Clamp(Vector2.Dot(Vector2I - line.Item1, line.Item2 - line.Item1) / lineLengthSquared, 0f, 1f);
+            float t = MathHelper.Clamp(Vector2.Dot(Vector2 - line.Item1, line.Item2 - line.Item1) / lineLengthSquared, 0f, 1f);
             return line.Item1 + t * (line.Item2 - line.Item1);
         }
 

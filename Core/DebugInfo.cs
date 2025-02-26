@@ -32,10 +32,12 @@ namespace Somniloquy {
         }
 
         public static void Draw(SpriteFont font) {
+            var color = Util.InvertColor(ScreenManager.GetFirstOfType<Section2DScreen>().Section.BackgroundColor);
+
             Vector2 position = new Vector2(1, 1);
             if (Active) {
                 foreach (var lineGenerator in lines) {
-                    SQ.SB.DrawString(font, lineGenerator(), position, Color.White * 0.5f);
+                    SQ.SB.DrawString(font, lineGenerator(), position, color * 0.5f);
                     position.Y += 18;
                 }
             }
@@ -46,7 +48,7 @@ namespace Somniloquy {
                     SQ.SB.DrawString(font, lineGenerator(), position, Color.LightBlue);
                 }
                 try {
-                    SQ.SB.DrawString(font, lineGenerator(), position, Color.White * 0.5f * MathF.Min((float)time, 1f));
+                    SQ.SB.DrawString(font, lineGenerator(), position, color * 0.5f * MathF.Min((float)time, 1f));
                 } catch (ArgumentException) {
                     string caughtString = lineGenerator();
                     Console.WriteLine($"Cannot display one of he characters of {caughtString}");
