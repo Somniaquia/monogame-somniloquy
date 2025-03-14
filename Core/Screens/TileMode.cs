@@ -180,18 +180,18 @@ namespace Somniloquy {
                         if (InputManager.IsKeyDown(Keys.LeftShift)) {
                             PixelActions.ApplySnappedLineAction(PreviousTilePos.Value, GetTilePos(layer), 0, (pos) => {
                                 var displacement = pos - PreviousTilePos;
-                                SelectedTiles[Util.PosMod(displacement.Value.X, SelectedTiles.GetLength(0)), Util.PosMod(displacement.Value.Y, SelectedTiles.GetLength(1))].Draw(Editor.Camera, new Rectangle(pos * layer.TileLength, new(layer.TileLength)), 0.25f);
+                                SelectedTiles[Util.PosMod(displacement.Value.X, SelectedTiles.GetLength(0)), Util.PosMod(displacement.Value.Y, SelectedTiles.GetLength(1))]?.Draw(Editor.Camera, new Rectangle(pos * layer.TileLength, new(layer.TileLength)), 0.25f);
                             });
                         } else {
                             PixelActions.ApplyLineAction(PreviousTilePos.Value, GetTilePos(layer), 0, (pos) => {
                                 var displacement = pos - PreviousTilePos;
-                                SelectedTiles[Util.PosMod(displacement.Value.X, SelectedTiles.GetLength(0)), Util.PosMod(displacement.Value.Y, SelectedTiles.GetLength(1))].Draw(Editor.Camera, new Rectangle(pos * layer.TileLength, new(layer.TileLength)), 0.25f);
+                                SelectedTiles[Util.PosMod(displacement.Value.X, SelectedTiles.GetLength(0)), Util.PosMod(displacement.Value.Y, SelectedTiles.GetLength(1))]?.Draw(Editor.Camera, new Rectangle(pos * layer.TileLength, new(layer.TileLength)), 0.25f);
                             });
                         }
                     } else if (TileModeState == TileModeState.Rectangle) {
                         PixelActions.ApplyRectangleAction(PreviousTilePos.Value, GetTilePos(layer), true, (pos) => {
                             var displacement = pos - PreviousTilePos;
-                            SelectedTiles[Util.PosMod(displacement.Value.X, SelectedTiles.GetLength(0)), Util.PosMod(displacement.Value.Y, SelectedTiles.GetLength(1))].Draw(Editor.Camera, new Rectangle(pos * layer.TileLength, new(layer.TileLength)), 0.25f);
+                            SelectedTiles[Util.PosMod(displacement.Value.X, SelectedTiles.GetLength(0)), Util.PosMod(displacement.Value.Y, SelectedTiles.GetLength(1))]?.Draw(Editor.Camera, new Rectangle(pos * layer.TileLength, new(layer.TileLength)), 0.25f);
                         });
                     } else if (TileModeState == TileModeState.Select) {
                         var (start, end) = Vector2Extensions.Rationalize(PreviousTilePos.Value, GetTilePos(layer));

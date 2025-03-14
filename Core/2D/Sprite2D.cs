@@ -89,6 +89,12 @@ namespace Somniloquy {
         [JsonInclude] public ISpriteSheet SpriteSheet;
         [JsonInclude] public Rectangle SourceRect;
 
+        public SheetSpriteFrame2D() { }
+        public SheetSpriteFrame2D(ISpriteSheet spriteSheet, Rectangle sourceRect) {
+            SpriteSheet = spriteSheet;
+            SourceRect = sourceRect;
+        }
+
         public Color GetColor(Vector2I position) => SpriteSheet.GetColor(GetSheetPosition(position));
         public void PaintPixel(Vector2I position, Color color, float opacity, CommandChain chain) => SpriteSheet.PaintPixel(GetSheetPosition(position), color, opacity, chain);
         public void SetPixel(Vector2I position, Color color, CommandChain chain) => SpriteSheet.SetPixel(GetSheetPosition(position), color, chain);
@@ -105,13 +111,13 @@ namespace Somniloquy {
         }
     }
 
-    public class SpriteFrameCollection2D {
+    public class Sprite2D {
         [JsonInclude] public List<(string Name, List<string> Values)> Conditions = new();
         [JsonInclude] public Dictionary<string, ISpriteFrame2D> Frames = new();
 
-        public SpriteFrameCollection2D() { }
+        public Sprite2D() { }
 
-        public SpriteFrameCollection2D(params (string Name, string InitialValue)[] conditions) {
+        public Sprite2D(params (string Name, string InitialValue)[] conditions) {
             foreach (var (name, value) in conditions) {
                 Conditions.Add((name, new List<string> { value }));
             }
@@ -168,8 +174,9 @@ namespace Somniloquy {
             return true;
         }
 
-        public void AddFrame(string[] conditionValues, string conditionName, string conditionValue) {
-            
+        public void AddFrame(string[] conditionValues, ISpriteFrame2D frame) {
+            if (conditionValues.Length != Conditions.Count) DebugInfo.AddTempLine(() => "Tried to add a frame to a sprite but the conditions mismatched", 5);
+            Frames[string.Join("|", conditionValues)] = frame;
         }
 
         public ISpriteFrame2D GetFrame(params string[] conditionValues) {

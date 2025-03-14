@@ -118,13 +118,11 @@
         public void SetTile(Vector2I tilePosition, Tile2D tile, CommandChain chain = null) {
             if (GetTile(tilePosition) == tile) return;
 
-            chain?.AddCommand(new TileSetCommand(this, tilePosition, GetTile(tilePosition), tile));
-
             var chunkPosition = GetChunkPosition(tilePosition);
             var tilePosInChunk = GetTilePositionInChunk(tilePosition);
             if (!Chunks.ContainsKey(chunkPosition)) AddChunk(chunkPosition);
 
-            Chunks[chunkPosition].SetTile(tilePosInChunk, tile);
+            Chunks[chunkPosition].SetTile(tilePosInChunk, tile, chain);
         }
 
         private void AddChunk(Vector2I chunkPosition, CommandChain chain = null) {
@@ -304,36 +302,34 @@
 
     public class TileChunk2D {
         [JsonInclude] public Tile2D[,] Tiles;
-        [JsonInclude] public TileLayer2D Parent;
+        [JsonInclude] public TileLayer2D Layer;
 
-        public Vector2I GetTilePositionInChunk(Vector2I positionInChunk) => positionInChunk / new Vector2I(Parent.TileLength);
-        public Vector2I GetPositionInTile(Vector2I positionInChunk) => Util.PosMod(positionInChunk, new Vector2I(Parent.TileLength));
+        public Vector2I GetTilePositionInChunk(Vector2I positionInChunk) => positionInChunk / new Vector2I(Layer.TileLength);
+        public Vector2I GetPositionInTile(Vector2I positionInChunk) => Util.PosMod(positionInChunk, new Vector2I(Layer.TileLength));
         
         public TileChunk2D() { }
-        public TileChunk2D (TileLayer2D parent) {
-            Parent = parent;
+        public TileChunk2D (TileLayer2D layer) {
+            Layer = layer;
 
-            Tiles = new Tile2D[parent.ChunkLength, parent.ChunkLength];
+            Tiles = new Tile2D[layer.ChunkLength, layer.ChunkLength];
         }
 
-        public void SetTile(Vector2I positionInChunk, Tile2D tile) {
+        public void SetTile(Vector2I positionInChunk, Tile2D tile, CommandChain chain = null) {
+            chain?.AddCommand(new TileSetCommand(this, positionInChunk, GetTile(positionInChunk), tile));
             Tiles[positionInChunk.X, positionInChunk.Y] = tile;
+        }
+        
+        public Tile2D NewTile(Vector2I positionInChunk, CommandChain chain = null) {
+            var tile = new Tile2D(Layer.Section);
+            SetTile(positionInChunk, tile, chain);
+            return tile;
         }
 
         public void SetPixel(Vector2I positionInChunk, Color color, CommandChain chain) {
             var (tilePosInChunk, posInTile) = (GetTilePositionInChunk(positionInChunk), GetPositionInTile(positionInChunk));
             var tile = GetTile(tilePosInChunk);
             if (tile is null) {
-                var animation = new Animation2D()
-                    .AddFrame(Parent.Section.SpriteSheet, Parent.Section.SpriteSheet.AllocateSpace());
-
-                var sprite = new SpriteFrameCollection2D()
-                    .AddAnimation("0", animation)
-                    .SetCurrentAnimation("0");
-
-                tile = new Tile2D().SetSprite(sprite);
-
-                SetTile(GetTilePositionInChunk(positionInChunk), tile);
+                tile = NewTile(GetTilePositionInChunk(positionInChunk), chain);
             }
             tile.SetPixel(posInTile, color, chain);
         }
@@ -342,17 +338,7 @@
             var (tilePosInChunk, posInTile) = (GetTilePositionInChunk(positionInChunk), GetPositionInTile(positionInChunk));
             var tile = GetTile(tilePosInChunk);
             if (tile is null) {
-                var animation = new Animation2D()
-                    .AddFrame(Parent.Section.SpriteSheet, Parent.Section.SpriteSheet.AllocateSpace());
-
-                var sprite = new SpriteFrameCollection2D()
-                    .AddAnimation("0", animation)
-                    .SetCurrentAnimation("0");
-
-                tile = new Tile2D().SetSprite(sprite);
-                // tile.CollisionEdges = new List<Vector2> { new(0, 0), new(16, 0), new(16, 16), new(0, 16) };
-
-                SetTile(GetTilePositionInChunk(positionInChunk), tile);
+                tile = NewTile(GetTilePositionInChunk(positionInChunk), chain);
             }
             tile.PaintPixel(posInTile, color, opacity, chain);
         }

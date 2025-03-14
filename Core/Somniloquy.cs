@@ -37,7 +37,7 @@ namespace Somniloquy {
         [DllImport("user32.dll")] private static extern bool SetForegroundWindow(IntPtr hWnd);
 
         public SQ() {
-            base.Content.RootDirectory = "Content";
+            Content.RootDirectory = "Content";
             IsMouseVisible = true;
 
             SetProcessDPIAware();

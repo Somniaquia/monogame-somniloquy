@@ -130,11 +130,11 @@ namespace Somniloquy {
     }
 
     public class TileSetCommand : ICommand {
-        private TileLayer2D target;
+        private TileChunk2D target;
         private Vector2I position;
         private Tile2D tileBefore, tileAfter;
 
-        public TileSetCommand(TileLayer2D target, Vector2I position, Tile2D tileBefore, Tile2D tileAfter) {
+        public TileSetCommand(TileChunk2D target, Vector2I position, Tile2D tileBefore, Tile2D tileAfter) {
             this.target = target;
             this.position = position;
             this.tileBefore = tileBefore;

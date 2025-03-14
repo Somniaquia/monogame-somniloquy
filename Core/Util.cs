@@ -61,21 +61,6 @@ namespace Somniloquy {
             return new RectangleF(rectangle.X - amount.Left, rectangle.Y - amount.Up, rectangle.Width + amount.Left + amount.Right, rectangle.Height + amount.Up + amount.Down);
         }
 
-        public static Vector2I AnchorVector2I(Vector2I Vector2I, Vector2I anchor) {
-            if (Vector2I.X == anchor.X || Vector2I.Y == anchor.Y) return Vector2I;
-
-            float slope = (float)(Vector2I.Y - anchor.Y) / (Vector2I.X - anchor.X);
-            float distance = Vector2.Distance(Vector2I, anchor);
-
-            if (MathF.Abs(slope) >= 1) {
-                slope = MathF.Round(slope);
-            } else {
-                slope = 1 / MathF.Round(1 / slope);
-            }
-
-            return new Vector2I(Vector2I.X, (int)(anchor.Y + (Vector2I.X - anchor.X) * slope));
-        }
-
         internal static bool IntersectsOrAdjacent(RectangleF rect1, RectangleF rect2) {
             if (rect1.X < rect2.X + rect2.Width &&
                 rect1.X + rect1.Width > rect2.X &&
@@ -208,6 +193,5 @@ namespace Somniloquy {
         }
 
         public static Axis Perpendicular(Axis axis) => axis == Axis.Horizontal ? Axis.Vertical : Axis.Horizontal;
-
     }
 }

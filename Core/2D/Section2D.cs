@@ -14,8 +14,9 @@ namespace Somniloquy {
         [JsonInclude] public Vector2 CoordsInWorldMap;
         [JsonInclude] public Layer2D Root;
         
-        [JsonInclude] public TileSpriteSheet SpriteSheet = new(16, 64);
-        [JsonInclude] public SpriteFrameCollection2D TileSprite;
+        [JsonInclude] public TileSpriteSheet TileSpriteSheet;
+        [JsonInclude] public Sprite2D TileSprite;
+        [JsonInclude] public uint NextTileID;
 
         [JsonInclude] public Color BackgroundColor = Color.Black;
         [JsonInclude] public Color GridColor;
@@ -23,6 +24,9 @@ namespace Somniloquy {
         public Section2D() {
             Root = new Layer2D("Root") { Section = this };
             GridColor = Util.InvertColor(BackgroundColor);
+
+            TileSpriteSheet = new(16, 64);
+            TileSprite = new(("Tile", "0"), ("Animation", "0"), ("Frame", "0"));
         }
 
         public void Update() {
