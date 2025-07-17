@@ -43,14 +43,6 @@ namespace Somniloquy {
                 return Up + Down;
             }
         }
-
-        public Sides GetPart(Axis axis, bool perpendicular = false) {
-            if (axis == Axis.Horizontal ^ perpendicular) {
-                return new Sides(Left, Right, 0, 0);
-            } else {
-                return new Sides(0, 0, Up, Down);
-            }
-        }
     }
 
     public abstract class Screen {

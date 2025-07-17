@@ -1,5 +1,4 @@
-namespace Somniloquy
-{
+namespace Somniloquy {
     using System;
     using System.Collections.Generic;
     using System.Runtime.InteropServices;
@@ -30,7 +29,7 @@ namespace Somniloquy
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         public static extern bool SetDllDirectory(string path);
 
-        public static void Initialize(string soundsDirectory) {
+        public static void Initialize() {
             string fmodPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ExternalAssemblies", "FMod");
             SetDllDirectory(fmodPath);
 
@@ -38,10 +37,8 @@ namespace Somniloquy
             FMODSystem.init(128, INITFLAGS.NORMAL, IntPtr.Zero);
             FMODSystem.createChannelGroup(null, out ChannelGroup);
 
-            DirectoryInfo directory = new(soundsDirectory);
-            foreach (var path in directory.GetFiles("*.wav")) {
-                AddSound(path);
-            }
+            foreach (var path in new DirectoryInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets/Loops/")).GetFiles("*.wav")) { AddSound(path); }
+            foreach (var path in new DirectoryInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets/Sounds/")).GetFiles("*.ogg")) { AddSound(path); }
 
             FMODSystem.createDSPByType(DSP_TYPE.PITCHSHIFT, out PitchShiftDSP);
 
@@ -63,11 +60,19 @@ namespace Somniloquy
         }
 
         public static string AddSound(FileInfo path) {
-            var name = path.Name[..^4];
+            var name = path.Name;
             if (Sounds.ContainsKey(name)) return name;
             FMODSystem.createSound(path.FullName, MODE.DEFAULT, out Sound sound);
             Sounds.Add(name, sound);
             return name;
+        }
+
+        public static void PlaySound(string name) {
+            if (Sounds.ContainsKey(name)) {
+                FMODSystem.playSound(Sounds[name], ChannelGroup, false, out _);
+            } else {
+                DebugInfo.AddTempLine(() => $"No such sound named {name}!", 5);
+            }
         }
 
         public static void StartLoop(string name, float fade_seconds = 0f) {

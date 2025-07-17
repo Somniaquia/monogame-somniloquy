@@ -1,2 +1,2 @@
 Source File,Dest File,Processor Type,Content Type,Source File Size,Dest File Size,Build Seconds
-"C:/Somnia/Projects/monogame-somniloquy/Content/Fonts/Misaki.spritefont","C:/Somnia/Projects/monogame-somniloquy/Content/bin/DesktopGL/Content/Fonts/Misaki.xnb","FontDescriptionProcessor","SpriteFontContent",1261,3112239,1.0700394
+"/home/Somnia/Projects/monogame-somniloquy/Content/Fonts/Misaki.spritefont","/home/Somnia/Projects/monogame-somniloquy/Content/bin/DesktopGL/Content/Fonts/Misaki.xnb","FontDescriptionProcessor","SpriteFontContent",1261,3112233,0.5845542

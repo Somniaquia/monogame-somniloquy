@@ -109,17 +109,15 @@ namespace Somniloquy {
             // Begin the effect and draw a full-screen quad
             FractalEffect.CurrentTechnique.Passes[0].Apply();
 
-            SQ.SB.End();
             // Render a full-screen quad
             SQ.SB.Begin(SpriteSortMode.Immediate, BlendState.Opaque, SamplerState.LinearClamp, null, null, FractalEffect);
             SQ.SB.Draw(RenderTarget, new Rectangle(0, 0, RenderTarget.Width, RenderTarget.Height), Color.White);
-            SQ.SB.End();
 
             // Reset the render target to the backbuffer
             SQ.GD.SetRenderTarget(null);
 
             // Draw the fractal render target to the screen
-            SQ.SB.Begin();
+            SQ.SB.Begin(SpriteSortMode.Immediate);
             SQ.SB.Draw(RenderTarget, new Rectangle(0, 0, SQ.GD.PresentationParameters.BackBufferWidth, SQ.GD.PresentationParameters.BackBufferHeight), Color.White);
             SQ.SB.End();
         }

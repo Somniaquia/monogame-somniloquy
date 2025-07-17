@@ -54,6 +54,19 @@ namespace Somniloquy {
         public void Redo() => commands.ForEach(command => command.Redo());
     }
 
+    // public class LayerCommand : ICommand {
+    //     private Layer2D parent;
+
+    //     public LayerAddCommand(Layer2D parent, Layer2D child, int index) {
+    //         this.parent = parent;
+    //         this.child = child;
+    //         this.index = index;
+    //     }
+
+    //     public void Undo() => parent.Layers.Remove(child);
+    //     public void Redo() => parent.Layers.Insert(index, child);
+    // }
+
     public class PixelChangeCommand : ICommand {
         private SQTexture2D target;
         private Vector2I position;

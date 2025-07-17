@@ -15,7 +15,7 @@ namespace Somniloquy {
         public static Screen SelectedScreen;
 
         public static Color DefaultUIColor = Color.White;
-
+    
         public static Screen AddScreen(Screen screen) {
             Screens.Add(screen);
             return screen;

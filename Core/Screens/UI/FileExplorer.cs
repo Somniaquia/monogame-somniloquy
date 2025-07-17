@@ -42,7 +42,6 @@ namespace Somniloquy {
             if (ScreenManager.GetFirstOfType<ColorPicker>() is not null) ScreenManager.GetFirstOfType<ColorPicker>().Active = false;
             LayerTable.DestroyUI();
             
-            
             var directoryLabel = new TextLabel(RootUI, 20, 5) { Identifier = "path", PerpendicularAxisFill = true };
             var mainBox = new BoxUI(RootUI, 20, 0) { MainAxis = Axis.Horizontal, Identifier = "mainBox", MainAxisFill = true, PerpendicularAxisFill = true };
                 ContentsBox = new BoxUI(mainBox) { MainAxis = Axis.Vertical, Identifier = "contents", MainAxisShrink = true, PerpendicularAxisFill = true };
@@ -50,6 +49,8 @@ namespace Somniloquy {
             var bottomBox = new BoxUI(RootUI, 20, 0) { Identifier = "bottomBox", PerpendicularAxisFill = true };
                 SaveNameBox = new TextLabel(bottomBox, 0, 20) { Identifier = "saveNameBox", Editable = true, MainAxisFill = true, Text = "" };
                 var Button = new BoxUI(bottomBox, 0, 20) { Identifier = "saveButton", PerpendicularAxisFill = true };
+
+            SoundManager.PlaySound("menu-open.ogg");
         }
 
         public static void DestroyUI() {
@@ -60,6 +61,8 @@ namespace Somniloquy {
 
             RootUI?.Destroy();
             RootUI = null;
+
+            SoundManager.PlaySound("menu-close.ogg");
         }
 
         public static void ToggleFileExplorer() {
@@ -131,6 +134,8 @@ namespace Somniloquy {
 
         public static void EnterDirectory() {
             if (DirectoryContents.Count == 0) return;
+            SoundManager.PlaySound("confirm.ogg");
+            
             if (File.GetAttributes(DirectoryContents[HighlightedLine]).HasFlag(FileAttributes.Directory)) {
                 OpenDirectory(DirectoryContents[HighlightedLine]);
             }

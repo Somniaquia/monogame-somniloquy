@@ -32,7 +32,9 @@ namespace Somniloquy {
         }
 
         public static void Draw(SpriteFont font) {
-            var color = Util.InvertColor(ScreenManager.GetFirstOfType<Section2DScreen>().Section.BackgroundColor);
+            SQ.SB.Begin(SpriteSortMode.Immediate);
+            Color color = Color.White;
+            if (ScreenManager.GetFirstOfType<Section2DScreen>() is not null) color = Util.InvertColor(ScreenManager.GetFirstOfType<Section2DScreen>().Section.BackgroundColor);
 
             Vector2 position = new Vector2(1, 1);
             if (Active) {

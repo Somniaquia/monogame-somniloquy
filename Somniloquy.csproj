@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>.net8.0</TargetFramework>
     <RollForward>Major</RollForward>
     <PublishReadyToRun>false</PublishReadyToRun>
     <TieredCompilation>false</TieredCompilation>
@@ -27,8 +27,8 @@
     <PackageReference Include="FmodForFoxes" Version="3.1.0" />
     <PackageReference Include="LibreHardwareMonitorLib" Version="0.9.3" />
     <PackageReference Include="MagicPhysX" Version="1.0.0" />
-    <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.1.303" />
-    <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.1.303" />
+    <PackageReference Include="MonoGame.Framework.Compute.DesktopGL" Version="3.8.3" />
+    <PackageReference Include="MonoGame.Content.Builder.Task.Compute" Version="3.8.3" />
     <PackageReference Include="MoonSharp" Version="2.0.0" />
     <PackageReference Include="Nopipeline.Task" Version="2.3.0" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.5" />

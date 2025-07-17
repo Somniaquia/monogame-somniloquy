@@ -4,20 +4,19 @@
     <RestoreSuccess Condition=" '$(RestoreSuccess)' == '' ">True</RestoreSuccess>
     <RestoreTool Condition=" '$(RestoreTool)' == '' ">NuGet</RestoreTool>
     <ProjectAssetsFile Condition=" '$(ProjectAssetsFile)' == '' ">$(MSBuildThisFileDirectory)project.assets.json</ProjectAssetsFile>
-    <NuGetPackageRoot Condition=" '$(NuGetPackageRoot)' == '' ">$(UserProfile)\.nuget\packages\</NuGetPackageRoot>
-    <NuGetPackageFolders Condition=" '$(NuGetPackageFolders)' == '' ">C:\Users\Somni\.nuget\packages\;C:\Program Files (x86)\Microsoft Visual Studio\Shared\NuGetPackages</NuGetPackageFolders>
+    <NuGetPackageRoot Condition=" '$(NuGetPackageRoot)' == '' ">/home/Somnia/.nuget/packages/</NuGetPackageRoot>
+    <NuGetPackageFolders Condition=" '$(NuGetPackageFolders)' == '' ">/home/Somnia/.nuget/packages/</NuGetPackageFolders>
     <NuGetProjectStyle Condition=" '$(NuGetProjectStyle)' == '' ">PackageReference</NuGetProjectStyle>
-    <NuGetToolVersion Condition=" '$(NuGetToolVersion)' == '' ">6.12.0</NuGetToolVersion>
+    <NuGetToolVersion Condition=" '$(NuGetToolVersion)' == '' ">6.8.1</NuGetToolVersion>
   </PropertyGroup>
   <ItemGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
-    <SourceRoot Include="C:\Users\Somni\.nuget\packages\" />
-    <SourceRoot Include="C:\Program Files (x86)\Microsoft Visual Studio\Shared\NuGetPackages\" />
+    <SourceRoot Include="/home/Somnia/.nuget/packages/" />
   </ItemGroup>
   <ImportGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
-    <Import Project="$(NuGetPackageRoot)sixlabors.imagesharp\3.1.5\build\SixLabors.ImageSharp.props" Condition="Exists('$(NuGetPackageRoot)sixlabors.imagesharp\3.1.5\build\SixLabors.ImageSharp.props')" />
-    <Import Project="$(NuGetPackageRoot)monogame.content.builder.task\3.8.1.303\build\MonoGame.Content.Builder.Task.props" Condition="Exists('$(NuGetPackageRoot)monogame.content.builder.task\3.8.1.303\build\MonoGame.Content.Builder.Task.props')" />
+    <Import Project="$(NuGetPackageRoot)sixlabors.imagesharp/3.1.5/build/SixLabors.ImageSharp.props" Condition="Exists('$(NuGetPackageRoot)sixlabors.imagesharp/3.1.5/build/SixLabors.ImageSharp.props')" />
+    <Import Project="$(NuGetPackageRoot)monogame.content.builder.task.compute/3.8.3/build/MonoGame.Content.Builder.Task.Compute.props" Condition="Exists('$(NuGetPackageRoot)monogame.content.builder.task.compute/3.8.3/build/MonoGame.Content.Builder.Task.Compute.props')" />
   </ImportGroup>
   <PropertyGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
-    <PkgNopipeline_Task Condition=" '$(PkgNopipeline_Task)' == '' ">C:\Users\Somni\.nuget\packages\nopipeline.task\2.3.0</PkgNopipeline_Task>
+    <PkgNopipeline_Task Condition=" '$(PkgNopipeline_Task)' == '' ">/home/Somnia/.nuget/packages/nopipeline.task/2.3.0</PkgNopipeline_Task>
   </PropertyGroup>
 </Project>

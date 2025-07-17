@@ -69,7 +69,7 @@ namespace Somniloquy {
             base.Initialize();
             // SerializationManager.InitializeDirectories((typeof(World), "Worlds"), (typeof(Texture2D), "Textures"));
             InputManager.Initialize(Window);
-            SoundManager.Initialize("C:\\Somnia\\Projects\\monogame-somniloquy\\Assets\\Loops");
+            SoundManager.Initialize();
             FileExplorer.Initialize();
             ShaderManager.Initialize();
             DebugInfo.Initialize();
@@ -101,7 +101,7 @@ namespace Somniloquy {
             DebugInfo.Subscribe(() => $"Focused Screen: {ScreenManager.FocusedScreen}");
             
             var sectionScreen = new Section2DScreen(new Rectangle(new(), WindowSize));
-            LayerTable.BuildUI();
+            // LayerTable.BuildUI();
             ScreenManager.LoadContent();
             ShaderManager.LoadContent(null);
         }
